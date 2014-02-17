@@ -1,0 +1,53 @@
+plugin.tx_pongback {
+	view {
+		templateRootPath = {$plugin.tx_pongback.view.templateRootPath}
+		partialRootPath = {$plugin.tx_pongback.view.partialRootPath}
+		layoutRootPath = {$plugin.tx_pongback.view.layoutRootPath}
+	}
+	persistence {
+		storagePid = {$plugin.tx_pongback.persistence.storagePid}
+	}
+	features {
+		# uncomment the following line to enable the new Property Mapper.
+		# rewrittenPropertyMapper = 1
+	}
+}
+
+plugin.tx_pongback._CSS_DEFAULT_STYLE (
+	textarea.f3-form-error {
+		background-color:#FF9F9F;
+		border: 1px #FF0000 solid;
+	}
+
+	input.f3-form-error {
+		background-color:#FF9F9F;
+		border: 1px #FF0000 solid;
+	}
+
+	.tx-pongback table {
+		border-collapse:separate;
+		border-spacing:10px;
+                border: solid 2px black; 
+	}
+
+	.tx-pongback table th {
+		font-weight:bold;
+               
+	}
+
+	.tx-pongback table td {
+		vertical-align:top;
+	}
+)
+
+ # Module configuration
+module.tx_pongback {
+	persistence {
+		storagePid = {$module.tx_pongback.persistence.storagePid}
+	}
+	view {
+		templateRootPath = {$module.tx_pongback.view.templateRootPath}
+		partialRootPath = {$module.tx_pongback.view.partialRootPath}
+		layoutRootPath = {$module.tx_pongback.view.layoutRootPath}
+	}
+}
