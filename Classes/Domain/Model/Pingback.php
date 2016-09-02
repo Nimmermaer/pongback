@@ -5,7 +5,7 @@ namespace PHTH\Pongback\Domain\Model;
  *  Copyright notice
  *
  *  (c) 2014 Michael Blunck <michael.blunck@phth.de>, PHTH
- *  
+ *
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -24,171 +24,241 @@ namespace PHTH\Pongback\Domain\Model;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 /**
- *
- *
- * @package pongback
- * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
- *
+ * Class Pingback
+ * @package PHTH\Pongback\Domain\Model
  */
-  /**
-   * 
-   * @return string  find the origin website url
-   */
-    function ownWebsiteURL(){
-      return '<link rel="pingback" href="http://www.'.$_SERVER['SERVER_NAME'].$_SERVER['PHP_SELF']."\">"; 
+class Pingback extends AbstractEntity
+{
+
+    /**
+     * sourceLink
+     *
+     * @var \string
+     * @validate NotEmpty
+     */
+    protected $sourceLink;
+
+    /**
+     * pingClient
+     *
+     * @var \string
+     */
+    protected $pingClient;
+
+    /**
+     * pingRessource
+     *
+     * @var \string
+     */
+    protected $pingRessource;
+
+    /**
+     * targetLink
+     *
+     * @var \string
+     * @validate NotEmpty
+     */
+    protected $targetLink;
+
+    /**
+     * serializedInformation
+     *
+     * @var \string
+     * @validate NotEmpty
+     */
+    protected $serializedInformation;
+
+    /**
+     * validation error
+     *
+     * @var \array
+     *
+     */
+    protected $validationError;
+
+    /**
+     * Returns the sourceLink
+     *
+     * @return \string $sourceLink
+     */
+    public function getSourceLink()
+    {
+
+        return $this->sourceLink;
     }
-/**
- * Set in 
- */
-  $GLOBALS['TSFE']->additionalHeaderData['3493'] = ownWebsiteURL(); 
- class Pingback extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity {
 
-	/**
-	 * sourceLink
-	 *
-	 * @var \string
-	 * @validate NotEmpty
-	 */
-	protected $sourceLink;
+    /**
+     * Sets the sourceLink
+     *
+     * @param \string $sourceLink
+     * @return void
+     */
+    public function setSourceLink($sourceLink)
+    {
 
-	/**
-	 * pingClient
-	 *
-	 * @var \string
-	 */
-	protected $pingClient;
+        $this->sourceLink = $sourceLink;
+    }
 
-	/**
-	 * pingRessource
-	 *
-	 * @var \string
-	 * @validate NotEmpty
-	 */
-	protected $pingRessource;
+    /**
+     * @var boolean
+     */
+    protected $hidden;
 
-	/**
-	 * targetLink
-	 *
-	 * @var \string
-	 * @validate NotEmpty
-	 */
-	protected $targetLink;
+    /**
+     * @return boolean $hidden
+     */
+    public function getHidden()
+    {
+        return $this->hidden;
+    }
 
-	/**
-	 * serializedInformation
-	 *
-	 * @var \string
-	 * @validate NotEmpty
-	 */
-	protected $serializedInformation;
+    /**
+     * @return boolean $hidden
+     */
+    public function isHidden()
+    {
+        return $this->getHidden();
+    }
 
-	/**
-	 * Returns the sourceLink
-	 *
-	 * @return \string $sourceLink
-	 */
-	public function getSourceLink() {
-		return $this->sourceLink;
-	}
+    /**
+     * @param boolean $hidden
+     * @return void
+     */
+    public function setHidden($hidden)
+    {
+        $this->hidden = $hidden;
+    }
 
-	/**
-	 * Sets the sourceLink
-	 *
-	 * @param \string $sourceLink
-	 * @return void
-	 */
-	public function setSourceLink($sourceLink) {
-		$this->sourceLink = $sourceLink;
-	}
+    /**
+     * Returns the pingClient
+     *
+     * @return \string $pingClient
+     */
+    public function getPingClient()
+    {
+        return $this->pingClient;
+    }
 
-	/**
-	 * Returns the pingClient
-	 *
-	 * @return \string $pingClient
-	 */
-	public function getPingClient() {
-		return $this->pingClient;
-	}
+    /**
+     * Sets the pingClient
+     *
+     * @param \string $pingClient
+     * @return void
+     */
+    public function setPingClient($pingClient)
+    {
+        $this->pingClient = $pingClient;
+    }
 
-	/**
-	 * Sets the pingClient
-	 *
-	 * @param \string $pingClient
-	 * @return void
-	 */
-	public function setPingClient($pingClient) {
-		$this->pingClient = $pingClient;
-	}
+    /**
+     * Returns the pingRessource
+     *
+     * @return \string $pingRessource
+     */
+    public function getPingRessource()
+    {
+        return $this->pingRessource;
+    }
 
-	/**
-	 * Returns the pingRessource
-	 *
-	 * @return \string $pingRessource
-	 */
-	public function getPingRessource() {
-		return $this->pingRessource;
-	}
+    /**
+     * Sets the pingRessource
+     *
+     * @param \string $pingRessource
+     * @return void
+     */
+    public function setPingRessource($pingRessource)
+    {
+        $this->pingRessource = $pingRessource;
+    }
 
-	/**
-	 * Sets the pingRessource
-	 *
-	 * @param \string $pingRessource
-	 * @return void
-	 */
-	public function setPingRessource($pingRessource) {
-		$this->pingRessource = $pingRessource;
-	}
+    /**
+     * Adds the validationError
+     *
+     * @return \string $validationError
+     */
+    public function addValidationError($validationError)
+    {
+        $this->validationErrors[] = $validationError;
+    }
 
-	/**
-	 * Returns the targetLink
-	 *
-	 * @return \string $targetLink
-	 */
-	public function getTargetLink() {
-		return $this->targetLink;
-	}
+    /**
+     * Sets the validationErrors
+     *
+     * @return \array $validationErrors
+     */
+    public function setValidationErrors($validationErrors)
+    {
+        $this->validationErrors = $validationErrors;
+    }
 
-	/**
-	 * Sets the targetLink
-	 *
-	 * @param \string $targetLink
-	 * @return void
-	 */
-	public function setTargetLink($targetLink) {
-		$this->targetLink = $targetLink;
-	}
+    /**
+     * Returns the validationErrors
+     *
+     * @return \array $validationErrors
+     */
+    public function getValidationErrors()
+    {
+        return $this->validationErrors;
+    }
 
-	/**
-	 * Returns the serializedInformation
-	 *
-	 * @return \string $serializedInformation
-	 */
-	public function getSerializedInformation() {
-		return $this->serializedInformation;
-	}
+    /**
+     * Returns the targetLink
+     *
+     * @return \string $targetLink
+     */
+    public function getTargetLink()
+    {
+        return $this->targetLink;
+    }
 
-	/**
-	 * Sets the serializedInformation
-	 *
-	 * @param \string $serializedInformation
-	 * @return void
-	 */
-	public function setSerializedInformation($serializedInformation) {
-		$this->serializedInformation = $serializedInformation;
-	}
-        
-        public function sendRequest($sourceLink, $targetLink) {
-           
-            $ch = curl_init(); 
-            curl_setopt($ch, CURLOPT_URL, $targetLink); 
-            curl_setopt($ch, CURLOPT_HEADERFUNCTION, "callback");
-            $page = curl_exec($ch); 
-            echo $page; 
-            
-            
-        }
+    /**
+     * Sets the targetLink
+     *
+     * @param \string $targetLink
+     * @return void
+     */
+    public function setTargetLink($targetLink)
+    {
+        $this->targetLink = $targetLink;
+    }
+
+    /**
+     * Returns the serializedInformation
+     *
+     * @return \string $serializedInformation
+     */
+    public function getSerializedInformation()
+    {
+
+        return $this->serializedInformation;
+    }
+
+    /**
+     * Sets the serializedInformation
+     *
+     * @param \string $serializedInformation
+     * @return void
+     */
+    public function setSerializedInformation($serializedInformation)
+    {
+
+        $this->serializedInformation = $serializedInformation;
+
+
+    }
+
+
+    /**
+     * information changed in object
+     * @param type $param
+     */
+    public function seralizeInformation($param)
+    {
+
+        $this->setSerializedInformation(serialize($param));
+    }
 
 }
-?>

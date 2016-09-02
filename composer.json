@@ -1,0 +1,21 @@
+{
+  "name": "phth\pongback",
+  "type": "typo3-cms-extension",
+  "description": "TYPO3 CMS extension - Pingback ",
+  "license": "GPL-3.0+",
+  "require": {
+    "typo3/cms": ">=7.6.0,<8.0",
+    "lstrojny/fxmlrpc":">=0.12.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "PHTH\\Pongback\\": "Classes"
+    }
+  },
+  "authors": [
+    {
+      "name": "Michael Blunck",
+      "role": "Developer"
+    }
+  ]
+}

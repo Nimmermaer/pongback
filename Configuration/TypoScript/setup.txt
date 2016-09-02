@@ -1,11 +1,12 @@
 plugin.tx_pongback {
 	view {
-		templateRootPath = {$plugin.tx_pongback.view.templateRootPath}
-		partialRootPath = {$plugin.tx_pongback.view.partialRootPath}
-		layoutRootPath = {$plugin.tx_pongback.view.layoutRootPath}
+		templateRootPaths.0 = {$plugin.tx_pongback.view.templateRootPath}
+		partialRootPaths.0 = {$plugin.tx_pongback.view.partialRootPath}
+		layoutRootPaths.0 = {$plugin.tx_pongback.view.layoutRootPath}
 	}
 	persistence {
 		storagePid = {$plugin.tx_pongback.persistence.storagePid}
+                   # Pingbacks werden da gespeichert auf der sie eingehen 
 	}
 	features {
 		# uncomment the following line to enable the new Property Mapper.
@@ -13,41 +14,40 @@ plugin.tx_pongback {
 	}
 }
 
-plugin.tx_pongback._CSS_DEFAULT_STYLE (
-	textarea.f3-form-error {
-		background-color:#FF9F9F;
-		border: 1px #FF0000 solid;
-	}
-
-	input.f3-form-error {
-		background-color:#FF9F9F;
-		border: 1px #FF0000 solid;
-	}
-
-	.tx-pongback table {
-		border-collapse:separate;
-		border-spacing:10px;
-                border: solid 2px black; 
-	}
-
-	.tx-pongback table th {
-		font-weight:bold;
-               
-	}
-
-	.tx-pongback table td {
-		vertical-align:top;
-	}
-)
-
  # Module configuration
 module.tx_pongback {
 	persistence {
 		storagePid = {$module.tx_pongback.persistence.storagePid}
 	}
 	view {
-		templateRootPath = {$module.tx_pongback.view.templateRootPath}
-		partialRootPath = {$module.tx_pongback.view.partialRootPath}
-		layoutRootPath = {$module.tx_pongback.view.layoutRootPath}
+		templateRootPaths.0 = {$module.tx_pongback.view.templateRootPath}
+		partialRootPaths.0 = {$module.tx_pongback.view.partialRootPath}
+		layoutRootPaths.0 = {$module.tx_pongback.view.layoutRootPath}
 	}
 }
+
+page.headerData.1392814115 = TEXT
+page.headerData.1392814115 {
+    value = pingback
+    typolink.parameter = 1
+    typolink.additionalParams = &type=1392814100
+    typolink.returnLast = url
+    typolink.forceAbsoluteUrl = 1
+    wrap = <link rel="pingback" href="|">
+}
+
+
+PingbackEndpoint = PAGE
+PingbackEndpoint {
+    typeNum = 1392814100
+    config {
+        disableAllHeaderCode = 1
+        xhtml_cleaning = 0
+        admPanel = 0
+        debug = 0
+        no_cache = 1
+        additionalHeaders = Content-Type:text/xml
+    }
+    10 < tt_content.list.20.pongback_server
+}
+

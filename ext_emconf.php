@@ -11,34 +11,36 @@
  ***************************************************************/
 
 $EM_CONF[$_EXTKEY] = array(
-	'title' => 'Pongback',
-	'description' => 'Senden und Empfangen eines Pingbacks',
-	'category' => 'plugin',
-	'author' => 'Michael Blunck',
-	'author_email' => 'michael.blunck@phth.de',
-	'author_company' => 'PHTH',
-	'shy' => '',
-	'priority' => '',
-	'module' => '',
-	'state' => 'alpha',
-	'internal' => '',
-	'uploadfolder' => '0',
-	'createDirs' => '',
-	'modify_tables' => '',
-	'clearCacheOnLoad' => 0,
-	'lockType' => '',
-	'version' => '0.1',
-	'constraints' => array(
-		'depends' => array(
-			'extbase' => '6.0',
-			'fluid' => '6.0',
-			'typo3' => '6.0',
-		),
-		'conflicts' => array(
-		),
-		'suggests' => array(
-		),
-	),
+    'title' => 'Pongback',
+    'description' => 'Senden und Empfangen eines Pingbacks',
+    'category' => 'plugin',
+    'author' => 'Michael Blunck',
+    'author_email' => 'michael.blunck@phth.de',
+    'author_company' => 'PHTH',
+    'shy' => '',
+    'priority' => '',
+    'module' => '',
+    'state' => 'alpha',
+    'internal' => '',
+    'uploadfolder' => '0',
+    'createDirs' => '',
+    'modify_tables' => '',
+    'clearCacheOnLoad' => 0,
+    'lockType' => '',
+    'version' => '0.1.2',
+    'autoload' =>
+        array(
+            'classmap' => array(
+                'Classes/Library/fXmlRpc/'
+            )
+        ),
+    'constraints' => array(
+        'depends' => array(
+            'extbase' => '6.1.0-6.2.99',
+            'fluid' => '6.1.0-6.2.99',
+            'typo3' => '6.1.0-6.2.99',
+        ),
+        'conflicts' => array(),
+        'suggests' => array(),
+    ),
 );
-
-?>

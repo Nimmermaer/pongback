@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+    <file source-language="en" datatype="plaintext" original="messages" date="2014-02-12T08:24:48Z"
+          product-name="pongback">
+        <header/>
+        <body>
+
+            <trans-unit id="tx_pongback_plugin.pongback_frontend">
+                <source>Pongback Frontend</source>
+            </trans-unit>
+            <trans-unit id="tx_pongback_plugin.pongback_server">
+                <source>Pongback Server</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

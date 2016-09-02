@@ -16,6 +16,14 @@ Otherwise your changes will be overwritten the next time you save the extension 
 
 <f:flashMessages />
 <f:render partial="Pingback/Properties" arguments="{pingback:pingback}" />
+          <f:for each="{pingbacks}" as="pingback">
+              <table class="tx_pongback" >
+              <tr>
+            <td> {pingback.sourceLink}</td>
+            <td> {pingback.targetLink}</td>
+            <td> {pingback.serializedInformation}</td>
+            </table>
+        </f:for>
 <f:link.action action="list">Back to list</f:link.action><br />
 <f:link.action action="new">New Pingback</f:link.action>
 </f:section>
