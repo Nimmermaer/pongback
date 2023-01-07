@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace PHTH\Pongback\Domain\Model;
 
 /***************************************************************
@@ -24,6 +27,7 @@ namespace PHTH\Pongback\Domain\Model;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+use TYPO3\CMS\Extbase\Annotation as Extbase;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 /**
@@ -32,12 +36,13 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
  */
 class Pingback extends AbstractEntity
 {
+    public $validationErrors;
 
     /**
      * sourceLink
      *
      * @var \string
-     * @validate NotEmpty
+     * @Extbase\Validate("NotEmpty")
      */
     protected $sourceLink;
 
@@ -59,7 +64,7 @@ class Pingback extends AbstractEntity
      * targetLink
      *
      * @var \string
-     * @validate NotEmpty
+     * @Extbase\Validate("NotEmpty")
      */
     protected $targetLink;
 
@@ -67,7 +72,7 @@ class Pingback extends AbstractEntity
      * serializedInformation
      *
      * @var \string
-     * @validate NotEmpty
+     * @Extbase\Validate("NotEmpty")
      */
     protected $serializedInformation;
 
@@ -75,18 +80,21 @@ class Pingback extends AbstractEntity
      * validation error
      *
      * @var \array
-     *
      */
     protected $validationError;
 
     /**
+     * @var boolean
+     */
+    protected $hidden = false;
+
+    /**
      * Returns the sourceLink
      *
-     * @return \string $sourceLink
+     * @return \string
      */
     public function getSourceLink()
     {
-
         return $this->sourceLink;
     }
 
@@ -94,21 +102,14 @@ class Pingback extends AbstractEntity
      * Sets the sourceLink
      *
      * @param \string $sourceLink
-     * @return void
      */
-    public function setSourceLink($sourceLink)
+    public function setSourceLink($sourceLink): void
     {
-
         $this->sourceLink = $sourceLink;
     }
 
     /**
-     * @var boolean
-     */
-    protected $hidden;
-
-    /**
-     * @return boolean $hidden
+     * @return boolean
      */
     public function getHidden()
     {
@@ -116,18 +117,14 @@ class Pingback extends AbstractEntity
     }
 
     /**
-     * @return boolean $hidden
+     * @return boolean
      */
     public function isHidden()
     {
         return $this->getHidden();
     }
 
-    /**
-     * @param boolean $hidden
-     * @return void
-     */
-    public function setHidden($hidden)
+    public function setHidden(bool $hidden): void
     {
         $this->hidden = $hidden;
     }
@@ -135,7 +132,7 @@ class Pingback extends AbstractEntity
     /**
      * Returns the pingClient
      *
-     * @return \string $pingClient
+     * @return \string
      */
     public function getPingClient()
     {
@@ -146,9 +143,8 @@ class Pingback extends AbstractEntity
      * Sets the pingClient
      *
      * @param \string $pingClient
-     * @return void
      */
-    public function setPingClient($pingClient)
+    public function setPingClient($pingClient): void
     {
         $this->pingClient = $pingClient;
     }
@@ -156,7 +152,7 @@ class Pingback extends AbstractEntity
     /**
      * Returns the pingRessource
      *
-     * @return \string $pingRessource
+     * @return \string
      */
     public function getPingRessource()
     {
@@ -167,9 +163,8 @@ class Pingback extends AbstractEntity
      * Sets the pingRessource
      *
      * @param \string $pingRessource
-     * @return void
      */
-    public function setPingRessource($pingRessource)
+    public function setPingRessource($pingRessource): void
     {
         $this->pingRessource = $pingRessource;
     }
@@ -177,9 +172,9 @@ class Pingback extends AbstractEntity
     /**
      * Adds the validationError
      *
-     * @return \string $validationError
+     * @return \string
      */
-    public function addValidationError($validationError)
+    public function addValidationError($validationError): void
     {
         $this->validationErrors[] = $validationError;
     }
@@ -187,9 +182,9 @@ class Pingback extends AbstractEntity
     /**
      * Sets the validationErrors
      *
-     * @return \array $validationErrors
+     * @return \array
      */
-    public function setValidationErrors($validationErrors)
+    public function setValidationErrors($validationErrors): void
     {
         $this->validationErrors = $validationErrors;
     }
@@ -197,7 +192,7 @@ class Pingback extends AbstractEntity
     /**
      * Returns the validationErrors
      *
-     * @return \array $validationErrors
+     * @return \array
      */
     public function getValidationErrors()
     {
@@ -207,7 +202,7 @@ class Pingback extends AbstractEntity
     /**
      * Returns the targetLink
      *
-     * @return \string $targetLink
+     * @return \string
      */
     public function getTargetLink()
     {
@@ -218,9 +213,8 @@ class Pingback extends AbstractEntity
      * Sets the targetLink
      *
      * @param \string $targetLink
-     * @return void
      */
-    public function setTargetLink($targetLink)
+    public function setTargetLink($targetLink): void
     {
         $this->targetLink = $targetLink;
     }
@@ -228,11 +222,10 @@ class Pingback extends AbstractEntity
     /**
      * Returns the serializedInformation
      *
-     * @return \string $serializedInformation
+     * @return \string
      */
     public function getSerializedInformation()
     {
-
         return $this->serializedInformation;
     }
 
@@ -240,25 +233,18 @@ class Pingback extends AbstractEntity
      * Sets the serializedInformation
      *
      * @param \string $serializedInformation
-     * @return void
      */
-    public function setSerializedInformation($serializedInformation)
+    public function setSerializedInformation($serializedInformation): void
     {
-
         $this->serializedInformation = $serializedInformation;
-
-
     }
-
 
     /**
      * information changed in object
-     * @param type $param
+     * @param mixed $param
      */
-    public function seralizeInformation($param)
+    public function seralizeInformation(mixed $param): void
     {
-
         $this->setSerializedInformation(serialize($param));
     }
-
 }

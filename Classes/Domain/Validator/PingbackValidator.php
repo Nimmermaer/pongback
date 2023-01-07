@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace PHTH\Pongback\Domain\Validator;
 
 /***************************************************************
@@ -24,103 +27,95 @@ namespace PHTH\Pongback\Domain\Validator;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+use PHTH\Pongback\Controller\PingbackController;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
 /**
- *
- *
  * @package pongback
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
- *
  */
 class PingbackValidator
 {
-
-
-    /**
-     * @param mixed $params
-     */
-    public function validateTargetUri(&$params)
+    public function validateTargetUri(mixed &$params): void
     {
         $pingback = $params['pingback'];
         $targetLink = $params['params'][0];
         $sourceLink = $params['params'][1];
         $matchLink = $_SERVER['SERVER_NAME'];
 
-        if (strpos($targetLink, $matchLink) > 0) {
+        if (strpos((string) $targetLink, (string) $matchLink) > 0) {
             $pingback->setSourceLink($sourceLink);
             $pingback->setTargetLink($targetLink);
-
         } else {
-            $error = GeneralUtility::makeInstance('PHTH\Pongback\Controller\PingbackController');
+            $error = GeneralUtility::makeInstance(PingbackController::class);
 
-            $pingback->addValidationError($error->return_xmlrpc_error('32',
-                LocalizationUtility::translate("tx_pongback_domain_model_pingback.error_targetlink",
-                    'pongback')));
-
+            $pingback->addValidationError($error->return_xmlrpc_error(
+                '32',
+                LocalizationUtility::translate(
+                    'tx_pongback_domain_model_pingback.error_targetlink',
+                    'pongback'
+                )
+            ));
         }
     }
 
-    /**
-     * @param mixed $params
-     */
-    public function getInformationFromOtherWebsite(&$params)
+    public function getInformationFromOtherWebsite(mixed &$params): void
     {
-
         $pingback = $params['pingback'];
         $targetLink = $params['params'][0];
         $sourceLink = $params['params'][1];
 
         /**
-         *
          * Pingback add to the Timestamp because its need an unique identifier
          */
         $pseudotag = '#%$PINGBACK-' . time() . '$%#';
         $sourceContent = file_get_contents($sourceLink);
-        $sourceContent = preg_replace('@<a [^>]*href="' . preg_quote($targetLink) . '"[^>]*>@', $pseudotag,
-            $sourceContent, 100, $count);
+        $sourceContent = preg_replace(
+            '@<a [^>]*href="' . preg_quote((string) $targetLink, '@') . '"[^>]*>@',
+            $pseudotag,
+            $sourceContent,
+            100,
+            $count
+        );
         /**
-         *
          * @todo other inputfile
-         *
          */
 
         file_put_contents('sample.php', $sourceContent);
 
         $tagLessData = '';
 
-        $handle = @fopen("sample.php", "r");
+        $handle = @fopen('sample.php', 'r');
         if ($handle) {
-            while (!feof($handle)) {
-                $tagLessData .= fgetss($handle, 4096);
+            while (! feof($handle)) {
+                // @todo could new behaviour because fgetss was removed
+                $tagLessData .= fgets($handle, 4096);
             }
+
             fclose($handle);
         }
 
         /**
          * Replace the '#%$PINGBACK- with an empty String, because we dont want it in the Output
          */
-        $tagLessData = preg_replace('/\s+/', ' ', $tagLessData);
+        $tagLessData = preg_replace('#\s+#', ' ', $tagLessData);
         $pos = strpos($tagLessData, $pseudotag);
 
         if ($pos !== false) {
-
             $informationString = str_replace($pseudotag, '', $tagLessData);
 
             $informationString = '...' . trim(substr($informationString, $pos - 100, 200)) . '...';
 
             $pingback->setSerializedInformation($informationString);
-
         } else {
+            $error = GeneralUtility::makeInstance(PingbackController::class);
 
-
-            $error = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('PHTH\Pongback\Controller\PingbackController');
-
-            $pingback->addValidationError($error->return_xmlrpc_error('33',
-                \TYPO3\CMS\Extbase\Utility\LocalizationUtility::translate("tx_pongback_domain_model_pingback.error_noInformations"),
-                'pongback'));
+            $pingback->addValidationError($error->return_xmlrpc_error(
+                '33',
+                LocalizationUtility::translate('tx_pongback_domain_model_pingback.error_noInformations'),
+                'pongback'
+            ));
         }
     }
-
 }

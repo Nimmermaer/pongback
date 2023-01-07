@@ -6,7 +6,9 @@
   "version": "1.0.0",
   "require": {
     "typo3/cms-core": "^12",
-    "lstrojny/fxmlrpc":">=0.12.0"
+    "lstrojny/fxmlrpc": "^0.22.0",
+    "ext-curl": "*",
+    "ext-xmlrpc": "*"
   },
   "autoload": {
     "psr-4": {

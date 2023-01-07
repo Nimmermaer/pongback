@@ -3,5 +3,3 @@ notificationAddress =
 
 # cat=basic/enable; type=boolean; label=Enable AutoPublishing: Publish incoming pingbacks automatically
 enableAutoPublishing = 1
-
-

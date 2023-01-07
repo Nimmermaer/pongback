@@ -1,52 +1,51 @@
 <?php
-if (!defined('TYPO3_MODE')) {
-    die ('Access denied.');
+
+declare(strict_types=1);
+use PHTH\Pongback\Controller\PingbackController;
+use PHTH\Pongback\Hook\Tcemain;
+use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
+
+if (! defined('TYPO3')) {
+    die('Access denied.');
 }
 
-\TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
-    'PHTH.' . $_EXTKEY,
+ExtensionUtility::configurePlugin(
+    'Pongback',
     'Pongbackfrontend',
-
-    array(
-        'Pingback' => 'list, show',
-
-    ),
+    [
+        PingbackController::class => 'list, show',
+    ],
     // non-cacheable actions
-    array(
-        'Pingback' => '',
-
-    )
+    [
+        PingbackController::class => '',
+    ]
 );
-\TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
-    'PHTH.' . $_EXTKEY,
+ExtensionUtility::configurePlugin(
+    'Pongback',
     'Pongbackbackend',
-    array(
-        'Pingback' => 'list, show, delete, edit, publish, unpublish',
-
-    ),
+    [
+        PingbackController::class => 'list, show, delete, edit, publish, unpublish',
+    ],
     // non-cacheable actions
-    array(
-        'Pingback' => '',
-
-    )
+    [
+        PingbackController::class => '',
+    ]
 );
 
-\TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
-    'PHTH.' . $_EXTKEY,
+ExtensionUtility::configurePlugin(
+    'Pongback',
     'server',
-    array(
-        'Pingback' => 'server',
-
-    ),
+    [
+        PingbackController::class => 'server',
+    ],
     // non-cacheable actions
-    array(
-        'Pingback' => 'server',
-
-    )
+    [
+        PingbackController::class => 'server',
+    ]
 );
 
 $TYPO3_CONF_VARS['MAIL']['substituteOldMailAPI'] = '0';
 $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['pongback']['validatePingback'][] = 'EXT:pongback/Classes/Domain/Validator/PingbackValidator.php:PHTH\Pongback\Domain\Validator\PingbackValidator->validateTargetUri';
 $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['pongback']['validatePingback'][] = 'EXT:pongback/Classes/Domain/Validator/PingbackValidator.php:PHTH\Pongback\Domain\Validator\PingbackValidator->getInformationFromOtherWebsite';
 $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['pongback']['validatePingback'][] = 'EXT:pongback/Classes/Service/PingbackClient.php:PHTH\Pongback\Service\PingbackClient->mailPingbackArrived';
-$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] = 'EXT:pongback/Classes/Hook/Tcemain.php:PHTH\Pongback\Hook\Tcemain';
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] = Tcemain::class;

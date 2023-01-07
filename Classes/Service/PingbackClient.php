@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace PHTH\Pongback\Service;
 
 /*
@@ -7,7 +10,11 @@ namespace PHTH\Pongback\Service;
  * and open the template in the editor.
  */
 use fXmlRpc\Client;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Mail\MailMessage;
+use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
+use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MailUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
@@ -18,23 +25,10 @@ use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
  */
 class PingbackClient
 {
-
     /**
-     *
-     * @var string $targetLink
+     * @var string
      */
     protected $targetLink;
-
-
-    /**
-     * @var \TYPO3\CMS\Extbase\Mvc\Controller\ControllerContext
-     */
-    protected $controllerContext;
-
-    /**
-     * @var \TYPO3\CMS\Extbase\Object\ObjectManager
-     */
-    protected $objectManager;
 
     /**
      * @return string
@@ -44,20 +38,13 @@ class PingbackClient
         return $this->targetLink;
     }
 
-    /**
-     * @param $targetLink
-     */
-    public function setTargetLink($targetLink)
+    public function setTargetLink(string $targetLink): void
     {
         $this->targetLink = $targetLink;
     }
 
-    /**
-     * @param $params
-     */
-    public function mailPingbackArrived(&$params)
+    public function mailPingbackArrived(&$params): void
     {
-
         $sourceLink = $params['params'][1];
 
         /**
@@ -65,72 +52,60 @@ class PingbackClient
          *
          * require  [defaultMailFromAddress] and [defaultMailFromName]
          */
-        $pongbackConf = (array)unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['pongback']);
+        $pongbackConf = (array) GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('pongback');
         if (GeneralUtility::validEmail($pongbackConf['notificationAddress'])) {
-            $mailer = GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Mail\\MailMessage');
+            $mailer = GeneralUtility::makeInstance(MailMessage::class);
 
-            $subject = LocalizationUtility::translate("tx_pongback_domain_model_pingback.pingback_arrived_alert_mail_subject",
-                'pongback');
-            $body = LocalizationUtility::translate("tx_pongback_domain_model_pingback.pingback_arrived_alert_mail",
-                    'pongback') . " $sourceLink ";
+            $subject = LocalizationUtility::translate(
+                'tx_pongback_domain_model_pingback.pingback_arrived_alert_mail_subject',
+                'pongback'
+            );
+            $body = LocalizationUtility::translate(
+                'tx_pongback_domain_model_pingback.pingback_arrived_alert_mail',
+                'pongback'
+            ) . sprintf(' %s ', $sourceLink);
 
-            $from = MailUtility::getSystemFrom();
+            $systemFrom = MailUtility::getSystemFrom();
 
-            $mailer->setFrom($from);
-            $mailer->setTo(array($pongbackConf['notificationAddress'] => 'mail'))
+            $mailer->setFrom($systemFrom);
+            $mailer->setTo([
+                $pongbackConf['notificationAddress'] => 'mail',
+            ])
                 ->setSubject($subject)
-                ->setBody($body);
-
+                ->text($body);
 
             $mailer->send();
         }
     }
 
-
-    /**
-     * @param $targetUri
-     * @param $sourceUri
-     */
-    public function send($targetUri, $sourceUri)
+    public function send($targetUri, $sourceUri): void
     {
-
         $this->autoDiscovery($targetUri);
 
         $client = new Client($this->getTargetLink());
 
-        $response = $client->call('pingback.ping', array($sourceUri, $targetUri));
+        $client->call('pingback.ping', [$sourceUri, $targetUri]);
     }
 
-    /**
-     * @param $targetLink
-     */
-    public function autoDiscovery($targetLink)
+    public function autoDiscovery($targetLink): void
     {
-
-        $this->objectManager = GeneralUtility::makeInstance('TYPO3\\CMS\\Extbase\\Object\\ObjectManager');
-
-        $flashMessageService = $this->objectManager->get(\TYPO3\CMS\Core\Messaging\FlashMessageService::class);
+        $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
 
         $messageQueue = $flashMessageService->getMessageQueueByIdentifier();
         $searchPattern = '/X-Pingback/';
         $proofLink = $this->sendRequest($targetLink);
 
-        preg_match($searchPattern, substr($proofLink, 3), $success, PREG_OFFSET_CAPTURE, 3);
-        if ($success === "Pingback" | "pingback") {
-            preg_match_all("/( (http|https):\/\/[^\s]*)/", $proofLink, $output);
-            $this->setTargetLink($output);
-
-
+        preg_match($searchPattern, substr((string) $proofLink, 3), $success, PREG_OFFSET_CAPTURE, 3);
+        if ($success === 'Pingback' | 'pingback') {
+            preg_match_all("#( (http|https):\/\/[^\s]*)#", (string) $proofLink, $output);
+            $this->setTargetLink((string)$output);
         } elseif ($this->htmlHeader($targetLink)) {
-
             $this->setTargetLink($this->htmlHeader($targetLink));
-
-
         } else {
-
-
             $o_flashMessage = GeneralUtility::makeInstance(
-                'TYPO3\\CMS\\Core\\Messaging\\FlashMessage', ' Kein Pingback vorhanden ', FlashMessage::OK
+                FlashMessage::class,
+                ' Kein Pingback vorhanden ',
+                AbstractMessage::OK
             );
 
             $messageQueue->addMessage($o_flashMessage);
@@ -138,24 +113,19 @@ class PingbackClient
     }
 
     /**
-     * @param $targetLink
      * @return mixed
      */
-    public function sendRequest($targetLink)
+    public function sendRequest($targetLink): int
     {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $targetLink);
-        curl_setopt($ch, CURLOPT_HEADERFUNCTION, array($this, 'callback'));
+        $curlHandle = curl_init();
+        curl_setopt($curlHandle, CURLOPT_URL, $targetLink);
+        curl_setopt($curlHandle, CURLOPT_HEADERFUNCTION, $this->callback(...));
 
-        $page = curl_exec($ch);
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        return $httpcode;
-
+        curl_exec($curlHandle);
+        return curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
     }
 
     /**
-     * @param $ch
-     * @param $header
      * @return mixed
      */
     public function callback($ch, $header)
@@ -164,20 +134,18 @@ class PingbackClient
     }
 
     /**
-     * @param $website
      * @return mixed
      */
     public function htmlHeader($website)
     {
-
         $response = file_get_contents($website, true, null, 0, 5000);
-        preg_match_all("/(link[^>].*pingback.*href=\")(.*)(\".*>)/iU", $response, $treffer);
+        preg_match_all('#(link[^>].*pingback.*href=")(.*)(".*>)#iU', $response, $treffer);
 
-        if (!isset($treffer[1][0])) {
-            $treffer[1][0] = "";
+        if (! isset($treffer[1][0])) {
+            $treffer[1][0] = '';
         } else {
-
             return $treffer[2][0];
         }
+        return '';
     }
 }
