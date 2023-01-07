@@ -3,13 +3,19 @@
   "type": "typo3-cms-extension",
   "description": "TYPO3 CMS extension - Pingback ",
   "license": "GPL-3.0+",
+  "version": "1.0.0",
   "require": {
-    "typo3/cms": ">=7.6.0,<8.0",
+    "typo3/cms-core": "^12",
     "lstrojny/fxmlrpc":">=0.12.0"
   },
   "autoload": {
     "psr-4": {
       "PHTH\\Pongback\\": "Classes"
+    }
+  },
+  "extra": {
+    "typo3/cms": {
+      "extension-key": "pongback"
     }
   },
   "authors": [
