@@ -94,9 +94,8 @@ class PingbackClient
         $messageQueue = $flashMessageService->getMessageQueueByIdentifier();
         $searchPattern = '/X-Pingback/';
         $proofLink = $this->sendRequest($targetLink);
-
         preg_match($searchPattern, substr((string) $proofLink, 3), $success, PREG_OFFSET_CAPTURE, 3);
-        if ($success === 'Pingback' | 'pingback') {
+        if ($success == 'Pingback' | 'pingback') {
             preg_match_all("#( (http|https):\/\/[^\s]*)#", (string) $proofLink, $output);
             $this->setTargetLink((string) $output);
         } elseif ($this->htmlHeader($targetLink)) {
@@ -115,14 +114,21 @@ class PingbackClient
     /**
      * @return mixed
      */
-    public function sendRequest($targetLink): int
+    public function sendRequest($targetLink)
     {
-        $curlHandle = curl_init();
-        curl_setopt($curlHandle, CURLOPT_URL, $targetLink);
-        curl_setopt($curlHandle, CURLOPT_HEADERFUNCTION, $this->callback(...));
+//        $requestFactory = GeneralUtility::makeInstance(RequestFactory::class);
+//        $response = $requestFactory->request($targetLink, 'POST');
+//        debug($response);
+//        debug($response->getHeaders());
+//        debug($response->getBody()->getContents());
+//        dd($response->getStatusCode());
 
-        curl_exec($curlHandle);
-        return curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $targetLink);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_HEADERFUNCTION, "callback");
+       return curl_exec($ch);
     }
 
     /**

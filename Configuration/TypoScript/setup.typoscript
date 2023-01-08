@@ -25,22 +25,27 @@ module.tx_pongback {
 		layoutRootPaths.0 = {$module.tx_pongback.view.layoutRootPath}
 	}
 }
-
-page.headerData.1392814115 = TEXT
-page.headerData.1392814115 {
-	value = pingback
-	typolink.parameter = 1
-	typolink.additionalParams = &type=1392814100
-	typolink.returnLast = url
-	typolink.forceAbsoluteUrl = 1
-	wrap = <link rel="pingback" href="|">
+page {
+	headerData{
+		1392814115 = TEXT
+		1392814115 {
+			value = pingback
+			typolink.parameter = 1
+			typolink.additionalParams = &type=1392814100
+			typolink.returnLast = url
+			typolink.forceAbsoluteUrl = 1
+			wrap = <link rel="pingback" href="|">
+		}
+	}
 }
+
 
 
 PingbackEndpoint = PAGE
 PingbackEndpoint {
 	typeNum = 1392814100
 	config {
+		contentObjectExceptionHandler = 0
 		disableAllHeaderCode = 1
 		xhtml_cleaning = 0
 		admPanel = 0

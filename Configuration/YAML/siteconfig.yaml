@@ -1,0 +1,5 @@
+routeEnhancers:
+  PageTypeSuffix:
+    type: PageType
+    map:
+      xmlrpc.php: 1392814100
