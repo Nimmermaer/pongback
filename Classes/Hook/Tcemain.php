@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace PHTH\Pongback\Hook;
 
-use fXmlRpc\Exception\HttpException;
 use PHTH\Pongback\Service\PingbackClient;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Context\TypoScriptAspect;
-use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
-use TYPO3\CMS\Core\RateLimiter\RateLimiterFactory;
 use TYPO3\CMS\Core\Routing\PageArguments;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\TimeTracker\TimeTracker;
@@ -23,7 +20,6 @@ use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
-use TYPO3\CMS\Frontend\Middleware\FrontendUserAuthenticator;
 
 class Tcemain
 {
@@ -35,19 +31,18 @@ class Tcemain
          */
         if (key($dataHandler->datamap) === 'tt_content' && $dataHandler->getHistoryRecords() !== []) {
             $links = [];
-            foreach ($dataHandler->getHistoryRecords()[key($dataHandler->datamap) .':' . $dataHandler->checkValue_currentRecord['uid']] as $recordType => $fields) {
-                if($recordType === 'newRecord') {
+            foreach ($dataHandler->getHistoryRecords()[key($dataHandler->datamap) . ':' . $dataHandler->checkValue_currentRecord['uid']] as $recordType => $fields) {
+                if ($recordType === 'newRecord') {
                     // iterate over all changed fields in tt_content e.g. header, subheader, bodytext
                     foreach ($fields as $field) {
                         $document = new \DOMDocument();
-                        $document->loadHTML((string)$field);
+                        $document->loadHTML((string) $field);
                         $xPath = new \DOMXPath($document);
                         $nodeList = $xPath->query('//a/@href');
                         foreach ($nodeList as $node) {
                             $links[] = $node->value;
                         }
                     }
-
                 }
             }
             if ($links !== []) {
@@ -78,7 +73,6 @@ class Tcemain
                     );
 
                     if (is_array($page)) {
-
                         $cObj = GeneralUtility::makeInstance(ContentObjectRenderer::class);
                         $cObj->start([], '');
 
@@ -93,24 +87,22 @@ class Tcemain
                                 'forceAbsoluteUrl' => true,
                             ];
 
-                            $permaLink = $cObj->typoLink_URL( $typolinkConf);
+                            $permaLink = $cObj->typoLink_URL($typolinkConf);
 
-
-                                $pingbackClient->send($link, $permaLink);
-                                $o_flashMessage = GeneralUtility::makeInstance(
-                                    '\\' . FlashMessage::class,
-                                    LocalizationUtility::translate(
-                                        'tcemain.pingback.ping.accepted',
-                                        'pongback',
-                                        [$link]
-                                    ),
-                                    LocalizationUtility::translate(
-                                        'tcemain.pingback.ping.accepted_title',
-                                        'pongback'
-                                    ),
-                                    ContextualFeedbackSeverity::OK
-                                );
-
+                            $pingbackClient->send($link, $permaLink);
+                            $o_flashMessage = GeneralUtility::makeInstance(
+                                '\\' . FlashMessage::class,
+                                LocalizationUtility::translate(
+                                    'tcemain.pingback.ping.accepted',
+                                    'pongback',
+                                    [$link]
+                                ),
+                                LocalizationUtility::translate(
+                                    'tcemain.pingback.ping.accepted_title',
+                                    'pongback'
+                                ),
+                                ContextualFeedbackSeverity::OK
+                            );
                         }
                     } else {
                         $o_flashMessage = GeneralUtility::makeInstance(
@@ -152,6 +144,5 @@ class Tcemain
         }
 
         GeneralUtility::makeInstance(Context::class)->setAspect('typoscript', GeneralUtility::makeInstance(TypoScriptAspect::class, true));
-
     }
 }
