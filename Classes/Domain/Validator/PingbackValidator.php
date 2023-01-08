@@ -77,7 +77,7 @@ class PingbackValidator
             RequestOptions::VERIFY => false
         ]);
         $response = $client->request('GET', $sourceLink);
-        $sourceContent = $response->getBody();
+        $sourceContent = $response->getBody()->getContents();
 
         $sourceContent = preg_replace(
             '@<a [^>]*href="' . preg_quote((string) $targetLink, '@') . '"[^>]*>@',
