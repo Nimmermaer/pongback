@@ -98,7 +98,7 @@ class PingbackClient
         preg_match($searchPattern, substr((string) $proofLink, 3), $success, PREG_OFFSET_CAPTURE, 3);
         if ($success === 'Pingback' | 'pingback') {
             preg_match_all("#( (http|https):\/\/[^\s]*)#", (string) $proofLink, $output);
-            $this->setTargetLink((string)$output);
+            $this->setTargetLink((string) $output);
         } elseif ($this->htmlHeader($targetLink)) {
             $this->setTargetLink($this->htmlHeader($targetLink));
         } else {

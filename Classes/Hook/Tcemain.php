@@ -19,8 +19,6 @@ use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
 class Tcemain
 {
-
-
     public function processDatamap_postProcessFieldArray($status, $table, $id, $fieldArray, $ref): void
     {
         // @todo: make tables configurable

@@ -31,6 +31,7 @@ namespace PHTH\Pongback\Domain\Repository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
 use TYPO3\CMS\Extbase\Persistence\QueryInterface;
+use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 use TYPO3\CMS\Extbase\Persistence\Repository;
 
 /**
@@ -39,7 +40,7 @@ use TYPO3\CMS\Extbase\Persistence\Repository;
  */
 class PingbackRepository extends Repository
 {
-    public function initializeObject()
+    public function initializeObject(): void
     {
         /** @var Typo3QuerySettings $querySettings */
         $querySettings = GeneralUtility::makeInstance(Typo3QuerySettings::class);
@@ -48,7 +49,7 @@ class PingbackRepository extends Repository
         $this->setDefaultQuerySettings($querySettings);
     }
 
-    public function findVisible()
+    public function findVisible(): QueryResultInterface|array
     {
         $query = $this->createQuery();
 

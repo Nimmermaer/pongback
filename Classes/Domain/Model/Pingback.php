@@ -29,6 +29,7 @@ namespace PHTH\Pongback\Domain\Model;
  ***************************************************************/
 use TYPO3\CMS\Extbase\Annotation as Extbase;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
+use TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator;
 
 /**
  * Class Pingback
@@ -38,87 +39,44 @@ class Pingback extends AbstractEntity
 {
     public $validationErrors;
 
-    /**
-     * sourceLink
-     *
-     * @var \string
-     * @Extbase\Validate("NotEmpty")
-     */
-    protected $sourceLink;
+    #[Extbase\Validate([
+        'validator' => NotEmptyValidator::class,
+    ])]
+    protected string $sourceLink;
 
-    /**
-     * pingClient
-     *
-     * @var \string
-     */
-    protected $pingClient;
+    protected string $pingClient;
 
-    /**
-     * pingRessource
-     *
-     * @var \string
-     */
-    protected $pingRessource;
+    protected string $pingRessource;
 
-    /**
-     * targetLink
-     *
-     * @var \string
-     * @Extbase\Validate("NotEmpty")
-     */
-    protected $targetLink;
+    #[Extbase\Validate([
+        'validator' => NotEmptyValidator::class,
+    ])]
+    protected string $targetLink;
 
-    /**
-     * serializedInformation
-     *
-     * @var \string
-     * @Extbase\Validate("NotEmpty")
-     */
-    protected $serializedInformation;
+    #[Extbase\Validate([
+        'validator' => NotEmptyValidator::class,
+    ])]
+    protected string $serializedInformation;
 
-    /**
-     * validation error
-     *
-     * @var \array
-     */
-    protected $validationError;
+    protected array $validationError;
 
-    /**
-     * @var boolean
-     */
-    protected $hidden = false;
+    protected bool $hidden = false;
 
-    /**
-     * Returns the sourceLink
-     *
-     * @return \string
-     */
-    public function getSourceLink()
+    public function getSourceLink(): string
     {
         return $this->sourceLink;
     }
 
-    /**
-     * Sets the sourceLink
-     *
-     * @param \string $sourceLink
-     */
-    public function setSourceLink($sourceLink): void
+    public function setSourceLink(string $sourceLink): void
     {
         $this->sourceLink = $sourceLink;
     }
 
-    /**
-     * @return boolean
-     */
-    public function getHidden()
+    public function getHidden(): bool
     {
         return $this->hidden;
     }
 
-    /**
-     * @return boolean
-     */
     public function isHidden()
     {
         return $this->getHidden();
@@ -129,121 +87,65 @@ class Pingback extends AbstractEntity
         $this->hidden = $hidden;
     }
 
-    /**
-     * Returns the pingClient
-     *
-     * @return \string
-     */
-    public function getPingClient()
+    public function getPingClient(): string
     {
         return $this->pingClient;
     }
 
-    /**
-     * Sets the pingClient
-     *
-     * @param \string $pingClient
-     */
-    public function setPingClient($pingClient): void
+    public function setPingClient(string $pingClient): void
     {
         $this->pingClient = $pingClient;
     }
 
-    /**
-     * Returns the pingRessource
-     *
-     * @return \string
-     */
-    public function getPingRessource()
+    public function getPingRessource(): string
     {
         return $this->pingRessource;
     }
 
-    /**
-     * Sets the pingRessource
-     *
-     * @param \string $pingRessource
-     */
-    public function setPingRessource($pingRessource): void
+    public function setPingRessource(string $pingRessource): void
     {
         $this->pingRessource = $pingRessource;
     }
 
-    /**
-     * Adds the validationError
-     *
-     * @return \string
-     */
     public function addValidationError($validationError): void
     {
         $this->validationErrors[] = $validationError;
     }
 
-    /**
-     * Sets the validationErrors
-     *
-     * @return \array
-     */
     public function setValidationErrors($validationErrors): void
     {
         $this->validationErrors = $validationErrors;
     }
 
-    /**
-     * Returns the validationErrors
-     *
-     * @return \array
-     */
-    public function getValidationErrors()
+    public function getValidationErrors(): array
     {
         return $this->validationErrors;
     }
 
-    /**
-     * Returns the targetLink
-     *
-     * @return \string
-     */
-    public function getTargetLink()
+    public function getTargetLink(): string
     {
         return $this->targetLink;
     }
 
-    /**
-     * Sets the targetLink
-     *
-     * @param \string $targetLink
-     */
-    public function setTargetLink($targetLink): void
+    public function setTargetLink(string $targetLink): void
     {
         $this->targetLink = $targetLink;
     }
 
-    /**
-     * Returns the serializedInformation
-     *
-     * @return \string
-     */
-    public function getSerializedInformation()
+    public function getSerializedInformation(): string
     {
         return $this->serializedInformation;
     }
 
-    /**
-     * Sets the serializedInformation
-     *
-     * @param \string $serializedInformation
-     */
-    public function setSerializedInformation($serializedInformation): void
+    public function setSerializedInformation(string $serializedInformation): void
     {
         $this->serializedInformation = $serializedInformation;
     }
 
     /**
      * information changed in object
-     * @param mixed $param
      */
-    public function seralizeInformation(mixed $param): void
+    public function serializeInformation(mixed $param): void
     {
         $this->setSerializedInformation(serialize($param));
     }

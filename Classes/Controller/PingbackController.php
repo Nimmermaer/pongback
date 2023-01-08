@@ -27,14 +27,14 @@ namespace PHTH\Pongback\Controller;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  * ************************************************************* */
-use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
+use PHTH\Pongback\Domain\Model\Pingback;
 use PHTH\Pongback\Domain\Repository\PingbackRepository;
 use Psr\Http\Message\ResponseInterface;
-use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
-use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
-use PHTH\Pongback\Domain\Model\Pingback;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
+use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
 /**
  * @package pongback
@@ -85,7 +85,7 @@ class PingbackController extends ActionController
      *
      * @param string $pingback
      */
-    public function unpublishAction($pingback)
+    public function unpublishAction($pingback): void
     {
         $pingback = $this->pingbackRepository->findByUid((int) $pingback);
         $pingback->setHidden(1);
@@ -98,7 +98,7 @@ class PingbackController extends ActionController
      *
      * @param string $pingback
      */
-    public function publishAction($pingback)
+    public function publishAction($pingback): void
     {
         $pingback = $this->pingbackRepository->findByUid((int) $pingback);
         $pingback->setHidden(0);
@@ -111,7 +111,7 @@ class PingbackController extends ActionController
      *
      * @param string $pingback
      */
-    public function deleteAction($pingback)
+    public function deleteAction($pingback): void
     {
         $pingback = $this->pingbackRepository->findByUid((int) $pingback);
         $this->pingbackRepository->remove($pingback);
@@ -213,16 +213,16 @@ class PingbackController extends ActionController
         die();
     }
 
-    /* Deaktiviert FlashMessage
-    * @see Tx_Extbase_MVC_Controller_ActionController::getErrorFlashMessage()
-    */
-    protected function getErrorFlashMessage()
-    {
-        return false;
-    }
-
     public function injectPingbackRepository(PingbackRepository $pingbackRepository): void
     {
         $this->pingbackRepository = $pingbackRepository;
+    }
+
+    /* Deaktiviert FlashMessage
+    * @see Tx_Extbase_MVC_Controller_ActionController::getErrorFlashMessage()
+    */
+    protected function getErrorFlashMessage(): bool
+    {
+        return false;
     }
 }
