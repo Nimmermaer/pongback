@@ -77,7 +77,7 @@ class Pingback extends AbstractEntity
         return $this->hidden;
     }
 
-    public function isHidden()
+    public function isHidden(): bool
     {
         return $this->getHidden();
     }
@@ -112,7 +112,7 @@ class Pingback extends AbstractEntity
         $this->validationErrors[] = $validationError;
     }
 
-    public function setValidationErrors($validationErrors): void
+    public function setValidationErrors(array $validationErrors): void
     {
         $this->validationErrors = $validationErrors;
     }

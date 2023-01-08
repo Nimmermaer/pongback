@@ -74,7 +74,7 @@ class PingbackValidator
          */
         $pseudotag = '#%$PINGBACK-' . time() . '$%#';
         $client = new Client([
-            RequestOptions::VERIFY => false
+            RequestOptions::VERIFY => false,
         ]);
         $response = $client->request('GET', $sourceLink);
         $sourceContent = $response->getBody()->getContents();

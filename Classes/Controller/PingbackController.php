@@ -42,9 +42,9 @@ use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
  */
 class PingbackController extends ActionController
 {
-
-    public function __construct(private readonly PingbackRepository $pingbackRepository)
-    {
+    public function __construct(
+        private readonly PingbackRepository $pingbackRepository
+    ) {
     }
 
     public function administerAction(): ResponseInterface
@@ -54,7 +54,6 @@ class PingbackController extends ActionController
         $this->view->assign('pingbacks', $pingbacks);
         return $this->htmlResponse();
     }
-
 
     public function listAction(): ResponseInterface
     {
@@ -131,9 +130,6 @@ class PingbackController extends ActionController
     }
 
     /**
-     * @param string $methodName
-     * @param array $xmlRpcParams
-     * @return null|string
      * @throws IllegalObjectTypeException
      */
     public function pingback(string $methodName, array $xmlRpcParams, mixed $appData): ?string

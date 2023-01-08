@@ -23,7 +23,7 @@ class PingbackHeader implements MiddlewareInterface, LoggerAwareInterface
         try {
             $siteUrl = $request->getAttributes()['normalizedParams']->getSiteUrl();
         } catch (\Exception) {
-            $this->logger->notice('site url was not found', $siteUrl);
+            $this->logger->notice('site url was not found', ['url' => $siteUrl]);
         }
 
         if ($siteUrl !== '') {
