@@ -37,7 +37,7 @@ use TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator;
  */
 class Pingback extends AbstractEntity
 {
-    public $validationErrors;
+    public array $validationErrors = [];
 
     #[Extbase\Validate([
         'validator' => NotEmptyValidator::class,

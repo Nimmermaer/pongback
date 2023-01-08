@@ -42,16 +42,11 @@ use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
  */
 class PingbackController extends ActionController
 {
-    /**
-     * pingbackRepository
-     *
-     * @var PingbackRepository
-     */
-    protected $pingbackRepository;
 
-    /**
-     * action list
-     */
+    public function __construct(private readonly PingbackRepository $pingbackRepository)
+    {
+    }
+
     public function administerAction(): ResponseInterface
     {
         $pingbacks = $this->pingbackRepository->findByDeleted('0');
@@ -60,9 +55,7 @@ class PingbackController extends ActionController
         return $this->htmlResponse();
     }
 
-    /**
-     * action list
-     */
+
     public function listAction(): ResponseInterface
     {
         $pingbacks = $this->pingbackRepository->findVisible();
@@ -71,20 +64,12 @@ class PingbackController extends ActionController
         return $this->htmlResponse();
     }
 
-    /**
-     * action show
-     */
     public function showAction(Pingback $pingback): ResponseInterface
     {
         $this->view->assign('pingback', $pingback);
         return $this->htmlResponse();
     }
 
-    /**
-     * action publish
-     *
-     * @param string $pingback
-     */
     public function unpublishAction($pingback): void
     {
         $pingback = $this->pingbackRepository->findByUid((int) $pingback);
@@ -139,7 +124,6 @@ class PingbackController extends ActionController
         $fp = fopen('php://input', 'rb');
         stream_filter_append($fp, 'dechunk', STREAM_FILTER_READ);
         $HTTP_RAW_POST_DATA = stream_get_contents($fp);
-
         $xmlrpcServerHandler = xmlrpc_server_create();
         xmlrpc_server_register_method($xmlrpcServerHandler, 'pingback.ping', $this->pingback(...));
         $response = xmlrpc_server_call_method($xmlrpcServerHandler, $HTTP_RAW_POST_DATA, null);
@@ -147,12 +131,12 @@ class PingbackController extends ActionController
     }
 
     /**
-     * @param string $method_name
+     * @param string $methodName
      * @param array $xmlRpcParams
      * @return null|string
      * @throws IllegalObjectTypeException
      */
-    public function pingback($method_name = '', $xmlRpcParams, mixed $app_data)
+    public function pingback(string $methodName, array $xmlRpcParams, mixed $appData): ?string
     {
         /**
          * We must implement some Hooks to validate some important content, the URL, the content from other page an  send an email to the owner of the blog
@@ -199,9 +183,9 @@ class PingbackController extends ActionController
      *
      * @param string $errno
      * @param string $errstr
-     * @param string $errfile
-     * @param string $errline
-     * @param string $errcontext
+     * @param string|null $errfile
+     * @param string|null $errline
+     * @param string|null $errcontext
      */
     public function return_xmlrpc_error($errno, $errstr, $errfile = null, $errline = null, $errcontext = null): never
     {
@@ -213,14 +197,9 @@ class PingbackController extends ActionController
         die();
     }
 
-    public function injectPingbackRepository(PingbackRepository $pingbackRepository): void
-    {
-        $this->pingbackRepository = $pingbackRepository;
-    }
-
-    /* Deaktiviert FlashMessage
-    * @see Tx_Extbase_MVC_Controller_ActionController::getErrorFlashMessage()
-    */
+    /**
+     *  Overrides getErrorFlashMessage to deactivate
+     */
     protected function getErrorFlashMessage(): bool
     {
         return false;

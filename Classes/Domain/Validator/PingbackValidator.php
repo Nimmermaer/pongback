@@ -27,6 +27,9 @@ namespace PHTH\Pongback\Domain\Validator;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
+use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions;
 use PHTH\Pongback\Controller\PingbackController;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
@@ -70,7 +73,12 @@ class PingbackValidator
          * Pingback add to the Timestamp because its need an unique identifier
          */
         $pseudotag = '#%$PINGBACK-' . time() . '$%#';
-        $sourceContent = file_get_contents($sourceLink);
+        $client = new Client([
+            RequestOptions::VERIFY => false
+        ]);
+        $response = $client->request('GET', $sourceLink);
+        $sourceContent = $response->getBody();
+
         $sourceContent = preg_replace(
             '@<a [^>]*href="' . preg_quote((string) $targetLink, '@') . '"[^>]*>@',
             $pseudotag,
@@ -78,10 +86,10 @@ class PingbackValidator
             100,
             $count
         );
+
         /**
          * @todo other inputfile
          */
-
         file_put_contents('sample.php', $sourceContent);
 
         $tagLessData = '';
@@ -113,8 +121,7 @@ class PingbackValidator
 
             $pingback->addValidationError($error->return_xmlrpc_error(
                 '33',
-                LocalizationUtility::translate('tx_pongback_domain_model_pingback.error_noInformations'),
-                'pongback'
+                LocalizationUtility::translate('tx_pongback_domain_model_pingback.error_noInformations', 'pongback')
             ));
         }
     }

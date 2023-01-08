@@ -45,7 +45,7 @@ ExtensionUtility::configurePlugin(
 );
 
 $TYPO3_CONF_VARS['MAIL']['substituteOldMailAPI'] = '0';
-$GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['pongback']['validatePingback'][] = 'EXT:pongback/Classes/Domain/Validator/PingbackValidator.php:PHTH\Pongback\Domain\Validator\PingbackValidator->validateTargetUri';
-$GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['pongback']['validatePingback'][] = 'EXT:pongback/Classes/Domain/Validator/PingbackValidator.php:PHTH\Pongback\Domain\Validator\PingbackValidator->getInformationFromOtherWebsite';
-$GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['pongback']['validatePingback'][] = 'EXT:pongback/Classes/Service/PingbackClient.php:PHTH\Pongback\Service\PingbackClient->mailPingbackArrived';
+$GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['pongback']['validatePingback'][] = \PHTH\Pongback\Domain\Validator\PingbackValidator::class . '->validateTargetUri';
+$GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['pongback']['validatePingback'][] = \PHTH\Pongback\Domain\Validator\PingbackValidator::class. '->getInformationFromOtherWebsite';
+$GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['pongback']['validatePingback'][] = \PHTH\Pongback\Domain\Validator\PingbackValidator::class. '->mailPingbackArrived';
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] = Tcemain::class;
