@@ -5,6 +5,7 @@
   "license": "GPL-3.0+",
   "version": "1.0.0",
   "require": {
+    "php": "^8.1",
     "typo3/cms-core": "^12",
     "lstrojny/fxmlrpc": "^0.22.0",
     "ext-curl": "*",
