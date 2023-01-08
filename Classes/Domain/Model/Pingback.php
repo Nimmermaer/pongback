@@ -44,9 +44,9 @@ class Pingback extends AbstractEntity
     ])]
     protected string $sourceLink;
 
-    protected string $pingClient;
+    protected string $pingClient = '';
 
-    protected string $pingRessource;
+    protected string $pingResource = '';
 
     #[Extbase\Validate([
         'validator' => NotEmptyValidator::class,
@@ -97,14 +97,14 @@ class Pingback extends AbstractEntity
         $this->pingClient = $pingClient;
     }
 
-    public function getPingRessource(): string
+    public function getPingResource(): string
     {
-        return $this->pingRessource;
+        return $this->pingResource;
     }
 
-    public function setPingRessource(string $pingRessource): void
+    public function setPingResource(string $pingResource): void
     {
-        $this->pingRessource = $pingRessource;
+        $this->pingResource = $pingResource;
     }
 
     public function addValidationError($validationError): void

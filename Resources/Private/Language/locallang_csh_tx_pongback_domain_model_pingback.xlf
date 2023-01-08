@@ -10,8 +10,8 @@
 			<trans-unit id="ping_client.description">
 				<source>Ping Client</source>
 			</trans-unit>
-			<trans-unit id="ping_ressource.description">
-				<source>Ressource</source>
+			<trans-unit id="ping_resource.description">
+				<source>Resource</source>
 			</trans-unit>
 			<trans-unit id="target_link.description">
 				<source>Target Link</source>

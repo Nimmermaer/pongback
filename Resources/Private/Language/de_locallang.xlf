@@ -16,7 +16,7 @@
 			<trans-unit id="tx_pongback_domain_model_pingback.ping_client">
 				<source></source>
 			</trans-unit>
-			<trans-unit id="tx_pongback_domain_model_pingback.ping_ressource">
+			<trans-unit id="tx_pongback_domain_model_pingback.ping_resource">
 				<source>Inhalt</source>
 			</trans-unit>
 			<trans-unit id="tx_pongback_domain_model_pingback.target_link">

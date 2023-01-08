@@ -13,8 +13,8 @@
 			<trans-unit id="tx_pongback_domain_model_pingback.ping_client">
 				<source>Ping Client</source>
 			</trans-unit>
-			<trans-unit id="tx_pongback_domain_model_pingback.ping_ressource">
-				<source>Ping Ressource</source>
+			<trans-unit id="tx_pongback_domain_model_pingback.ping_resource">
+				<source>Ping Resource</source>
 			</trans-unit>
 			<trans-unit id="tx_pongback_domain_model_pingback.target_link">
 				<source>Target Link</source>
