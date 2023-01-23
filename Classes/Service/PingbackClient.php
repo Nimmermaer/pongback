@@ -4,19 +4,9 @@ declare(strict_types=1);
 
 namespace PHTH\Pongback\Service;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 use fXmlRpc\Client;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
-use TYPO3\CMS\Core\Http\RequestFactory;
 use TYPO3\CMS\Core\Mail\MailMessage;
-use TYPO3\CMS\Core\Messaging\AbstractMessage;
-use TYPO3\CMS\Core\Messaging\FlashMessage;
-use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MailUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
@@ -27,15 +17,10 @@ use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
  */
 class PingbackClient
 {
-    /**
-     * @var string
-     */
-    protected $targetLink;
+    protected string $targetLink;
 
-    /**
-     * @return string
-     */
-    public function getTargetLink()
+
+    public function getTargetLink(): string
     {
         return $this->targetLink;
     }
@@ -54,7 +39,7 @@ class PingbackClient
          *
          * require  [defaultMailFromAddress] and [defaultMailFromName]
          */
-        $pongbackConf = (array)GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('pongback');
+        $pongbackConf = (array) GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('pongback');
         if (GeneralUtility::validEmail($pongbackConf['notificationAddress'])) {
             $mailer = GeneralUtility::makeInstance(MailMessage::class);
 
@@ -63,9 +48,9 @@ class PingbackClient
                 'pongback'
             );
             $body = LocalizationUtility::translate(
-                    'tx_pongback_domain_model_pingback.pingback_arrived_alert_mail',
-                    'pongback'
-                ) . sprintf(' %s ', $sourceLink);
+                'tx_pongback_domain_model_pingback.pingback_arrived_alert_mail',
+                'pongback'
+            ) . sprintf(' %s ', $sourceLink);
 
             $systemFrom = MailUtility::getSystemFrom();
 
@@ -85,65 +70,55 @@ class PingbackClient
         $this->autoDiscovery($targetUri);
 
         $client = new Client($this->getTargetLink());
-
         $client->call('pingback.ping', [$sourceUri, $targetUri]);
     }
 
     public function autoDiscovery($targetLink): void
     {
-        $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
-
-        $messageQueue = $flashMessageService->getMessageQueueByIdentifier();
-        $searchPattern = '/X-Pingback/';
-        $proofLink = $this->sendRequest($targetLink);
-        preg_match($searchPattern, substr((string)$proofLink, 3), $success, PREG_OFFSET_CAPTURE, 3);
-        dd($success);
-        if ($success == 'Pingback' | 'pingback') {
-            preg_match_all("#( (http|https):\/\/[^\s]*)#", (string)$proofLink, $output);
-            $this->setTargetLink((string)$output);
-        } elseif ($this->htmlHeader($targetLink)) {
-            $this->setTargetLink($this->htmlHeader($targetLink));
-        } else {
-            $o_flashMessage = GeneralUtility::makeInstance(
-                FlashMessage::class,
-                ' Kein Pingback vorhanden ',
-                AbstractMessage::OK
-            );
-
-            $messageQueue->addMessage($o_flashMessage);
+        try {
+            $pingbackLink = $this->getPingbackUrlFromHeader($targetLink);
+            if (empty($pingbackLink)) {
+                $pingbackLink = $this->getPingbackUrlFromHTMLHeader($targetLink);
+            }
+            $this->setTargetLink($pingbackLink);
+        } catch (\Exception) {
+            // no need
         }
     }
 
     /**
      * @return mixed
      */
-    public function sendRequest(string $targetLink): string
+    public function getPingbackUrlFromHeader($targetLink): string
     {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $targetLink);
-        curl_setopt($ch, CURLOPT_HEADERFUNCTION, function ($cURLHandle, $header) use (&$headers) {
-            return strlen($header);
-        });
-        $result =  curl_exec($ch);
-        curl_close($ch);
-        var_dump($result);
-        return curl_exec($ch);
+        $client = new \GuzzleHttp\Client();
+        $options = [
+            'verify' => false,
+        ];
+        $response = $client->get($targetLink, $options);
+        $pingbackHeader = $response->getHeader('X-Pingback');
+        return $pingbackHeader[0] ?? '';
     }
-
 
     /**
      * @return mixed
      */
-    public function htmlHeader($website)
+    public function getPingbackUrlFromHTMLHeader($targetLink): string
     {
-        $response = file_get_contents($website, true, null, 0, 5000);
-        preg_match_all('#(link[^>].*pingback.*href=")(.*)(".*>)#iU', $response, $treffer);
-
-        if (!isset($treffer[1][0])) {
-            $treffer[1][0] = '';
-        } else {
-            return $treffer[2][0];
+        $client = new \GuzzleHttp\Client();
+        $options = [
+            'verify' => false,
+        ];
+        $response = $client->get($targetLink, $options);
+        $html = $response->getBody()->getContents();
+        $dom = new \DomDocument();
+        $dom->loadHTML($html);
+        $links = $dom->getElementsByTagName('link');
+        foreach ($links as $link) {
+            if (str_contains($link->getAttribute('rel'), 'pingback')) {
+                $pingbackUrl = $link->getattribute('href');
+            }
         }
-        return '';
+        return $pingbackUrl ?? '';
     }
 }
