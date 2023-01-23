@@ -1,10 +1,10 @@
 <?php
 
 declare(strict_types=1);
-use PHTH\Pongback\Domain\Validator\PingbackValidator;
-use PHTH\Pongback\Service\PingbackClient;
 use PHTH\Pongback\Controller\PingbackController;
+use PHTH\Pongback\Domain\Validator\PingbackValidator;
 use PHTH\Pongback\Hook\Tcemain;
+use PHTH\Pongback\Service\PingbackClient;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 
 if (! defined('TYPO3')) {
