@@ -1,0 +1,8 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+  Webicorns\Pongback\:
+    resource: '../Classes/*'
+    exclude: '../Classes/Domain/Model/*'
