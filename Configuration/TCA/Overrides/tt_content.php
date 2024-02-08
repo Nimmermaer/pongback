@@ -5,13 +5,13 @@ use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 defined('TYPO3') || die();
 
 call_user_func(
-    static function ($extensionKey): void {
+    static function ($extensionKey, $table): void {
         ExtensionUtility::registerPlugin(
             $extensionKey,
             'list',
-            'LLL:EXT:pongback/Resources/Private/Language/locallang_be.xlf:tx_pongback_plugin.pongback_frontend'
+            'LLL:EXT:pongback/Resources/Private/Language/locallang_be.xlf:plugin.tx_pongback.pongback_list.title'
         );
-    },
-    'pongpack',
+ },
+    'pongback',
     basename(__FILE__, '.php')
 );
