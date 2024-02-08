@@ -15,3 +15,23 @@ services:
   Webicorns\Pongback\Utility\Mail:
     arguments:
       $extensionConfiguration: '@TYPO3\CMS\Core\Configuration\ExtensionConfiguration'
+  dashboard.buttons.pongback:
+    class: 'TYPO3\CMS\Dashboard\Widgets\Provider\ButtonProvider'
+    arguments:
+      $title: 'LLL:EXT:dashboard/Resources/Private/Language/locallang.xlf:widgets.t3news.moreItems'
+      $link: 'https://typo3.org/project/news'
+      $target: '_blank'
+
+  dashboard.widget.pongback:
+    class: 'Webicorns\Pongback\Widget\PongbackWidget'
+    arguments:
+      $buttonProvider: '@dashboard.buttons.pongback'
+    tags:
+      - name: dashboard.widget
+        identifier: 'pongback'
+        groupNames: 'news'
+        title: 'LLL:EXT:pongback/Resources/Private/Language/locallang_be.xlf:widgets.pongback.title'
+        description: 'LLL:EXT:pongback/Resources/Private/Language/locallang_be.xlf:widgets.pongback.description'
+        iconIdentifier: 'tx-pongback-pong'
+        height: 'medium'
+        width: 'small'

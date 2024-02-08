@@ -2,3 +2,8 @@
 @import 'EXT:pongback/Configuration/PageTs/Mod/WebList/configuration.tsconfig'
 @import 'EXT:pongback/Configuration/PageTs/Mod/Wizards/configuration.tsconfig'
 @import 'EXT:pongback/Configuration/PageTs/Templates/reaction.tsconfig'
+templates {
+  typo3/cms-dashboard {
+    1707407283059 = webicorns/pongback:Resources/Private/
+  }
+}
