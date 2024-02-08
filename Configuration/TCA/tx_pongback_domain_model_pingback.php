@@ -13,6 +13,9 @@ return [
         'tstamp' => 'tstamp',
         'crdate' => 'crdate',
         'sortby' => 'sorting',
+        'security' => [
+            'ignorePageTypeRestriction' => true,
+        ],
         'versioningWS' => true,
         'origUid' => 't3_origuid',
         'languageField' => 'sys_language_uid',
@@ -130,6 +133,7 @@ return [
         'source_link' => [
             'exclude' => 0,
             'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.source_link',
+            'description' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.source_link.description',
             'config' => [
                 'type' => 'link',
                 'size' => 50,
@@ -138,6 +142,7 @@ return [
         'ping_client' => [
             'exclude' => 0,
             'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.ping_client',
+            'description' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.ping_client.description',
             'config' => [
                 'type' => 'input',
                 'size' => 50,
@@ -146,6 +151,7 @@ return [
         'ping_resource' => [
             'exclude' => 1,
             'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.ping_resource',
+            'description' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.ping_resource.description',
             'config' => [
                 'type' => 'input',
                 'size' => 50,
@@ -154,6 +160,7 @@ return [
         'target_link' => [
             'exclude' => 1,
             'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.target_link',
+            'description' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.target_link.description',
             'config' => [
                 'type' => 'link',
                 'size' => 50,
@@ -162,6 +169,7 @@ return [
         'serialized_information' => [
             'exclude' => 1,
             'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.serialized_information',
+            'description' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.serialized_information.description',
             'config' => [
                 'type' => 'text',
                 'renderType' => 't3editor',
