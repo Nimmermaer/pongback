@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-if (! defined('TYPO3')) {
+if (!defined('TYPO3')) {
     die('Access denied.');
 }
 
@@ -53,10 +53,12 @@ return [
             'config' => [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
-                'items' => [[
-                    'label' => '',
-                    'value' => 0,
-                ]],
+                'items' => [
+                    [
+                        'label' => '',
+                        'value' => 0,
+                    ]
+                ],
                 'foreign_table' => 'tx_pongback_domain_model_pingback',
                 'foreign_table_where' => 'AND tx_pongback_domain_model_pingback.pid=###CURRENT_PID### AND tx_pongback_domain_model_pingback.sys_language_uid IN (-1,0)',
             ],
@@ -90,7 +92,7 @@ return [
                 'checkbox' => 0,
                 'default' => 0,
                 'range' => [
-                    'lower' => mktime(0, 0, 0, (int) date('m'), (int) date('d'), (int) date('Y')),
+                    'lower' => mktime(0, 0, 0, (int)date('m'), (int)date('d'), (int)date('Y')),
                 ],
                 [
                     'behaviour' => [
@@ -108,7 +110,7 @@ return [
                 'checkbox' => 0,
                 'default' => 0,
                 'range' => [
-                    'lower' => mktime(0, 0, 0, (int) date('m'), (int) date('d'), (int) date('Y')),
+                    'lower' => mktime(0, 0, 0, (int)date('m'), (int)date('d'), (int)date('Y')),
                 ],
                 [
                     'behaviour' => [
@@ -122,9 +124,7 @@ return [
             'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.source_link',
             'config' => [
                 'type' => 'input',
-                'size' => 30,
-                'eval' => 'trim',
-                'required' => true,
+                'size' => 50,
             ],
         ],
         'ping_client' => [
@@ -132,38 +132,29 @@ return [
             'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.ping_client',
             'config' => [
                 'type' => 'input',
-                'size' => 30,
-                'eval' => 'trim',
+                'size' => 50,
             ],
         ],
         'ping_resource' => [
             'exclude' => 1,
             'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.ping_resource',
             'config' => [
-                'type' => 'input',
-                'size' => 30,
-                'eval' => 'trim',
-                'required' => true,
+                'type' => 'link',
             ],
         ],
         'target_link' => [
             'exclude' => 1,
             'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.target_link',
             'config' => [
-                'type' => 'input',
-                'size' => 30,
-                'eval' => 'trim',
-                'required' => true,
+                'type' => 'link',
             ],
         ],
         'serialized_information' => [
             'exclude' => 1,
             'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.serialized_information',
             'config' => [
-                'type' => 'input',
-                'size' => 30,
-                'eval' => 'trim',
-                'required' => true,
+                'type' => 'text',
+                'renderType' => 't3editor',
             ],
         ],
     ],
