@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<xliff version="1.0">
-	<file source-language="en" datatype="plaintext" original="messages" date="2024-02-05TO14:21:36Z"
-		  product-name="pongback">
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+	<file source-language="en" datatype="plaintext" original="messages" date="2024-02-05T14:21:36Z" product-name="pongback">
 		<header/>
 		<body>
 			<trans-unit id="tx_pongback_domain_model_pingback">
