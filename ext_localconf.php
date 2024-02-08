@@ -5,13 +5,18 @@ use Webicorns\Pongback\Controller\PingbackController;
 
 defined('TYPO3') || die();
 
-ExtensionUtility::configurePlugin(
-    'Pongback',
-    'list',
-    [
-        PingbackController::class => 'list',
-    ],
-    [
-        PingbackController::class => '',
-    ]
+call_user_func(
+    static function ($extensionKey): void {
+        ExtensionUtility::configurePlugin(
+            $extensionKey,
+            'list',
+            [
+                PingbackController::class => 'list',
+            ],
+            [
+                PingbackController::class => '',
+            ]
+        );
+    },
+    'pongpack',
 );

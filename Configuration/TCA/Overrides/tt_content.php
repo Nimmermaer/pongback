@@ -13,7 +13,6 @@ call_user_func(
         );
 
         $GLOBALS['TCA'][$table]['types']['list']['subtypes_excludelist']['pongback_list'] = 'pages,layout,select_key,recursive';
-
     },
     'pongback',
     basename(__FILE__, '.php')

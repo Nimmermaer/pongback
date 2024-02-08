@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-if (!defined('TYPO3')) {
+if (! defined('TYPO3')) {
     die('Access denied.');
 }
 
@@ -57,7 +57,7 @@ return [
                     [
                         'label' => '',
                         'value' => 0,
-                    ]
+                    ],
                 ],
                 'foreign_table' => 'tx_pongback_domain_model_pingback',
                 'foreign_table_where' => 'AND tx_pongback_domain_model_pingback.pid=###CURRENT_PID### AND tx_pongback_domain_model_pingback.sys_language_uid IN (-1,0)',
@@ -92,7 +92,7 @@ return [
                 'checkbox' => 0,
                 'default' => 0,
                 'range' => [
-                    'lower' => mktime(0, 0, 0, (int)date('m'), (int)date('d'), (int)date('Y')),
+                    'lower' => mktime(0, 0, 0, (int) date('m'), (int) date('d'), (int) date('Y')),
                 ],
                 [
                     'behaviour' => [
@@ -110,7 +110,7 @@ return [
                 'checkbox' => 0,
                 'default' => 0,
                 'range' => [
-                    'lower' => mktime(0, 0, 0, (int)date('m'), (int)date('d'), (int)date('Y')),
+                    'lower' => mktime(0, 0, 0, (int) date('m'), (int) date('d'), (int) date('Y')),
                 ],
                 [
                     'behaviour' => [
