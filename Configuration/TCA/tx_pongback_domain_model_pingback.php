@@ -31,7 +31,15 @@ return [
     ],
     'types' => [
         '1' => [
-            'showitem' => 'sys_language_uid,--palette--,l10n_parent,l10n_diffsource,hidden,--palette--;;1,source_link,ping_client,ping_resource,target_link,serialized_information,--div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access,starttime,endtime',
+            'showitem' => 'sys_language_uid,
+            --palette--,l10n_parent,l10n_diffsource,hidden,
+            --palette--;;1,
+            ping_client,
+            ping_resource,
+            source_link,
+            target_link,
+            serialized_information,
+            --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access,starttime,endtime',
         ],
     ],
     'palettes' => [
@@ -123,7 +131,7 @@ return [
             'exclude' => 0,
             'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.source_link',
             'config' => [
-                'type' => 'input',
+                'type' => 'link',
                 'size' => 50,
             ],
         ],
@@ -139,7 +147,8 @@ return [
             'exclude' => 1,
             'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.ping_resource',
             'config' => [
-                'type' => 'link',
+                'type' => 'input',
+                'size' => 50,
             ],
         ],
         'target_link' => [
@@ -147,6 +156,7 @@ return [
             'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.target_link',
             'config' => [
                 'type' => 'link',
+                'size' => 50,
             ],
         ],
         'serialized_information' => [
