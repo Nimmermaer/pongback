@@ -11,7 +11,10 @@ call_user_func(
             'list',
             'LLL:EXT:pongback/Resources/Private/Language/locallang_be.xlf:plugin.tx_pongback.pongback_list.title'
         );
- },
+
+        $GLOBALS['TCA'][$table]['types']['list']['subtypes_excludelist']['pongback_list'] = 'pages,layout,select_key,recursive';
+
+    },
     'pongback',
     basename(__FILE__, '.php')
 );

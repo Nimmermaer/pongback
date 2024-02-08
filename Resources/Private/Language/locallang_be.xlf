@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+    <file source-language="en" datatype="plaintext" original="messages" date="2024-02-05TO14:21:36Z" product-name="pongback">
+        <header/>
+        <body>
+            <trans-unit id="plugin.tx_pongback.pongback_list.title">
+                <source>Pingback list</source>
+            </trans-unit>
+            <trans-unit id="plugin.tx_pongback.pongback_list.description">
+                <source>List pingbacks with pagination</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
