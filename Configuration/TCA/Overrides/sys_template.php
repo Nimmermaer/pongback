@@ -8,6 +8,6 @@ call_user_func(
     static function ($extensionKey, $table): void {
         ExtensionManagementUtility::addStaticFile($extensionKey, 'Configuration/TypoScript', 'EXT:pongback');
     },
-    'pongpack',
+    'pongback',
     basename(__FILE__, '.php')
 );
