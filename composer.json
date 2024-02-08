@@ -1,39 +1,39 @@
 {
-    "name": "webicorns/pongback",
-    "description": "TYPO3 extension for sending and receiving Pingbacks",
-    "keywords": [
-        "TYPO3",
-        "extension",
-        "blog"
-    ],
-    "version": "1.0.0",
-    "type": "typo3-cms-extension",
-    "license": "GPL-2.0-or-later",
-    "authors": [
-        {
-            "name": "Michael Blunck",
-            "email": "michael.blunck@webicorns.io",
-            "role": "developer"
-        },
-        {
-            "name": "Philipp Thiele",
-            "email": "philipp.thiele@webicorns.io",
-            "role": "Product manager"
-        }
-    ],
-    "autoload": {
-        "psr-4": {
-            "Webicorns\\Pongback\\": "Classes/"
-        }
+  "name": "webicorns/pongback",
+  "description": "TYPO3 extension for sending and receiving Pingbacks",
+  "keywords": [
+    "TYPO3",
+    "extension",
+    "blog"
+  ],
+  "version": "1.0.0",
+  "type": "typo3-cms-extension",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Michael Blunck",
+      "email": "michael.blunck@webicorns.com",
+      "role": "developer"
     },
-    "extra": {
-        "typo3/cms": {
-            "extension-key": "pongback"
-        }
-    },
-    "minimum-stability": "stable",
-    "require": {
-        "php": "~8.2",
-        "typo3/cms-core": "^12.0"
+    {
+      "name": "Philipp Thiele",
+      "email": "philipp.thiele@webicorns.com",
+      "role": "Product manager"
     }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Webicorns\\Pongback\\": "Classes/"
+    }
+  },
+  "extra": {
+    "typo3/cms": {
+      "extension-key": "pongback"
+    }
+  },
+  "minimum-stability": "stable",
+  "require": {
+    "php": "~8.2",
+    "typo3/cms-core": "^12.0"
+  }
 }
