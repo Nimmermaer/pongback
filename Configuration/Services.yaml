@@ -6,8 +6,3 @@ services:
   Webicorns\Pongback\:
     resource: '../Classes/*'
     exclude: '../Classes/Domain/Model/*'
-  Symfony\Component\Translation\Command\XliffLintCommand:
-    public: true
-    tags:
-      - name: console.command
-        command: 'xliff:lint'
