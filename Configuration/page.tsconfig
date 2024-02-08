@@ -18,10 +18,20 @@ mod {
       }
     }
   }
-
+  web_list {
+    hideTables = tx_pongback_domain_model_pingback
+  }
   linkvalidator {
     searchFields {
       tx_pongback_domain_model_pingback = source_link, target_link
     }
   }
 }
+
+[backend.user.isAdmin]
+mod {
+  web_list {
+    hideTables =
+  }
+}
+[global]
