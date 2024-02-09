@@ -1,13 +1,28 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
 	<file source-language="en" datatype="plaintext" original="messages" date="2024-02-05T14:21:36Z" product-name="pongback">
 		<header/>
 		<body>
+			<trans-unit id="plugin.tx_pongback.pongback.wizard">
+				<source>Pingback plugins</source>
+			</trans-unit>
 			<trans-unit id="plugin.tx_pongback.pongback_list.title">
 				<source>Pingback list</source>
 			</trans-unit>
 			<trans-unit id="plugin.tx_pongback.pongback_list.description">
 				<source>List pingbacks with pagination</source>
+			</trans-unit>
+			<trans-unit id="plugin.tx_pongback.pongback_latest.title">
+				<source>Latest Pingbacks</source>
+			</trans-unit>
+			<trans-unit id="plugin.tx_pongback.pongback_latest.description">
+				<source>List latest pingbacks with pagination</source>
+			</trans-unit>
+			<trans-unit id="widgets.pongback.title">
+				<source>List Pingbacks</source>
+			</trans-unit>
+			<trans-unit id="widgets.pongback.description">
+				<source>Pingback list</source>
 			</trans-unit>
 		</body>
 	</file>
