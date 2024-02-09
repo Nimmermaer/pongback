@@ -1,0 +1,2 @@
+.editorconfig linguist-detectable
+*.php text eol=lf
