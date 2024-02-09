@@ -6,3 +6,6 @@ services:
   Webicorns\Pongback\:
     resource: '../Classes/*'
     exclude: '../Classes/Domain/Model/*'
+  Webicorns\Pongback\Utility\Mail:
+    arguments:
+      $extensionConfiguration: '@TYPO3\CMS\Core\Configuration\ExtensionConfiguration'

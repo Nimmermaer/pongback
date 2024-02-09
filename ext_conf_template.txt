@@ -1,0 +1,8 @@
+admin {
+    emails {
+        # cat=pongback; type=string; label=This email will send if new pingback arrived
+        from =
+        # cat=pongback; type=string; label=This email will send if new pingback arrived
+        to =
+    }
+}

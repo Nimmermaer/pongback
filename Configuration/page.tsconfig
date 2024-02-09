@@ -14,6 +14,7 @@ mod {
                 list_type = pongback_list
               }
             }
+
             pongback_latest {
               title = LLL:EXT:pongback/Resources/Private/Language/locallang_be.xlf:plugin.tx_pongback.pongback_latest.title
               description = LLL:EXT:pongback/Resources/Private/Language/locallang_be.xlf:plugin.tx_pongback.pongback_latest.description
@@ -24,14 +25,17 @@ mod {
               }
             }
           }
+
           show = *
         }
       }
     }
   }
+
   web_list {
     hideTables = tx_pongback_domain_model_pingback
   }
+
   linkvalidator {
     searchFields {
       tx_pongback_domain_model_pingback = source_link, target_link
@@ -40,9 +44,9 @@ mod {
 }
 
 [backend.user.isAdmin]
-mod {
-  web_list {
-    hideTables =
+  mod {
+    web_list {
+      hideTables =
+    }
   }
-}
 [global]
