@@ -4,7 +4,7 @@ use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
 use TYPO3\CMS\Core\Cache\Frontend\VariableFrontend;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 use Webicorns\Pongback\Controller\PingbackController;
-use Webicorns\Pongback\Hooks\PongbackDataMap;
+use Webicorns\Pongback\Hooks\PingbackDataMap;
 use Webicorns\Pongback\Utility\Constants;
 
 defined('TYPO3') || die();
@@ -42,9 +42,9 @@ call_user_func(
         }
 
         $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][] =
-            PongbackDataMap::class;
+            PingbackDataMap::class;
         $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] =
-            PongbackDataMap::class;
+            PingbackDataMap::class;
     },
     'pongback',
 );
