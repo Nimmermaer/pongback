@@ -18,7 +18,7 @@
 			<trans-unit id="serialized_information">
 				<source>Serialized Information</source>
 			</trans-unit>
-			<trans-unit id="pongback.email.subject">
+			<trans-unit id="pongback.notification.email.subject">
 				<source>New pingback was arrived in your System</source>
 			</trans-unit>
 		</body>

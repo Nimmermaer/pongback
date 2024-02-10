@@ -17,18 +17,18 @@ final readonly class Mail
     ) {
     }
 
-    public function sendPingbackEmail(string $content = '', string $template = 'Default', string $subject = ''): void
+    public function sendNotification(string $content = '', string $template = 'Default', string $subject = ''): void
     {
         if ($subject === '' || $subject === '0') {
-            $subject = LocalizationUtility::translate('pongback.email.subject', 'pongback');
+            $subject = LocalizationUtility::translate('pongback.notification.email.subject', 'pongback');
         }
 
         $configuration = $this->extensionConfiguration->get('pongback');
 
         $email = GeneralUtility::makeInstance(FluidEmail::class);
         $email
-            ->to($configuration['admin']['emails']['to'])
-            ->from($this->setDefaultFromAddress($configuration['admin']['emails']['from']))
+            ->to($configuration['notification']['email']['to'])
+            ->from($this->setDefaultFromAddress($configuration['notification']['email']['from']))
             ->subject($subject)
             ->format(FluidEmail::FORMAT_BOTH)
             ->setTemplate($template)
