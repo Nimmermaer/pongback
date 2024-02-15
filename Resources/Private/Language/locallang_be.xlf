@@ -7,13 +7,13 @@
 				<source>Pingback plugins</source>
 			</trans-unit>
 			<trans-unit id="plugin.tx_pongback.pongback_list.title">
-				<source>Pingback list</source>
+				<source>Pongback:: Pingback list</source>
 			</trans-unit>
 			<trans-unit id="plugin.tx_pongback.pongback_list.description">
 				<source>List pingbacks with pagination</source>
 			</trans-unit>
 			<trans-unit id="plugin.tx_pongback.pongback_latest.title">
-				<source>Latest Pingbacks</source>
+				<source>Pongback:: Latest Pingbacks</source>
 			</trans-unit>
 			<trans-unit id="plugin.tx_pongback.pongback_latest.description">
 				<source>List latest pingbacks with pagination</source>
@@ -23,6 +23,12 @@
 			</trans-unit>
 			<trans-unit id="widgets.pongback.description">
 				<source>Pingback list</source>
+			</trans-unit>
+			<trans-unit id="plugin.pongback.configuration">
+				<source>Pingback Configuration</source>
+			</trans-unit>
+			<trans-unit id="plugin.pongback.configuration.listitem">
+				<source>Number of displayed items</source>
 			</trans-unit>
 		</body>
 	</file>

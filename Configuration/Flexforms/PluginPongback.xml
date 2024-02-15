@@ -1,0 +1,19 @@
+<T3DataStructure>
+    <sheets>
+        <sDEF>
+            <ROOT>
+                <sheetTitle>LLL:EXT:pongback/Resources/Private/Language/locallang_be.xlf:plugin.pongback.configuration</sheetTitle>
+                <type>array</type>
+                <el>
+                    <settings.listItem>
+                        <label>LLL:EXT:pongback/Resources/Private/Language/locallang_be.xlf:plugin.pongback.configuration.listitem</label>
+                        <config>
+                            <type>number</type>
+                            <default>5</default>
+                        </config>
+                    </settings.listItem>
+                </el>
+            </ROOT>
+        </sDEF>
+    </sheets>
+</T3DataStructure>

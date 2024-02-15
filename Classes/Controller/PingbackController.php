@@ -23,13 +23,13 @@ class PingbackController extends ActionController
 
     public function listAction(): ResponseInterface
     {
-        $data = $this->getCachedData(3);
+        $data = $this->getCachedData($this->settings['listItem'] ?? 3);
         return $this->htmlResponse($data);
     }
 
     public function latestAction(): ResponseInterface
     {
-        $data = $this->getCachedData(15, 'latest');
+        $data = $this->getCachedData($this->settings['listItem'] ?? 3, 'latest');
         return $this->htmlResponse($data);
     }
 
@@ -47,7 +47,6 @@ class PingbackController extends ActionController
 
         $cache = GeneralUtility::makeInstance(CacheManager::class)
             ->getCache(Constants::PONGBACK_CACHE);
-
         if (($data = $cache->get($cacheKey)) === false) {
             $this->buildSlideWindowPagination($this->pingbackRepository->findBy(
                 [
