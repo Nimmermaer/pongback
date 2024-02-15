@@ -36,6 +36,9 @@
 			<trans-unit id="tx_pongback_domain_model_pingback.serialized_information.description">
 				<source>Contains additional information about the pingback in serialized format.</source>
 			</trans-unit>
+			<trans-unit id="sys_webhook.webhook_type.pongback-pingback-page-modification">
+				<source>Sends an pingback if edit the page or content</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

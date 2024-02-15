@@ -1,3 +1,4 @@
+tablesToListenToInTheEventOfChanges = tt_content, pages
 notification {
     email {
         # cat=pongback; type=string; label=This email will send if new pingback arrived

@@ -1,10 +1,12 @@
 <?php
 
+use Webicorns\Pongback\Listener\PageModificationListener;
 use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
 use TYPO3\CMS\Core\Cache\Frontend\VariableFrontend;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 use Webicorns\Pongback\Controller\PingbackController;
 use Webicorns\Pongback\Hooks\PingbackDataMap;
+use Webicorns\Pongback\Message\PingbackMessage;
 use Webicorns\Pongback\Utility\Constants;
 
 defined('TYPO3') || die();
@@ -18,7 +20,7 @@ call_user_func(
                 PingbackController::class => 'list',
             ],
             [
-                PingbackController::class => '',
+                PingbackController::class => 'list',
             ]
         );
         ExtensionUtility::configurePlugin(
@@ -41,10 +43,15 @@ call_user_func(
             ];
         }
 
+        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] =
+            PageModificationListener::class;
+
         $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][] =
             PingbackDataMap::class;
         $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] =
             PingbackDataMap::class;
+
+        $GLOBALS['TYPO3_CONF_VARS']['SYS']['messenger']['routing'][PingbackMessage::class] = 'doctrine';
     },
     'pongback',
 );
