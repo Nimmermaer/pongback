@@ -36,12 +36,12 @@ class PingbackDataMap
         }
     }
 
-    public function processDatamap_afterDatabaseOperations($status, $table, $id, &$fieldArray, DataHandler $pObj): void
+    public function processDatamap_afterDatabaseOperations(string $status, string $table, string $id, &$fieldArray, DataHandler $pObj): void
     {
         $this->clearPongbackCache($table, $id, $status);
     }
 
-    private function clearPongbackCache($table, $id, $status): void
+    private function clearPongbackCache(string $table, string $id, string $status): void
     {
         if ($table === self::TABLE) {
             $this->cacheManager->flushByTags(['pageId_' . $id, 'pingback_latest_view', 'pingback_list_view']);
