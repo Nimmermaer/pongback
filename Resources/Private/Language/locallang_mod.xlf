@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+	<file source-language="en" datatype="plaintext" original="messages" date="2024-02-05T14:21:36Z" product-name="pongback">
+		<header/>
+		<body>
+			<trans-unit id="mlang_tabs_tab">
+				<source>Pongback Admin</source>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>
