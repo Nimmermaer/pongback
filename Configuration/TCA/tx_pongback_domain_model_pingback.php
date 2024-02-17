@@ -145,8 +145,8 @@ return [
             'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.ping_resource',
             'description' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.ping_resource.description',
             'config' => [
-                'type' => 'input',
-                'size' => 50,
+                'type' => 'text',
+                'renderType' => 't3editor',
             ],
         ],
         'target_link' => [
