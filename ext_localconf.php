@@ -4,17 +4,21 @@ declare(strict_types=1);
 
 use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
 use TYPO3\CMS\Core\Cache\Frontend\VariableFrontend;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 use Webicorns\Pongback\Controller\PingbackController;
 use Webicorns\Pongback\Hooks\PingbackDataMap;
 use Webicorns\Pongback\Listener\PageModificationListener;
 use Webicorns\Pongback\Message\PingbackMessage;
+use Webicorns\Pongback\MetaTag\PingbackMetaTagGenerator;
 use Webicorns\Pongback\Utility\Constants;
 
 defined('TYPO3') || die();
 
 call_user_func(
     static function ($extensionKey): void {
+        $extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class);
         ExtensionUtility::configurePlugin(
             $extensionKey,
             'list',
@@ -54,6 +58,11 @@ call_user_func(
             PingbackDataMap::class;
 
         $GLOBALS['TYPO3_CONF_VARS']['SYS']['messenger']['routing'][PingbackMessage::class] = 'doctrine';
+
+        if ($extensionConfiguration->get($extensionKey, 'includePingbackHeader')) {
+            $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['TYPO3\CMS\Frontend\Page\PageGenerator']['generateMetaTags'][1_709_405_732_751] =
+                PingbackMetaTagGenerator::class . '->generate';
+        }
     },
     'pongback',
 );

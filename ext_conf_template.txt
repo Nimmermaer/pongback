@@ -1,4 +1,9 @@
+# cat=pongback; type=string; label=Add tables to listen in the event of changes
 tablesToListenToInTheEventOfChanges = tt_content, pages
+
+# cat=pongback; type=boolean; label=Adds Pingback header automatically
+includePingbackHeader = 1
+
 notification {
     email {
         # cat=pongback; type=string; label=This email will send if new pingback arrived
