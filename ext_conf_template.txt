@@ -1,7 +1,7 @@
 # cat=pongback; type=string; label=Add tables to listen in the event of changes
 tablesToListenToInTheEventOfChanges = tt_content, pages
 
-# cat=pongback; type=boolean; label=Adds Pingback header automatically
+# cat=pongback; type=boolean; label=Adds X-Pingback HTTP header automatically
 includePingbackHeader = 1
 
 # cat=pongback; type=boolean; label=Adds Pingback Yaml configuration automatically

@@ -21,12 +21,22 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use TYPO3\CMS\Core\Routing\RouterInterface;
+use TYPO3\CMS\Core\Site\Entity\Site;
 
 class PingbackMiddleware implements MiddlewareInterface
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        /** @var Site $site */
+        $site = $request->getAttribute('site');
         $response = $handler->handle($request);
-        return $response->withHeader('X-Pingback', 'url');
+        return $response->withHeader(
+            'X-Pingback',
+            (string) $site->getRouter()
+                ->generateUri($site->getIdentifier(), [
+                    'type' => 1_709_405_325_110,
+                ], type: RouterInterface::ABSOLUTE_URL)
+        );
     }
 }

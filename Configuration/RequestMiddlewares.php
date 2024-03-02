@@ -6,7 +6,7 @@ return [
     'frontend' => [
         'pongback-pingback-header' => [
             'target' => PingbackMiddleware::class,
-            'before' => ['typo3/cms-frontend/timetracker'],
+            'before' => ['typo3/cms-frontend/content-length-headers'],
         ],
     ],
 ];
