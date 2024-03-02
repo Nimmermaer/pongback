@@ -4,6 +4,9 @@ tablesToListenToInTheEventOfChanges = tt_content, pages
 # cat=pongback; type=boolean; label=Adds Pingback header automatically
 includePingbackHeader = 1
 
+# cat=pongback; type=boolean; label=Adds Pingback Yaml configuration automatically
+includePongbackYaml = 1
+
 notification {
     email {
         # cat=pongback; type=string; label=This email will send if new pingback arrived

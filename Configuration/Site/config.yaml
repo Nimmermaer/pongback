@@ -1,0 +1,5 @@
+routeEnhancers:
+  PageTypeSuffix:
+    type: PageType
+    map:
+      'pingback.ping': 1709405325110
