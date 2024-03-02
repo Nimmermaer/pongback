@@ -2,11 +2,16 @@
 
 use Webicorns\Pongback\Middleware\PingbackMiddleware;
 
-return [
-    'frontend' => [
-        'pongback-pingback-header' => [
-            'target' => PingbackMiddleware::class,
-            'before' => ['typo3/cms-frontend/content-length-headers'],
+$extensionConfiguration = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class);
+
+if ($extensionConfiguration->get('pongback', 'includePingbackHTTPHeader')) {
+    return [
+        'frontend' => [
+            'pongback-pingback-header' => [
+                'target' => PingbackMiddleware::class,
+                'before' => ['typo3/cms-frontend/content-length-headers'],
+            ],
         ],
-    ],
-];
+    ];
+
+}

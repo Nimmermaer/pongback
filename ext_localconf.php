@@ -59,7 +59,7 @@ call_user_func(
 
         $GLOBALS['TYPO3_CONF_VARS']['SYS']['messenger']['routing'][PingbackMessage::class] = 'doctrine';
 
-        if ($extensionConfiguration->get($extensionKey, 'includePingbackHeader')) {
+        if ($extensionConfiguration->get($extensionKey, 'includePingbackMetaTag')) {
             $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['TYPO3\CMS\Frontend\Page\PageGenerator']['generateMetaTags'][1_709_405_732_751] =
                 PingbackMetaTagGenerator::class . '->generate';
         }
