@@ -34,8 +34,10 @@
 	"minimum-stability": "stable",
 	"require": {
 		"php": "~8.2",
-		"typo3/cms-core": "^12.0",
+		"typo3/cms-core": "^12.4",
 		"typo3/cms-webhooks": "^12.4",
-		"typo3/cms-reactions": "^12.4"
+		"typo3/cms-reactions": "^12.4",
+		"ext-simplexml": "*",
+		"ext-xmlrpc": "*"
 	}
 }
