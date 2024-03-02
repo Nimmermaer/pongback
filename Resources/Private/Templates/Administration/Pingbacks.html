@@ -1,0 +1,43 @@
+<html
+    xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+    xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+    xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+    data-namespace-typo3-fluid="true"
+>
+<f:layout name="Module"/>
+<f:section name="Content">
+    <h4>List of Pingbacks</h4>
+    <div class="list-group">
+        <f:for as="item" each="{pagination.paginator.paginatedItems}" iteration="paginationIterator">
+            <a href="#"
+               class="list-group-item list-group-item-action {f:if(condition:paginationIterator.isFirst, then:'active')}"
+               aria-current="true">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{item.targetLink}</h5>
+                    <form action="{be:moduleLink(route:'pingback_list.edit')}"
+                          name="site_configuration_delete_{page.siteIdentifier}"
+                          id="site_configuration_delete_{page.siteIdentifier}" method="post">
+                        <div class="form-check form-switch">
+                            <input type="checkbox" value="{item:item}" class="form-check-input"
+                                   id="flexSwitchCheckDefault"/>
+                            <label class="form-check-label" for="flexSwitchCheckDefault">Enable Pingback</label>
+                        </div>
+                    </form>
+                </div>
+
+                {item.sourceLink}
+            </a>
+        </f:for>
+        <ul class="pagination">
+            <f:for each="{pagination.pagination.allPageNumbers}" as="page">
+                <li class="page-item">
+                    <a href="{currentPageNumber:page}"
+                       class="page-link {f:if(condition:'{currentPageNumber}=={page}',then:'active')}">
+                        {page}
+                    </a>
+                </li>
+            </f:for>
+        </ul>
+    </div>
+</f:section>
+</html>

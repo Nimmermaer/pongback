@@ -17,16 +17,17 @@ declare(strict_types=1);
 
 namespace Webicorns\Pongback\Traits;
 
+use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Pagination\SlidingWindowPagination;
 use TYPO3\CMS\Extbase\Pagination\QueryResultPaginator;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
 trait PaginationTrait
 {
-    private function buildSlideWindowPagination(
+    protected function buildSlideWindowPagination(
         QueryResultInterface $allItems,
-        $itemsPerPage = 10,
-        $maximumLinks = 15
+        int $itemsPerPage = 10,
+        int $maximumLinks = 15,
     ): void {
         $currentPage = $this->request->hasArgument('currentPage')
             ? (int) $this->request->getArgument('currentPage')
@@ -35,6 +36,25 @@ trait PaginationTrait
         $paginator = new QueryResultPaginator($allItems, $currentPage, $itemsPerPage);
         $pagination = new SlidingWindowPagination($paginator, $maximumLinks);
         $this->view->assign('pagination', [
+            'pagination' => $pagination,
+            'paginator' => $paginator,
+        ]);
+    }
+
+    protected function buildSlideWindowPaginationForBackend(
+        QueryResultInterface $allItems,
+        int $itemsPerPage = 10,
+        int $maximumLinks = 15,
+        ServerRequestInterface $request = null
+    ): void {
+        //        dd($request->getParsedBody());
+        //        $currentPage = $request->hasArgument('currentPage')
+        //            ? (int) $request->getArgument('currentPage')
+        //            : 1;
+
+        $paginator = new QueryResultPaginator($allItems, 1, $itemsPerPage);
+        $pagination = new SlidingWindowPagination($paginator, $maximumLinks);
+        $this->moduleTemplate->assign('pagination', [
             'pagination' => $pagination,
             'paginator' => $paginator,
         ]);
