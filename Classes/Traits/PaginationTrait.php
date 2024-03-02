@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Webicorns\Pongback\Traits;
 
 use TYPO3\CMS\Core\Pagination\SlidingWindowPagination;

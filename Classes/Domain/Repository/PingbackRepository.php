@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Webicorns\Pongback\Domain\Repository;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;

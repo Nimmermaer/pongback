@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Webicorns\Pongback\Controller;
 
 use Psr\Http\Message\ResponseInterface;
@@ -23,20 +25,20 @@ class PingbackController extends ActionController
 
     public function listAction(): ResponseInterface
     {
-        $data = $this->getCachedData($this->settings['listItem'] ?? 3);
+        $data = $this->getCachedData((int) ($this->settings['listItem'] ?? 3));
         return $this->htmlResponse($data);
     }
 
     public function latestAction(): ResponseInterface
     {
-        $data = $this->getCachedData($this->settings['listItem'] ?? 3, 'latest');
+        $data = $this->getCachedData((int) ($this->settings['listItem'] ?? 3), 'latest');
         return $this->htmlResponse($data);
     }
 
     /**
      * @return mixed|string
      */
-    public function getCachedData(int $limit = null, string $cacheTag = 'list'): mixed
+    public function getCachedData(int $limit = 0, string $cacheTag = 'list'): mixed
     {
         $pageId = $this->request->getAttribute('currentContentObject')
             ->data['pid'];

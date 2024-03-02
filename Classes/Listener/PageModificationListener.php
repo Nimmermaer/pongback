@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Webicorns\Pongback\Listener;
 
 use Psr\Log\LoggerInterface;

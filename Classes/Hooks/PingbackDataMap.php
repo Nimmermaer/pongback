@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Webicorns\Pongback\Hooks;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -36,8 +38,13 @@ class PingbackDataMap
         }
     }
 
-    public function processDatamap_afterDatabaseOperations(string $status, string $table, string $id, &$fieldArray, DataHandler $pObj): void
-    {
+    public function processDatamap_afterDatabaseOperations(
+        string $status,
+        string $table,
+        string $id,
+        &$fieldArray,
+        DataHandler $pObj
+    ): void {
         $this->clearPongbackCache($table, $id, $status);
     }
 

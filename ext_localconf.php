@@ -1,11 +1,13 @@
 <?php
 
-use Webicorns\Pongback\Listener\PageModificationListener;
+declare(strict_types=1);
+
 use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
 use TYPO3\CMS\Core\Cache\Frontend\VariableFrontend;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 use Webicorns\Pongback\Controller\PingbackController;
 use Webicorns\Pongback\Hooks\PingbackDataMap;
+use Webicorns\Pongback\Listener\PageModificationListener;
 use Webicorns\Pongback\Message\PingbackMessage;
 use Webicorns\Pongback\Utility\Constants;
 
