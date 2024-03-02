@@ -3,6 +3,7 @@
 ![Extension Status](https://img.shields.io/badge/Status-Alpha-lightblue)
 ![Version](https://img.shields.io/badge/Version-0.0.1-blue)
 
+[TOC]
 
 # TYPO3 Extension - Pongback
 
@@ -26,4 +27,16 @@ Pongback has exciting future plans to enhance its functionality:
 - **Extension Compatibility**: Pongback aims to support popular TYPO3 extensions such as EXT:news and EXT:blog.
 
 > Stay tuned for these exciting updates to Pongback!
+
+## Quick Start
+
+1) Install the extension:
+```bash
+    composer require webicorns/pongback
+```
+
+2) Configuration
+    + Include the basic TypoScript
+    + Look at extension configuration for further configurations
+      ![Backend configuration](../Resources/Public/Documentation/backend_configuration.png)
 
