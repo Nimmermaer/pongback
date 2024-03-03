@@ -47,7 +47,7 @@ class PingbackDataMap
         $pasteUpdate
     ): void {
         if ($command === 'delete' || $command === 'move') {
-            $this->clearPongbackCache($table, $id, $command);
+            $this->clearPongbackCache($table, (string) $id, $command);
         }
     }
 
@@ -58,7 +58,7 @@ class PingbackDataMap
         &$fieldArray,
         DataHandler $pObj
     ): void {
-        $this->clearPongbackCache($table, $id, $status);
+        $this->clearPongbackCache($table, (string)$id, $status);
     }
 
     private function clearPongbackCache(string $table, string $id, string $status): void

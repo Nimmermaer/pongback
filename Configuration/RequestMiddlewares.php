@@ -1,8 +1,10 @@
 <?php
 
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Webicorns\Pongback\Middleware\PingbackMiddleware;
 
-$extensionConfiguration = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class);
+$extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class);
 
 if ($extensionConfiguration->get('pongback', 'includePingbackHTTPHeader')) {
     return [
@@ -13,5 +15,4 @@ if ($extensionConfiguration->get('pongback', 'includePingbackHTTPHeader')) {
             ],
         ],
     ];
-
 }

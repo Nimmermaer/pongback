@@ -38,13 +38,13 @@ class PingbackController extends ActionController
 
     public function listAction(): ResponseInterface
     {
-        $data = $this->getCachedData((int)($this->settings['listItem'] ?? 3));
+        $data = $this->getCachedData((int) ($this->settings['listItem'] ?? 3));
         return $this->htmlResponse($data);
     }
 
     public function latestAction(): ResponseInterface
     {
-        $data = $this->getCachedData((int)($this->settings['listItem'] ?? 3), 'latest');
+        $data = $this->getCachedData((int) ($this->settings['listItem'] ?? 3), 'latest');
         return $this->htmlResponse($data);
     }
 
@@ -54,13 +54,13 @@ class PingbackController extends ActionController
     public function getCachedData(int $limit = 0, string $cacheTag = 'list'): mixed
     {
         $pageId = ($this->request->getAttribute('currentContentObject')
-                ->data['pid'] !== 0)
+            ->data['pid'] !== 0)
             ? $this->request->getAttribute('currentContentObject')
                 ->data['pid']
             : $this->request->getAttribute('frontend.controller')
                 ->id;
         $pluginId = ($this->request->getAttribute('currentContentObject')
-                ->data['pid'] !== 0)
+            ->data['pid'] !== 0)
             ? $this->request->getAttribute('currentContentObject')
                 ->data['pid']
             : $this->request->getAttribute('language')
