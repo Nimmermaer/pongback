@@ -25,3 +25,24 @@ plugin {
     }
   }
 }
+
+pingback = PAGE
+pingback {
+  typeNum = 1709405325110
+  10 < tt_content.list.20.pongback_server
+  config {
+    disableAllHeaderCode = 1
+    additionalHeaders {
+      10 {
+        header = Content-type:text/xml
+        replace = 1
+        httpResponseCode = 404
+      }
+    }
+
+    xhtml_cleaning = 0
+    debug = 0
+    no_cache = 1
+    admPanel = 0
+  }
+}

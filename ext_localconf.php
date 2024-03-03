@@ -8,6 +8,7 @@ use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 use Webicorns\Pongback\Controller\PingbackController;
+use Webicorns\Pongback\Domain\Validator\PingbackValidator;
 use Webicorns\Pongback\Hooks\PingbackDataMap;
 use Webicorns\Pongback\Listener\PageModificationListener;
 use Webicorns\Pongback\Message\PingbackMessage;
@@ -39,6 +40,16 @@ call_user_func(
                 PingbackController::class => 'latest',
             ]
         );
+        ExtensionUtility::configurePlugin(
+            $extensionKey,
+            'server',
+            [
+                PingbackController::class => 'server',
+            ],
+            [
+                PingbackController::class => 'server',
+            ]
+        );
         if ($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations'][Constants::PONGBACK_CACHE] ?? true) {
             $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations'][Constants::PONGBACK_CACHE] = [
                 'backend' => Typo3DatabaseBackend::class,
@@ -63,6 +74,8 @@ call_user_func(
             $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['TYPO3\CMS\Frontend\Page\PageGenerator']['generateMetaTags'][1_709_405_732_751] =
                 PingbackMetaTagGenerator::class . '->generate';
         }
+
+        $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['pongback']['validatePingback'][] = PingbackValidator::class . '->validateTargetUri';
     },
     'pongback',
 );

@@ -10,6 +10,9 @@ includePingbackHTTPHeader = 1
 # cat=pongback; type=boolean; label=Adds Pingback Yaml configuration automatically
 includePongbackYaml = 1
 
+# cat=pongback; type=boolean; label=Enables auto publishing
+enableAutoPublishing = 1
+
 notification {
     email {
         # cat=pongback; type=string; label=This email will send if new pingback arrived

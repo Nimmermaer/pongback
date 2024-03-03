@@ -8,6 +8,10 @@ services:
     exclude: '../Classes/Domain/Model/*'
   Webicorns\Pongback\Listener\PageModificationListener:
     public: true
+  Webicorns\Pongback\Listener\GetWebsiteInformationEventListener:
+    tags:
+      - name: event.listener
+        identifier: 'pongback/enhance-pongback-with-website-information'
   Webicorns\Pongback\Utility\Mail:
     arguments:
       $extensionConfiguration: '@TYPO3\CMS\Core\Configuration\ExtensionConfiguration'
