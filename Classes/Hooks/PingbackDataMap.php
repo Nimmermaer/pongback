@@ -58,7 +58,7 @@ class PingbackDataMap
         &$fieldArray,
         DataHandler $pObj
     ): void {
-        $this->clearPongbackCache($table, (string)$id, $status);
+        $this->clearPongbackCache($table, $id, $status);
     }
 
     private function clearPongbackCache(string $table, string $id, string $status): void

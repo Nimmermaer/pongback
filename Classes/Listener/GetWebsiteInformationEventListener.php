@@ -34,7 +34,7 @@ class GetWebsiteInformationEventListener
         $targetLink = $pingback->targetLink;
         $sourceLink = $pingback->sourceLink;
 
-        $pseudotag = '#%$PINGBACK-' . time() . '$%#';
+        $pseudoTag = '#%$PINGBACK-' . time() . '$%#';
         $client = new Client([
             RequestOptions::VERIFY => false,
         ]);
@@ -42,23 +42,25 @@ class GetWebsiteInformationEventListener
         try {
             $response = $client->request('GET', $sourceLink);
             $sourceContent = (string) $response->getBody();
-            $sourceContent = preg_replace(
-                '@<a [^>]*href="' . preg_quote($targetLink, '@') . '"[^>]*>@',
-                $pseudotag,
-                $sourceContent,
-                100,
-                $count
-            );
+            $pattern = '@<a\s+[^>]*href\s*=\s*"' . preg_quote($targetLink, '@') . '"[^>]*>.*?</a>@s';
+            preg_match($pattern, $sourceContent, $matches);
+            $originalLink = $matches[0] ?? '';
+
+            if ($originalLink !== '') {
+                $sourceContent = str_replace($originalLink, $pseudoTag, $sourceContent);
+            }
+
             file_put_contents('sample.php', $sourceContent);
 
             $tagLessData = file_get_contents('sample.php');
 
             $tagLessData = preg_replace('#\s+#', ' ', $tagLessData);
-            $pos = strpos($tagLessData, $pseudotag);
+            $pos = strpos($tagLessData, $pseudoTag);
 
             if ($pos !== false) {
                 $informationString = '...' . trim(substr($tagLessData, $pos - 100, 200)) . '...';
-                $pingback->serializedInformation = $informationString;
+                $informationString = strip_tags($informationString, '<a>');
+                $pingback->serializedInformation = str_replace($pseudoTag, $originalLink, $informationString);
             } else {
                 throw new \Exception('No Information found in source.');
             }

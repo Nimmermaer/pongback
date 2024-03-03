@@ -67,15 +67,15 @@ class PingbackController extends ActionController
     public function getCachedData(int $limit = 0, string $cacheTag = 'list'): mixed
     {
         $pageId = ($this->request->getAttribute('currentContentObject')
-            ->data['pid'] !== 0)
+            ->data['uid'] !== 0)
             ? $this->request->getAttribute('currentContentObject')
-                ->data['pid']
+                ->data['uid']
             : $this->request->getAttribute('frontend.controller')
                 ->id;
         $pluginId = ($this->request->getAttribute('currentContentObject')
-            ->data['pid'] !== 0)
+            ->data['uid'] !== 0)
             ? $this->request->getAttribute('currentContentObject')
-                ->data['pid']
+                ->data['uid']
             : $this->request->getAttribute('language')
                 ->getLanguageId();
 
