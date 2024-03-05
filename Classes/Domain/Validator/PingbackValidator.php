@@ -17,9 +17,8 @@ declare(strict_types=1);
 
 namespace Webicorns\Pongback\Domain\Validator;
 
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use Webicorns\Pongback\Controller\PingbackController;
 use Webicorns\Pongback\Domain\Model\Pingback;
+use Webicorns\Pongback\Service\XmlResponseService;
 
 class PingbackValidator
 {
@@ -27,17 +26,14 @@ class PingbackValidator
     {
         /** @var Pingback $pingback */
         $pingback = $params['pingback'];
-        $targetLink = $params['params'][0];
-        $sourceLink = $params['params'][1];
+        $targetLink = $params['params']['param'][0]['value']['string'] ?? $params['params'][0];
+        $sourceLink = $params['params']['param'][1]['value']['string'] ?? $params['params'][1];
         $matchLink = $_SERVER['SERVER_NAME'];
         if (strpos((string) $targetLink, (string) $matchLink) > 0) {
             $pingback->sourceLink = $sourceLink;
             $pingback-> targetLink = $targetLink;
         } else {
-            /** @var PingbackController $error */
-            $error = GeneralUtility::makeInstance(PingbackController::class);
-
-            $pingback->validationError[] = $error->xmlErrorResponse('32', 'Error');
+            $pingback->validationError[] = XmlResponseService::xmlErrorResponse('32', 'Error');
         }
     }
 }

@@ -28,6 +28,7 @@ use TYPO3\CMS\Extbase\Persistence\QueryInterface;
 use Webicorns\Pongback\Domain\Model\Pingback;
 use Webicorns\Pongback\Domain\Repository\PingbackRepository;
 use Webicorns\Pongback\Event\BeforePingbackCreateEvent;
+use Webicorns\Pongback\Service\XmlResponseService;
 use Webicorns\Pongback\Traits\PaginationTrait;
 use Webicorns\Pongback\Utility\Constants;
 
@@ -61,7 +62,7 @@ class PingbackController extends ActionController
         $xmlrpcServerHandler = xmlrpc_server_create();
         xmlrpc_server_register_method($xmlrpcServerHandler, 'pingback.ping', $this->pingback(...));
         $response = xmlrpc_server_call_method($xmlrpcServerHandler, $HTTP_RAW_POST_DATA, null);
-        return $this->xmlResponse($response);
+        return XmlResponseService::xmlResponse($response);
     }
 
     public function getCachedData(int $limit = 0, string $cacheTag = 'list'): mixed
@@ -137,36 +138,5 @@ class PingbackController extends ActionController
         $this->pingbackRepository->add($event->getPingback());
 
         return 'success';
-    }
-
-    public function xmlErrorResponse(
-        string $errorNumber,
-        string $errorString,
-        string $errorFile = '',
-        string $errorLine = '',
-        string $errorContext = ''
-    ): ResponseInterface {
-        $xml = xmlrpc_encode_request(null, [
-            'faultCode' => $errorNumber,
-            'faultString' => 'Remote XMLRPC Error from ' . $_SERVER['SERVER_NAME'] . sprintf(
-                ': %s in %s:%s',
-                $errorString,
-                $errorFile,
-                $errorLine
-            ),
-        ]);
-
-        return $this->responseFactory
-            ->createResponse(404)
-            ->withHeader('Content-Type', 'text/xml; charset=utf-8')
-            ->withBody($this->streamFactory->createStream($xml));
-    }
-
-    protected function xmlResponse(string $xml = null): ResponseInterface
-    {
-        return $this->responseFactory
-            ->createResponse()
-            ->withHeader('Content-Type', 'text/xml; charset=utf-8')
-            ->withBody($this->streamFactory->createStream(($xml ?? $this->view->render())));
     }
 }
