@@ -1,0 +1,35 @@
+mod {
+  wizards {
+    newContentElement {
+      wizardItems {
+        pingbacks {
+          header = LLL:EXT:pongback/Resources/Private/Language/locallang_be.xlf:plugin.tx_pongback.pongback.wizard
+          elements {
+            pongback_list {
+              title = LLL:EXT:pongback/Resources/Private/Language/locallang_be.xlf:plugin.tx_pongback.pongback_list.title
+              description = LLL:EXT:pongback/Resources/Private/Language/locallang_be.xlf:plugin.tx_pongback.pongback_list.description
+              iconIdentifier = tx-pongback-pong
+              tt_content_defValues {
+                CType = list
+                list_type = pongback_list
+              }
+            }
+
+            pongback_latest {
+              title = LLL:EXT:pongback/Resources/Private/Language/locallang_be.xlf:plugin.tx_pongback.pongback_latest.title
+              description = LLL:EXT:pongback/Resources/Private/Language/locallang_be.xlf:plugin.tx_pongback.pongback_latest.description
+              iconIdentifier = tx-pongback-pong
+              tt_content_defValues {
+                CType = list
+                list_type = pongback_latest
+              }
+            }
+          }
+
+          show = *
+        }
+      }
+    }
+  }
+
+}
