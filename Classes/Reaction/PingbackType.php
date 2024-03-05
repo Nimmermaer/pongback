@@ -17,15 +17,14 @@ declare(strict_types=1);
 
 namespace Webicorns\Pongback\Reaction;
 
-use Psr\Http\Message\MessageInterface;
-use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\StreamFactoryInterface;
 use TYPO3\CMS\Core\Registry;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Reactions\Model\ReactionInstruction;
 use TYPO3\CMS\Reactions\Reaction\ReactionInterface;
+use Webicorns\Pongback\Controller\PingbackController;
+use Webicorns\Pongback\Service\XmlResponseService;
 
 class PingbackType implements ReactionInterface
 {
@@ -36,8 +35,6 @@ class PingbackType implements ReactionInterface
 
     public function __construct(
         private readonly Registry $registry,
-        private readonly ResponseFactoryInterface $responseFactory,
-        private readonly StreamFactoryInterface $streamFactory,
     ) {
     }
 
@@ -62,25 +59,23 @@ class PingbackType implements ReactionInterface
         ReactionInstruction $reaction
     ): ResponseInterface {
         $response = [];
-        $xmlObject = new \SimpleXMLElement($request->getBody()->getContents());
-        if ((string) $xmlObject->children()->methodName !== 'pingback.ping') {
-            $data = [
-                'success' => false,
-                'error' => 'id not given',
-            ];
-
-            return $this->xmlResponse($data, 400);
-        }
-
-        foreach ($xmlObject->children()->params->param as $param) {
-            $response[] = $param->value->string;
-        }
-
         $this->updateRegistryEntry(trim(implode('-', $response)));
+        /** @var PingbackController $controller */
+        $controller = GeneralUtility::makeInstance(PingbackController::class);
 
-        return $this->xmlResponse([
-            'string' => 'success',
-        ]);
+        $controller->pingback($payload['methodName'], $payload['params']);
+
+        $transformedXml = GeneralUtility::array2xml([
+            'params' => [
+                'param' => [
+                    'value' => [
+                        'string' => 'success',
+                    ],
+                ],
+            ],
+        ], docTag: 'methodResponse');
+        $xml = new \SimpleXMLElement($transformedXml);
+        return XmlResponseService::xmlResponse($xml->asXML());
     }
 
     private function updateRegistryEntry(string $id): void
@@ -89,23 +84,5 @@ class PingbackType implements ReactionInterface
         $ids[] = $id;
         $ids = array_unique($ids);
         $this->registry->set('tx_pongback', self::REGISTRY_KEY, $ids);
-    }
-
-    private function xmlResponse(array $data, int $statusCode = 201): MessageInterface|ResponseInterface
-    {
-        $transformedXml = GeneralUtility::array2xml([
-            'params' => [
-                'param' => [
-                    'value' => $data,
-                ],
-            ],
-        ], docTag: 'methodResponse');
-        $xml = new \SimpleXMLElement($transformedXml);
-
-        return $this->responseFactory
-            ->createResponse()
-            ->withStatus($statusCode)
-            ->withHeader('Content-Type', 'text/xml; charset=utf-8')
-            ->withBody($this->streamFactory->createStream($xml->asXML()));
     }
 }

@@ -20,8 +20,62 @@ plugin {
     persistence {
       storagePid = {$plugin.tx_pongback.persistence.storagePid}
     }
+
     settings {
       listItem = 2
+      applicationList {
+        # JSON Header
+        application-json {
+          type = json
+          header = application/json
+        }
+
+        text-javascript {
+          type = json
+          header = text/javascript
+        }
+
+        application-vndApiJson {
+          type = json
+          header = application/vnd.api+json
+        }
+
+        application-ldJson {
+          type = json
+          header = application/ld+json
+        }
+
+        text-json {
+          type = json
+          header = text/json
+        }
+
+        # XML Header
+        application-xml {
+          type = xml
+          header = application/xml
+        }
+
+        text-xml {
+          type = xml
+          header = text/xml
+        }
+
+        application-rssXml {
+          type = xml
+          header = application/rss+xml
+        }
+
+        application-atomXml {
+          type = xml
+          header = application/atom+xml
+        }
+
+        application-xhtmlXml {
+          type = xml
+          header = application/xhtml+xml
+        }
+      }
     }
   }
 }
