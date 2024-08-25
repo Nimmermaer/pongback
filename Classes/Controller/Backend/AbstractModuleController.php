@@ -7,9 +7,14 @@ use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\Components\Buttons\DropDown\DropDownItem;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
+use TYPO3\CMS\Core\Http\ResponseFactory;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
+use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
+use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
+use Webicorns\Pongback\Domain\Repository\PingbackRepository;
 use Webicorns\Pongback\Traits\PaginationTrait;
 
 abstract class AbstractModuleController
@@ -28,7 +33,17 @@ abstract class AbstractModuleController
         protected ModuleTemplateFactory $moduleTemplateFactory,
         protected readonly IconFactory $iconFactory,
         protected readonly UriBuilder $uriBuilder,
+        protected readonly PageRenderer $pageRenderer,
+        protected readonly ResponseFactory $responseFactory,
+        protected readonly PingbackRepository $pingbackRepository,
+        protected readonly PersistenceManager $persistenceManager,
     ) {
+    }
+
+    public function injectAction(): void
+    {
+        $this->pageRenderer->getJavaScriptRenderer()
+            ->addJavaScriptModuleInstruction(JavaScriptModuleInstruction::create('@webicorns/pongback/enabled-pongback.js'));
     }
 
     public function getId(ServerRequestInterface $request): int

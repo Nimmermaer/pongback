@@ -21,7 +21,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     if ($extensionConfiguration->get('pongback', 'includePongbackYaml')) {
         $services->set('pongback/enhance-pongback-configuration', EnhanceSiteConfigurationListener::class)
             ->tag('event.listener', [
-                    'event' => SiteConfigurationLoadedEvent::class,
-                ]);
+                'event' => SiteConfigurationLoadedEvent::class,
+            ]);
     }
 };

@@ -38,6 +38,10 @@ final readonly class PingbackMessage implements WebhookMessageInterface
         private ?array $modifiedFields = null
     ) {
     }
+
+    /**
+     * @return array{action: string, identifier: int, record: mixed[], table: string, url: string, site: string, workspace: mixed, author?: array{uid: mixed, username: mixed, isAdmin: bool}, changedFields?: mixed[]}
+     */
     public function jsonSerialize(): array
     {
         $data = [

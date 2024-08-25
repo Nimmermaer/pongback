@@ -22,7 +22,7 @@ return [
         ],
     ],
     'pingback_list' => [
-        'parent' => 'web',
+        'parent' => 'pongback_admin',
         'position' => ['top'],
         'access' => 'user',
         'workspaces' => 'live',

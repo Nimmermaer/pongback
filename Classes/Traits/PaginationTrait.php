@@ -47,12 +47,11 @@ trait PaginationTrait
         int $maximumLinks = 15,
         ServerRequestInterface $request = null
     ): void {
-        //        dd($request->getParsedBody());
-        //        $currentPage = $request->hasArgument('currentPage')
-        //            ? (int) $request->getArgument('currentPage')
-        //            : 1;
+        $currentPage = ($request->getQueryParams()['currentPageNumber'] ?? false)
+            ? (int) $request->getQueryParams()['currentPageNumber']
+            : 1;
 
-        $paginator = new QueryResultPaginator($allItems, 1, $itemsPerPage);
+        $paginator = new QueryResultPaginator($allItems, $currentPage, $itemsPerPage);
         $pagination = new SlidingWindowPagination($paginator, $maximumLinks);
         $this->moduleTemplate->assign('pagination', [
             'pagination' => $pagination,

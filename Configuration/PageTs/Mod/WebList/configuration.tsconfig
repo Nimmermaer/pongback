@@ -1,13 +1,12 @@
 mod {
-  web_list {
-    hideTables = tx_pongback_domain_model_pingback
-  }
+    web_list {
+        hideTables = tx_pongback_domain_model_pingback
+    }
 }
 [backend.user.isAdmin]
-  mod {
+mod {
     web_list {
-      hideTables =
+        hideTables = 
     }
-  }
+}
 [global]
-

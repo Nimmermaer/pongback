@@ -1,5 +1,5 @@
 templates {
-  typo3/cms-dashboard {
-    1707407283059 = webicorns/pongback:Resources/Private/
-  }
+    typo3/cms-dashboard {
+        1707407283059 = webicorns/pongback:Resources/Private/
+    }
 }

@@ -1,102 +1,88 @@
 plugin {
-  tx_pongback {
-    view {
-      templateRootPaths {
-        0 = EXT:pongback/Resources/Private/Templates/
-        1 = {$plugin.tx_pongback.view.templateRootPath}
-      }
-
-      partialRootPaths {
-        0 = EXT:pongback/Resources/Private/Partials/
-        1 = {$plugin.tx_pongback.view.partialRootPath}
-      }
-
-      layoutRootPaths {
-        0 = EXT:pongback/Resources/Private/Layouts/
-        1 = {$plugin.tx_pongback.view.layoutRootPath}
-      }
+    tx_pongback {
+        view {
+            templateRootPaths {
+                0 = EXT:pongback/Resources/Private/Templates/
+                1 = {$plugin.tx_pongback.view.templateRootPath}
+            }
+            partialRootPaths {
+                0 = EXT:pongback/Resources/Private/Partials/
+                1 = {$plugin.tx_pongback.view.partialRootPath}
+            }
+            layoutRootPaths {
+                0 = EXT:pongback/Resources/Private/Layouts/
+                1 = {$plugin.tx_pongback.view.layoutRootPath}
+            }
+        }
+        persistence {
+            storagePid = {$plugin.tx_pongback.persistence.storagePid}
+        }
+        settings {
+            listItem = 2
+            applicationList {
+                # JSON Header
+                application-json {
+                    type = json
+                    header = application/json
+                }
+                text-javascript {
+                    type = json
+                    header = text/javascript
+                }
+                application-vndApiJson {
+                    type = json
+                    header = application/vnd.api+json
+                }
+                application-ldJson {
+                    type = json
+                    header = application/ld+json
+                }
+                text-json {
+                    type = json
+                    header = text/json
+                }
+                # XML Header
+                application-xml {
+                    type = xml
+                    header = application/xml
+                }
+                text-xml {
+                    type = xml
+                    header = text/xml
+                }
+                application-rssXml {
+                    type = xml
+                    header = application/rss+xml
+                }
+                application-atomXml {
+                    type = xml
+                    header = application/atom+xml
+                }
+                application-xhtmlXml {
+                    type = xml
+                    header = application/xhtml+xml
+                }
+            }
+        }
     }
-
-    persistence {
-      storagePid = {$plugin.tx_pongback.persistence.storagePid}
-    }
-
-    settings {
-      listItem = 2
-      applicationList {
-        # JSON Header
-        application-json {
-          type = json
-          header = application/json
-        }
-
-        text-javascript {
-          type = json
-          header = text/javascript
-        }
-
-        application-vndApiJson {
-          type = json
-          header = application/vnd.api+json
-        }
-
-        application-ldJson {
-          type = json
-          header = application/ld+json
-        }
-
-        text-json {
-          type = json
-          header = text/json
-        }
-
-        # XML Header
-        application-xml {
-          type = xml
-          header = application/xml
-        }
-
-        text-xml {
-          type = xml
-          header = text/xml
-        }
-
-        application-rssXml {
-          type = xml
-          header = application/rss+xml
-        }
-
-        application-atomXml {
-          type = xml
-          header = application/atom+xml
-        }
-
-        application-xhtmlXml {
-          type = xml
-          header = application/xhtml+xml
-        }
-      }
-    }
-  }
 }
 
 pingback = PAGE
 pingback {
-  typeNum = 1709405325110
-  10 < tt_content.list.20.pongback_server
-  config {
-    disableAllHeaderCode = 1
-    additionalHeaders {
-      10 {
-        header = Content-type:text/xml
-        replace = 1
-        httpResponseCode = 404
-      }
+    typeNum = 1709405325110
+    10 < tt_content.list.20.pongback_server
+    config {
+        disableAllHeaderCode = 1
+        additionalHeaders {
+            10 {
+                header = Content-type:text/xml
+                replace = 1
+                httpResponseCode = 404
+            }
+        }
+        xhtml_cleaning = 0
+        debug = 0
+        no_cache = 1
+        admPanel = 0
     }
-
-    xhtml_cleaning = 0
-    debug = 0
-    no_cache = 1
-    admPanel = 0
-  }
 }

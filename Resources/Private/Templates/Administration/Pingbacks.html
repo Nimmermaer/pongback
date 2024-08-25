@@ -9,17 +9,18 @@
     <h4>List of Pingbacks</h4>
     <div class="list-group">
         <f:for as="item" each="{pagination.paginator.paginatedItems}" iteration="paginationIterator">
-            <a href="#"
-               class="list-group-item list-group-item-action {f:if(condition:paginationIterator.isFirst, then:'active')}"
+
+            <a href="{be:uri.editRecord(uid:item.pid, table: 'tx_pongback_domain_model_pingback')}"
+               class="list-group-item list-group-item-action"
                aria-current="true">
                 <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">{item.targetLink}</h5>
+                    <h5 class="mb-1">{item.uid}:{item.targetLink}{item.sourceLink}</h5>
                     <form action="{be:moduleLink(route:'pingback_list.edit')}"
                           name="site_configuration_delete_{page.siteIdentifier}"
                           id="site_configuration_delete_{page.siteIdentifier}" method="post">
                         <div class="form-check form-switch">
-                            <input type="checkbox" value="{item:item}" class="form-check-input"
-                                   id="flexSwitchCheckDefault"/>
+                            <input type="checkbox" value="{item.hidden}" data-pongback-uid="{item.uid}" class="form-check-input"
+                                   id="flexSwitchCheckDefault" {f:if(condition:item.hidden, else:'checked')}/>
                             <label class="form-check-label" for="flexSwitchCheckDefault">Enable Pingback</label>
                         </div>
                     </form>
@@ -31,7 +32,7 @@
         <ul class="pagination">
             <f:for each="{pagination.pagination.allPageNumbers}" as="page">
                 <li class="page-item">
-                    <a href="{currentPageNumber:page}"
+                    <a href="{f:be.uri(route: 'pingback_list', parameters: '{currentPageNumber:page}')}"
                        class="page-link {f:if(condition:'{currentPageNumber}=={page}',then:'active')}">
                         {page}
                     </a>

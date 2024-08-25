@@ -23,26 +23,96 @@ use TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator;
 
 class Pingback extends AbstractEntity
 {
-    public array $validationError = [];
+    protected array $validationError = [];
 
-    public bool $hidden = false;
+    protected bool $hidden = false;
 
-    public string $pingClient = '';
+    protected string $pingClient = '';
 
-    public string $pingResource = '';
-
-    #[Validate([
-        'validator' => NotEmptyValidator::class,
-    ])]
-    public string $serializedInformation = '';
+    protected string $pingResource = '';
 
     #[Validate([
         'validator' => NotEmptyValidator::class,
     ])]
-    public string $sourceLink = '';
+    protected string $serializedInformation = '';
 
     #[Validate([
         'validator' => NotEmptyValidator::class,
     ])]
-    public string $targetLink = '';
+    protected string $sourceLink = '';
+
+    #[Validate([
+        'validator' => NotEmptyValidator::class,
+    ])]
+    protected string $targetLink = '';
+
+    public function isHidden(): bool
+    {
+        return $this->hidden;
+    }
+
+    public function setHidden(bool $hidden): void
+    {
+        $this->hidden = $hidden;
+    }
+
+    public function getPingClient(): string
+    {
+        return $this->pingClient;
+    }
+
+    public function setPingClient(string $pingClient): void
+    {
+        $this->pingClient = $pingClient;
+    }
+
+    public function getPingResource(): string
+    {
+        return $this->pingResource;
+    }
+
+    public function setPingResource(string $pingResource): void
+    {
+        $this->pingResource = $pingResource;
+    }
+
+    public function getSerializedInformation(): string
+    {
+        return $this->serializedInformation;
+    }
+
+    public function setSerializedInformation(string $serializedInformation): void
+    {
+        $this->serializedInformation = $serializedInformation;
+    }
+
+    public function getSourceLink(): string
+    {
+        return $this->sourceLink;
+    }
+
+    public function setSourceLink(string $sourceLink): void
+    {
+        $this->sourceLink = $sourceLink;
+    }
+
+    public function getTargetLink(): string
+    {
+        return $this->targetLink;
+    }
+
+    public function setTargetLink(string $targetLink): void
+    {
+        $this->targetLink = $targetLink;
+    }
+
+    public function getValidationError(): array
+    {
+        return $this->validationError;
+    }
+
+    public function setValidationError(array $validationError): void
+    {
+        $this->validationError = $validationError;
+    }
 }

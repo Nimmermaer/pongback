@@ -1,17 +1,16 @@
 plugin {
-  tx_pongback {
-    view {
-      # cat=plugin.tx_pongback/file; type=string; label=Path to template root (FE)
-      templateRootPath = EXT:pongback/Resources/Private/Templates/
-      # cat=plugin.tx_pongback/file; type=string; label=Path to template partials (FE)
-      partialRootPath = EXT:pongback/Resources/Private/Partials/
-      # cat=plugin.tx_pongback/file; type=string; label=Path to template layouts (FE)
-      layoutRootPath = EXT:pongback/Resources/Private/Layouts/
+    tx_pongback {
+        view {
+            # cat=plugin.tx_pongback/file; type=string; label=Path to template root (FE)
+            templateRootPath = EXT:pongback/Resources/Private/Templates/
+            # cat=plugin.tx_pongback/file; type=string; label=Path to template partials (FE)
+            partialRootPath = EXT:pongback/Resources/Private/Partials/
+            # cat=plugin.tx_pongback/file; type=string; label=Path to template layouts (FE)
+            layoutRootPath = EXT:pongback/Resources/Private/Layouts/
+        }
+        persistance {
+            # cat=plugin.tx_pongback/file; type=string; label=Default storage PID
+            storagePid = 0
+        }
     }
-
-    persistance {
-      # cat=plugin.tx_pongback/file; type=string; label=Default storage PID
-      storagePid = 0
-    }
-  }
 }
