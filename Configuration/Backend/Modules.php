@@ -14,7 +14,7 @@ return [
         'path' => '/module/pongback/administration',
         'labels' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_mod.xlf',
         'iconIdentifier' => 'tx-pongback-pong',
-        'navigationComponent' => '@typo3/backend/page-tree/page-tree-element',
+        'navigationComponent' => '@typo3/backend/tree/page-tree-element',
         'routes' => [
             '_default' => [
                 'target' => AdminModuleController::class . '::handleRequest',
@@ -29,7 +29,7 @@ return [
         'path' => '/module/pongback/list/pingback',
         'labels' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_mod.xlf',
         'iconIdentifier' => 'tx-pongback-pong',
-        'navigationComponent' => '@typo3/backend/page-tree/page-tree-element',
+        'navigationComponent' => '@typo3/backend/tree/page-tree-element',
         'routes' => [
             '_default' => [
                 'target' => PingbackModuleController::class . '::handleRequest',

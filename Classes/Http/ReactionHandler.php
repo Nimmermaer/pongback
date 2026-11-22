@@ -98,7 +98,7 @@ readonly class ReactionHandler
                     JSON_THROW_ON_ERROR,
                 ),
                 'json' => json_decode($body, true, 512, JSON_THROW_ON_ERROR),
-                default => throw new \Exception(sprintf('Unsupported type: %s', $type))
+                default => throw new \Exception(sprintf('Unsupported type: %s', $type), 1732300010)
             };
 
             return is_array($payload) ? $payload : [];
