@@ -8,3 +8,4 @@ parameters:
     - ext_localconf.php
   excludePaths:
     - .Build (?)
+    - var (?)
