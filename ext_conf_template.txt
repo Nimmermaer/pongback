@@ -7,7 +7,7 @@ includePingbackMetaTag = 1
 # cat=pongback; type=boolean; label=Adds X-Pingback HTTP header automatically
 includePingbackHTTPHeader = 1
 
-# cat=pongback; type=boolean; label=Adds Pingback Yaml configuration automatically
+# cat=pongback; type=boolean; label=TYPO3 v13 only: add the Pingback route enhancer to all sites automatically (TYPO3 v14: add the site set "webicorns/pongback" instead)
 includePongbackYaml = 1
 
 # cat=pongback; type=boolean; label=Enables auto publishing

@@ -1,0 +1,11 @@
+# Route enhancers of the "webicorns/pongback" site set.
+# TYPO3 v14+ applies this file automatically when the set is added to a site.
+# TYPO3 v13 does not support route enhancers in sets; there the file is merged
+# into the site configuration by EnhanceSiteConfigurationListener instead
+# (extension setting "includePongbackYaml").
+routeEnhancers:
+  PageTypeSuffix:
+    type: PageType
+    map:
+      # Must match Constants::PINGBACK_PAGE_TYPE
+      'pingback.ping': 1709405325110
