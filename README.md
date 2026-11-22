@@ -38,18 +38,23 @@ Pongback has exciting future plans to enhance its functionality:
 
 2) Configuration
     + Add the site set **"Pongback: Pingback endpoint and plugins"**
-      (`webicorns/pongback`) to your site configuration. Alternatively include
-      the static TypoScript template "EXT:pongback" in your TypoScript record.
+      (`webicorns/pongback`) to your site configuration. It provides the
+      TypoScript, the route enhancer and the site settings.
     + The route enhancer for the endpoint (`pingback.ping`) is part of the site
       set (`route-enhancers.yaml`) and applied automatically in TYPO3 v14. In
       TYPO3 v13 it is added to all sites by the extension setting
       `includePongbackYaml` (enabled by default).
-    + Look at the extension configuration for further configurations
-      ![Backend configuration](Resources/Public/Documentation/backend_configuration.png)
+    + Configure Pongback per site in *Site Management > Settings > Pongback*:
 
-3) Upgrading from earlier versions
-    + Run the upgrade wizard "Pongback: Migrate plugins to content elements"
-      to migrate existing plugins to the new content types.
+      | Setting                                     | Default                 |
+      |---------------------------------------------|-------------------------|
+      | `pongback.discovery.httpHeader`             | `true`                  |
+      | `pongback.discovery.metaTag`                | `true`                  |
+      | `pongback.receive.autoPublish`              | `true`                  |
+      | `pongback.send.tables`                      | `pages, tt_content`     |
+      | `pongback.notification.emailTo` / `emailFrom` | empty                 |
+      | `plugin.tx_pongback.view.*RootPath`         | extension paths         |
+      | `plugin.tx_pongback.persistence.storagePid` | `0`                     |
 
 ## Contributing
 

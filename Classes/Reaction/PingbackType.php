@@ -62,7 +62,7 @@ class PingbackType implements ReactionInterface
         /** @var PingbackController $controller */
         $controller = GeneralUtility::makeInstance(PingbackController::class);
 
-        $controller->pingback($payload['methodName'], $payload['params']);
+        $controller->pingback($payload['methodName'], $payload['params'], $request->getAttribute('site'));
 
         $transformedXml = GeneralUtility::array2xml([
             'params' => [

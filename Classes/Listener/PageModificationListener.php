@@ -20,11 +20,11 @@ namespace Webicorns\Pongback\Listener;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\MathUtility;
+use Webicorns\Pongback\Configuration\PongbackSettings;
 use Webicorns\Pongback\Message\PingbackMessage;
 
 class PageModificationListener
@@ -33,7 +33,6 @@ class PageModificationListener
         protected MessageBusInterface $bus,
         protected LoggerInterface $logger,
         protected SiteFinder $siteFinder,
-        private readonly ExtensionConfiguration $extensionConfiguration,
     ) {}
 
     public function processDatamap_afterDatabaseOperations(
@@ -43,10 +42,6 @@ class PageModificationListener
         array $fieldArray,
         DataHandler $dataHandler,
     ): void {
-        if (! str_contains($this->getConfiguredTables(), (string) $table)) {
-            return;
-        }
-
         if (! MathUtility::canBeInterpretedAsInteger($id)) {
             $id = $dataHandler->substNEWwithIDs[$id];
         }
@@ -55,6 +50,10 @@ class PageModificationListener
             $id = (int) $id;
             $site = $this->siteFinder->getSiteByPageId($id);
         } catch (SiteNotFoundException) {
+            return;
+        }
+
+        if (! in_array((string) $table, PongbackSettings::fromSite($site)->sendTables, true)) {
             return;
         }
 
@@ -101,8 +100,4 @@ class PageModificationListener
         }
     }
 
-    private function getConfiguredTables(): string
-    {
-        return $this->extensionConfiguration->get('pongback')['tablesToListenToInTheEventOfChanges'];
-    }
 }

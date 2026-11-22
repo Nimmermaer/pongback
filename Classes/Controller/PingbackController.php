@@ -19,12 +19,13 @@ namespace Webicorns\Pongback\Controller;
 
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Cache\CacheManager;
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Site\Entity\SiteInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Extbase\Persistence\QueryInterface;
 use TYPO3\CMS\Frontend\Page\PageInformation;
+use Webicorns\Pongback\Configuration\PongbackSettings;
 use Webicorns\Pongback\Domain\Model\Pingback;
 use Webicorns\Pongback\Domain\Repository\PingbackRepository;
 use Webicorns\Pongback\Event\BeforePingbackCreateEvent;
@@ -39,7 +40,6 @@ class PingbackController extends ActionController
 
     public function __construct(
         private readonly PingbackRepository $pingbackRepository,
-        private readonly ExtensionConfiguration $extensionConfiguration,
         private readonly XmlRpcCodec $xmlRpcCodec,
         private readonly Context $context,
         private readonly CacheManager $cacheManager,
@@ -71,7 +71,7 @@ class PingbackController extends ActionController
             return XmlResponseService::xmlErrorResponse(-32601, 'Unknown method ' . $call['methodName']);
         }
 
-        $result = $this->pingback($call['methodName'], $call['params']);
+        $result = $this->pingback($call['methodName'], $call['params'], $this->request->getAttribute('site'));
         if ($result instanceof ResponseInterface) {
             return $result;
         }
@@ -120,7 +120,7 @@ class PingbackController extends ActionController
         return $data;
     }
 
-    public function pingback(string $methodName, array $xmlRpcParams, ?array $userData = null)
+    public function pingback(string $methodName, array $xmlRpcParams, ?SiteInterface $site = null)
     {
         /** @var Pingback $pingback */
         $pingback = GeneralUtility::makeInstance(Pingback::class);
@@ -144,7 +144,7 @@ class PingbackController extends ActionController
             return $pingback->getValidationError()[0];
         }
 
-        if (! $this->extensionConfiguration->get('pongback', 'enableAutoPublishing')) {
+        if (! PongbackSettings::fromSite($site)->receiveAutoPublish) {
             $pingback->setHidden(true);
         }
 

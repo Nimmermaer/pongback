@@ -31,7 +31,6 @@
 		"typo3/cms-extbase": "^13.4 || ^14.0",
 		"typo3/cms-fluid": "^13.4 || ^14.0",
 		"typo3/cms-frontend": "^13.4 || ^14.0",
-		"typo3/cms-install": "^13.4 || ^14.0",
 		"typo3/cms-reactions": "^13.4 || ^14.0",
 		"typo3/cms-webhooks": "^13.4 || ^14.0"
 	},
