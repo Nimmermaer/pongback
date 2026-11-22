@@ -23,20 +23,20 @@ use GuzzleHttp\RequestOptions;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use Webicorns\Pongback\Controller\PingbackController;
 use Webicorns\Pongback\Event\BeforePingbackCreateEvent;
+use Webicorns\Pongback\Service\XmlResponseService;
 
 class GetWebsiteInformationEventListener
 {
     public function __invoke(BeforePingbackCreateEvent $event): void
     {
         $pingback = $event->getPingback();
-        $targetLink = $pingback->targetLink;
-        $sourceLink = $pingback->sourceLink;
+        $targetLink = $pingback->getTargetLink();
+        $sourceLink = $pingback->getSourceLink();
 
         $pseudoTag = '#%$PINGBACK-' . time() . '$%#';
         $client = new Client([
-            RequestOptions::VERIFY => false,
+            RequestOptions::TIMEOUT => 10,
         ]);
 
         try {
@@ -50,26 +50,20 @@ class GetWebsiteInformationEventListener
                 $sourceContent = str_replace($originalLink, $pseudoTag, $sourceContent);
             }
 
-            file_put_contents('sample.php', $sourceContent);
-
-            $tagLessData = file_get_contents('sample.php');
-
-            $tagLessData = preg_replace('#\s+#', ' ', $tagLessData);
+            $tagLessData = (string) preg_replace('#\s+#', ' ', $sourceContent);
             $pos = strpos($tagLessData, $pseudoTag);
 
             if ($pos !== false) {
                 $informationString = '...' . trim(substr($tagLessData, $pos - 100, 200)) . '...';
                 $informationString = strip_tags($informationString, '<a>');
-                $pingback->serializedInformation = str_replace($pseudoTag, $originalLink, $informationString);
+                $pingback->setSerializedInformation(str_replace($pseudoTag, $originalLink, $informationString));
             } else {
                 throw new \Exception('No Information found in source.');
             }
         } catch (RequestException) {
-            $error = GeneralUtility::makeInstance(PingbackController::class);
-            $pingback->validationError[] = $error->xmlErrorResponse('500', 'Source Link Unreachable');
+            $pingback->addValidationError(XmlResponseService::xmlErrorResponse(16, 'Source Link Unreachable'));
         } catch (\Exception $e) {
-            $error = GeneralUtility::makeInstance(PingbackController::class);
-            $pingback->validationError[] = $error->xmlErrorResponse('500', $e->getMessage());
+            $pingback->addValidationError(XmlResponseService::xmlErrorResponse(17, $e->getMessage()));
         }
 
         $pingback->setPid($this->findPidByUri($targetLink));
@@ -86,7 +80,7 @@ class GetWebsiteInformationEventListener
             if ($site->getBase()->getHost() === $target['host']) {
                 $result = $connection->select(['*'], 'pages', [
                     'slug' => $target['path'],
-                ],)->fetchAssociative();
+                ], )->fetchAssociative();
                 $page = $result['uid'] ?? 0;
                 break;
             }

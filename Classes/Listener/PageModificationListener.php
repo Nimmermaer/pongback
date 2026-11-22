@@ -33,16 +33,15 @@ class PageModificationListener
         protected MessageBusInterface $bus,
         protected LoggerInterface $logger,
         protected SiteFinder $siteFinder,
-        private readonly ExtensionConfiguration $extensionConfiguration
-    ) {
-    }
+        private readonly ExtensionConfiguration $extensionConfiguration,
+    ) {}
 
     public function processDatamap_afterDatabaseOperations(
         $status,
         $table,
         $id,
         array $fieldArray,
-        DataHandler $dataHandler
+        DataHandler $dataHandler,
     ): void {
         if (! str_contains($this->getConfiguredTables(), (string) $table)) {
             return;
@@ -86,7 +85,7 @@ class PageModificationListener
                     ->generateUri($id),
                 siteIdentifier: $site->getIdentifier(),
                 author: $dataHandler->BE_USER,
-                modifiedFields: $fieldArray
+                modifiedFields: $fieldArray,
             );
         }
 

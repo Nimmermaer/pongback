@@ -17,7 +17,6 @@ declare(strict_types=1);
 
 namespace Webicorns\Pongback\Traits;
 
-use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Pagination\SlidingWindowPagination;
 use TYPO3\CMS\Extbase\Pagination\QueryResultPaginator;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
@@ -36,24 +35,6 @@ trait PaginationTrait
         $paginator = new QueryResultPaginator($allItems, $currentPage, $itemsPerPage);
         $pagination = new SlidingWindowPagination($paginator, $maximumLinks);
         $this->view->assign('pagination', [
-            'pagination' => $pagination,
-            'paginator' => $paginator,
-        ]);
-    }
-
-    protected function buildSlideWindowPaginationForBackend(
-        QueryResultInterface $allItems,
-        int $itemsPerPage = 10,
-        int $maximumLinks = 15,
-        ServerRequestInterface $request = null
-    ): void {
-        $currentPage = ($request->getQueryParams()['currentPageNumber'] ?? false)
-            ? (int) $request->getQueryParams()['currentPageNumber']
-            : 1;
-
-        $paginator = new QueryResultPaginator($allItems, $currentPage, $itemsPerPage);
-        $pagination = new SlidingWindowPagination($paginator, $maximumLinks);
-        $this->moduleTemplate->assign('pagination', [
             'pagination' => $pagination,
             'paginator' => $paginator,
         ]);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Webicorns\Pongback\Controller\Backend;
 
 use Psr\Http\Message\ResponseInterface;
@@ -45,7 +47,6 @@ class PingbackModuleController extends AbstractModuleController
             ], 400);
         }
 
-        /** @var Pingback $pongback */
         $pongback = $this->getPingbackRepositoryWithIgnoredFields()
             ->findOneBy([
                 'uid' => $uid,

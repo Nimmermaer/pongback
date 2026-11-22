@@ -91,16 +91,9 @@ return [
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.starttime',
             'config' => [
                 'type' => 'datetime',
-                'size' => 13,
-                'checkbox' => 0,
                 'default' => 0,
-                'range' => [
-                    'lower' => mktime(0, 0, 0, (int) date('m'), (int) date('d'), (int) date('Y')),
-                ],
-                [
-                    'behaviour' => [
-                        'allowLanguageSynchronization' => true,
-                    ],
+                'behaviour' => [
+                    'allowLanguageSynchronization' => true,
                 ],
             ],
         ],
@@ -109,16 +102,9 @@ return [
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.endtime',
             'config' => [
                 'type' => 'datetime',
-                'size' => 13,
-                'checkbox' => 0,
                 'default' => 0,
-                'range' => [
-                    'lower' => mktime(0, 0, 0, (int) date('m'), (int) date('d'), (int) date('Y')),
-                ],
-                [
-                    'behaviour' => [
-                        'allowLanguageSynchronization' => true,
-                    ],
+                'behaviour' => [
+                    'allowLanguageSynchronization' => true,
                 ],
             ],
         ],
@@ -146,7 +132,7 @@ return [
             'description' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.ping_resource.description',
             'config' => [
                 'type' => 'text',
-                'renderType' => 't3editor',
+                'rows' => 5,
             ],
         ],
         'target_link' => [
@@ -164,7 +150,7 @@ return [
             'description' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.serialized_information.description',
             'config' => [
                 'type' => 'text',
-                'renderType' => 't3editor',
+                'rows' => 5,
             ],
         ],
     ],

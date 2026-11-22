@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Webicorns\Pongback\Controller\Backend;
 
 use Psr\Http\Message\ResponseInterface;

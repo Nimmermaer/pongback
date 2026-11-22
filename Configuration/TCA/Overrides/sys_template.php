@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
 defined('TYPO3') || die();
@@ -9,5 +11,5 @@ call_user_func(
         ExtensionManagementUtility::addStaticFile($extensionKey, 'Configuration/TypoScript', 'EXT:' . $extensionKey);
     },
     'pongback',
-    basename(__FILE__, '.php')
+    basename(__FILE__, '.php'),
 );

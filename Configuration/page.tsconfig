@@ -1,5 +1,4 @@
 @import 'EXT:pongback/Configuration/PageTs/Mod/Linkvalidator/configuration.tsconfig'
 @import 'EXT:pongback/Configuration/PageTs/Mod/WebList/configuration.tsconfig'
 @import 'EXT:pongback/Configuration/PageTs/Mod/Wizards/configuration.tsconfig'
-@import 'EXT:pongback/Configuration/PageTs/Templates/reaction.tsconfig'
 @import 'EXT:pongback/Configuration/PageTs/Templates/dashboard.tsconfig'

@@ -22,9 +22,8 @@ use Webicorns\Pongback\Domain\Model\Pingback;
 final class BeforePingbackCreateEvent
 {
     public function __construct(
-        private Pingback $pingback
-    ) {
-    }
+        private Pingback $pingback,
+    ) {}
 
     public function getPingback(): Pingback
     {

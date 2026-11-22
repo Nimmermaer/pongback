@@ -1,45 +1,45 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the TYPO3 CMS extension "pongback".
+ *
+ * It is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License, either version 2
+ * of the License, or any later version.
+ */
+
 namespace Webicorns\Pongback\Service;
 
 use Psr\Http\Message\ResponseInterface;
-use TYPO3\CMS\Core\Http\ResponseFactory;
-use TYPO3\CMS\Core\Http\StreamFactory;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Http\Response;
+use TYPO3\CMS\Core\Http\Stream;
+use Webicorns\Pongback\XmlRpc\XmlRpcCodec;
 
 class XmlResponseService
 {
-    public static function xmlErrorResponse(
-        string $errorNumber,
-        string $errorString,
-        string $errorFile = '',
-        string $errorLine = '',
-        string $errorContext = ''
-    ): ResponseInterface {
-        $xml = xmlrpc_encode_request(null, [
-            'faultCode' => $errorNumber,
-            'faultString' => 'Remote XMLRPC Error from ' . $_SERVER['SERVER_NAME'] . sprintf(
-                ': %s in %s:%s',
-                $errorString,
-                $errorFile,
-                $errorLine
-            ),
-        ]);
-        $responseFactory = GeneralUtility::makeInstance(ResponseFactory::class);
-        $streamFactory = GeneralUtility::makeInstance(StreamFactory::class);
-        return $responseFactory
-            ->createResponse(404)
-            ->withHeader('Content-Type', 'text/xml; charset=utf-8')
-            ->withBody($streamFactory->createStream($xml));
+    /**
+     * XML-RPC faults are transported with HTTP 200, the error is part of the payload.
+     */
+    public static function xmlErrorResponse(int|string $faultCode, string $faultString): ResponseInterface
+    {
+        return self::xmlResponse((new XmlRpcCodec())->encodeFault((int) $faultCode, $faultString));
+    }
+
+    public static function xmlSuccessResponse(mixed $value): ResponseInterface
+    {
+        return self::xmlResponse((new XmlRpcCodec())->encodeResponse($value));
     }
 
     public static function xmlResponse(string $xml): ResponseInterface
     {
-        $responseFactory = GeneralUtility::makeInstance(ResponseFactory::class);
-        $streamFactory = GeneralUtility::makeInstance(StreamFactory::class);
-        return $responseFactory
-            ->createResponse()
+        $body = new Stream('php://temp', 'rw');
+        $body->write($xml);
+        $body->rewind();
+
+        return (new Response())
             ->withHeader('Content-Type', 'text/xml; charset=utf-8')
-            ->withBody($streamFactory->createStream(($xml)));
+            ->withBody($body);
     }
 }
