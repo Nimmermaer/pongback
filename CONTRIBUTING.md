@@ -79,6 +79,8 @@ Install the dev dependencies with `composer install`, then run:
 | `composer fix:rector`      | Apply Rector refactorings             |
 | `composer ci:phpstan`      | Static analysis                       |
 | `composer ci:tests:unit`   | Unit tests                            |
+| `composer ci:tests:functional` | Functional tests (SQLite)         |
+| `composer ci:tests:mutation` | Mutation testing, min. 90 % covered MSI |
 
 The same checks run in GitHub Actions (`.github/workflows/ci.yml`) for every
 supported TYPO3/PHP combination.
@@ -89,3 +91,7 @@ supported TYPO3/PHP combination.
   structure.
 - Bug fixes come with a test that fails without the fix.
 - Use PHPUnit attributes (`#[Test]`), not annotations.
+- Code that needs TYPO3 (routing, database, DI, middlewares) is tested with
+  functional tests in `Tests/Functional/`, against TYPO3 v13 and v14.
+- Tests must detect bugs, not only execute code: Infection must report a
+  covered MSI of at least 90 %.

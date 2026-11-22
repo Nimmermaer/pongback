@@ -2,55 +2,65 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the TYPO3 CMS extension "pongback".
+ *
+ * It is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License, either version 2
+ * of the License, or any later version.
+ */
+
 namespace Webicorns\Pongback\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\StreamInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use TYPO3\CMS\Core\Http\Response;
+use TYPO3\CMS\Core\Http\Stream;
 use TYPO3\CMS\Core\Routing\PageArguments;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Reactions\Authentication\ReactionUserAuthentication;
-use TYPO3\CMS\Reactions\Exception\ReactionNotFoundException;
-use TYPO3\CMS\Reactions\Model\ReactionInstruction;
-use TYPO3\CMS\Reactions\Repository\ReactionRepository;
-use Webicorns\Pongback\Http\ReactionHandler;
-use Webicorns\Pongback\Service\XmlResponseService;
+use TYPO3\CMS\Core\Site\Entity\Site;
+use Webicorns\Pongback\Pingback\PingbackEndpoint;
 use Webicorns\Pongback\Utility\Constants;
 
-class PingbackReceiverMiddleware implements MiddlewareInterface
+/**
+ * Answers requests to the Pingback page type of a site, before any TypoScript rendering happens.
+ */
+final readonly class PingbackReceiverMiddleware implements MiddlewareInterface
 {
     public function __construct(
-        private readonly ReactionHandler $reactionHandler,
-        private readonly ReactionRepository $reactionRepository,
+        private PingbackEndpoint $endpoint,
     ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        // 1. We only listen to the "pingback" endpoint
-        $routeResult = $request->getAttribute('routing');
+        $routing = $request->getAttribute('routing');
+        $site = $request->getAttribute('site');
 
-        if (! ($routeResult instanceof PageArguments) || $routeResult->getPageType() !== (string) Constants::PINGBACK_PAGE_TYPE) {
+        if (! $routing instanceof PageArguments
+            || $routing->getPageType() !== (string) Constants::PINGBACK_PAGE_TYPE
+            || ! $site instanceof Site
+        ) {
             return $handler->handle($request);
         }
 
-        $reactionIdentifier = $request->getAttribute('site')
-            ->getConfiguration()['pingback_identifier'] ?? '';
-        $reaction = $this->reactionRepository->getReactionRecordByIdentifier($reactionIdentifier);
-        if (! $reaction instanceof ReactionInstruction) {
-            return XmlResponseService::xmlErrorResponse(401, 'Invalid reaction identifier given');
+        if ($request->getMethod() !== 'POST') {
+            return (new Response(null, 405))
+                ->withHeader('Allow', 'POST')
+                ->withHeader('Content-Type', 'text/plain; charset=utf-8')
+                ->withBody($this->textStream('This is the Pingback XML-RPC endpoint, send a POST request.'));
         }
 
-        // 3. Handle reaction user authentication
-        /** @var ReactionUserAuthentication $user */
-        $user = GeneralUtility::makeInstance(ReactionUserAuthentication::class);
-        $user->setReactionInstruction($reaction);
-        $user->start($request);
+        return $this->endpoint->handle($request, $site);
+    }
 
-        try {
-            return $this->reactionHandler->handleReaction($request, $reaction, $user);
-        } catch (ReactionNotFoundException $reactionNotFoundException) {
-            return XmlResponseService::xmlErrorResponse(404, $reactionNotFoundException->getMessage());
-        }
+    private function textStream(string $text): StreamInterface
+    {
+        $body = new Stream('php://temp', 'rw');
+        $body->write($text);
+        $body->rewind();
+
+        return $body;
     }
 }

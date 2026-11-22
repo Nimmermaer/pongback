@@ -16,6 +16,8 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Yaml\Yaml;
 use TYPO3\CMS\Core\Configuration\Event\SiteConfigurationLoadedEvent;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Configuration\Loader\YamlFileLoader;
 use Webicorns\Pongback\Listener\EnhanceSiteConfigurationListener;
 use Webicorns\Pongback\Utility\Constants;
@@ -82,7 +84,7 @@ final class EnhanceSiteConfigurationListenerTest extends TestCase
         );
     }
 
-    private function createSubject(): EnhanceSiteConfigurationListener
+    private function createSubject(bool $enabled = true): EnhanceSiteConfigurationListener
     {
         $yamlFileLoader = $this->createMock(YamlFileLoader::class);
         $yamlFileLoader
@@ -90,6 +92,33 @@ final class EnhanceSiteConfigurationListenerTest extends TestCase
             ->with(EnhanceSiteConfigurationListener::ROUTE_ENHANCERS_FILE)
             ->willReturn(Yaml::parseFile(self::SET_ROUTE_ENHANCERS));
 
-        return new EnhanceSiteConfigurationListener($yamlFileLoader);
+        $extensionConfiguration = $this->createMock(ExtensionConfiguration::class);
+        $extensionConfiguration->method('get')->with('pongback', 'includePongbackYaml')->willReturn($enabled);
+
+        return new EnhanceSiteConfigurationListener($yamlFileLoader, $extensionConfiguration);
+    }
+
+    #[Test]
+    public function leavesTheSiteConfigurationUntouchedIfDisabled(): void
+    {
+        $event = new SiteConfigurationLoadedEvent('main', ['base' => '/']);
+
+        $this->createSubject(false)($event);
+
+        self::assertSame(['base' => '/'], $event->getConfiguration());
+    }
+
+    #[Test]
+    public function isEnabledAsLongAsTheExtensionConfigurationIsNotWritten(): void
+    {
+        $yamlFileLoader = $this->createMock(YamlFileLoader::class);
+        $yamlFileLoader->method('load')->willReturn(Yaml::parseFile(self::SET_ROUTE_ENHANCERS));
+        $extensionConfiguration = $this->createMock(ExtensionConfiguration::class);
+        $extensionConfiguration->method('get')->willThrowException(new ExtensionConfigurationPathDoesNotExistException('missing', 1732400200));
+        $event = new SiteConfigurationLoadedEvent('main', []);
+
+        (new EnhanceSiteConfigurationListener($yamlFileLoader, $extensionConfiguration))($event);
+
+        self::assertArrayHasKey('PageTypeSuffix', $event->getConfiguration()['routeEnhancers']);
     }
 }

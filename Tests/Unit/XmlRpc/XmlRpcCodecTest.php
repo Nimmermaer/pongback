@@ -117,4 +117,85 @@ final class XmlRpcCodecTest extends TestCase
             $document->getElementsByTagName('string')->item(0)?->textContent,
         );
     }
+
+    #[Test]
+    public function trimsWhitespaceAroundMethodNameAndScalarValues(): void
+    {
+        $xml = '<methodCall><methodName> pingback.ping </methodName><params>'
+            . '<param><value><int> 42 </int></value></param>'
+            . '<param><value><i8>9007199254740993</i8></value></param>'
+            . '<param><value><boolean> 1 </boolean></value></param>'
+            . '<param><value><boolean>0</boolean></value></param>'
+            . '<param><value><double> 1.5 </double></value></param>'
+            . '<param><value><nil/></value></param>'
+            . '<param/>'
+            . '</params></methodCall>';
+
+        self::assertSame(
+            ['methodName' => 'pingback.ping', 'params' => [42, 9007199254740993, true, false, 1.5, null, null]],
+            $this->subject->decodeMethodCall($xml),
+        );
+    }
+
+    #[Test]
+    public function decodesStructsAndArraysDefensively(): void
+    {
+        $xml = '<methodCall><methodName>test</methodName><params>'
+            . '<param><value><struct>'
+            . '<member><name> first </name><value>1</value></member>'
+            . '<member><name>second</name><value><int>2</int></value></member>'
+            . '<member><value>no name</value></member>'
+            . '<member><name>no value</name></member>'
+            . '</struct></value></param>'
+            . '<param><value><array></array></value></param>'
+            . '<param><value><array><data><foo/><value>kept</value></data></array></value></param>'
+            . '</params></methodCall>';
+
+        self::assertSame(
+            [['first' => '1', 'second' => 2], [], ['kept']],
+            $this->subject->decodeMethodCall($xml)['params'],
+        );
+    }
+
+    #[Test]
+    public function rejectsWhitespaceOnlyPayloads(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionCode(1732300003);
+        $this->subject->decodeMethodCall("  \n ");
+    }
+
+    #[Test]
+    public function rejectsMethodCallsWithoutMethodName(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionCode(1732300002);
+        $this->subject->decodeMethodCall('<methodCall><methodName>  </methodName></methodCall>');
+    }
+
+    #[Test]
+    public function restoresTheLibxmlErrorHandlingState(): void
+    {
+        $previous = libxml_use_internal_errors(false);
+        try {
+            try {
+                $this->subject->decodeMethodCall('<methodCall><broken>');
+            } catch (\InvalidArgumentException) {
+            }
+
+            self::assertFalse(libxml_use_internal_errors(true), 'internal error handling must be reset');
+            self::assertSame([], libxml_get_errors(), 'libxml errors must be cleared');
+        } finally {
+            libxml_use_internal_errors($previous);
+        }
+    }
+
+    #[Test]
+    public function escapesSpecialCharactersInStringsAndMemberNames(): void
+    {
+        self::assertStringContainsString(
+            '<string>&lt;a href=&quot;x&quot;&gt;Tom &amp; Jerry&apos;s&lt;/a&gt;</string>',
+            $this->subject->encodeResponse('<a href="x">Tom & Jerry\'s</a>'),
+        );
+    }
 }

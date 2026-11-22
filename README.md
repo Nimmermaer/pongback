@@ -29,6 +29,20 @@ Pongback has exciting future plans to enhance its functionality:
 
 > Stay tuned for these exciting updates to Pongback!
 
+## How receiving works
+
+The endpoint `https://<your-site>/pingback.ping` accepts XML-RPC `pingback.ping`
+calls. A Pingback is only stored if
+
+- the target URI is a page of the same site that is visible to anonymous visitors,
+- it has not been registered before,
+- the source URI is a public http(s) URL (no internal addresses, default ports only)
+  and its HTML really links to the target.
+
+Answers follow the Pingback specification (fault codes 0, 16, 17, 32, 33, 48, 49, 50).
+New Pingbacks are hidden until approved (setting `pongback.receive.autoPublish`).
+Listeners of `BeforePingbackCreateEvent` can modify or reject Pingbacks.
+
 ## Quick Start
 
 1) Install the extension:
@@ -50,7 +64,8 @@ Pongback has exciting future plans to enhance its functionality:
       |---------------------------------------------|-------------------------|
       | `pongback.discovery.httpHeader`             | `true`                  |
       | `pongback.discovery.metaTag`                | `true`                  |
-      | `pongback.receive.autoPublish`              | `true`                  |
+      | `pongback.receive.autoPublish`              | `false` (moderation)    |
+      | `pongback.receive.rateLimit` (per IP/hour)  | `20`                    |
       | `pongback.send.tables`                      | `pages, tt_content`     |
       | `pongback.notification.emailTo` / `emailFrom` | empty                 |
       | `plugin.tx_pongback.view.*RootPath`         | extension paths         |

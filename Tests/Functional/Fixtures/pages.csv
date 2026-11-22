@@ -1,0 +1,7 @@
+"pages"
+,"uid","pid","title","slug","doktype","hidden","deleted","sys_language_uid","l10n_parent"
+,1,0,"Main","/",1,0,0,0,0
+,2,1,"Article","/article",1,0,0,0,0
+,3,1,"Hidden","/hidden",1,1,0,0,0
+,10,0,"Other","/",1,0,0,0,0
+,11,10,"Other article","/article",1,0,0,0,0

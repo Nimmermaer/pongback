@@ -61,7 +61,7 @@ final class XmlRpcCodec
         ];
     }
 
-    public function encodeResponse(mixed $value): string
+    public function encodeResponse(string $value): string
     {
         return $this->wrap('<params><param>' . $this->encodeValue($value) . '</param></params>');
     }
@@ -79,35 +79,38 @@ final class XmlRpcCodec
         return '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<methodResponse>' . $body . '</methodResponse>';
     }
 
-    private function encodeValue(mixed $value): string
+    /**
+     * Encodes the value types a Pingback server responds with: strings, integers and structs of those.
+     *
+     * @param string|int|array<string, string|int> $value
+     */
+    private function encodeValue(string|int|array $value): string
     {
         $encoded = match (true) {
-            is_bool($value) => '<boolean>' . ($value ? '1' : '0') . '</boolean>',
             is_int($value) => '<int>' . $value . '</int>',
-            is_float($value) => '<double>' . $value . '</double>',
-            is_array($value) && array_is_list($value) => '<array><data>'
-                . implode('', array_map($this->encodeValue(...), $value))
-                . '</data></array>',
             is_array($value) => $this->encodeStruct($value),
-            $value === null => '<string></string>',
-            default => '<string>' . htmlspecialchars((string) $value, ENT_XML1 | ENT_QUOTES, 'UTF-8') . '</string>',
+            default => '<string>' . $this->escape($value) . '</string>',
         };
 
         return '<value>' . $encoded . '</value>';
     }
 
     /**
-     * @param array<array-key, mixed> $struct
+     * @param array<string, string|int> $struct
      */
     private function encodeStruct(array $struct): string
     {
         $members = '';
         foreach ($struct as $name => $memberValue) {
-            $members .= '<member><name>' . htmlspecialchars((string) $name, ENT_XML1 | ENT_QUOTES, 'UTF-8') . '</name>'
-                . $this->encodeValue($memberValue) . '</member>';
+            $members .= '<member><name>' . $this->escape($name) . '</name>' . $this->encodeValue($memberValue) . '</member>';
         }
 
         return '<struct>' . $members . '</struct>';
+    }
+
+    private function escape(string $value): string
+    {
+        return htmlspecialchars($value, ENT_XML1 | ENT_QUOTES, 'UTF-8');
     }
 
     private function decodeValue(\DOMElement $value): mixed

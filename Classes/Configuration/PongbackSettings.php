@@ -26,7 +26,8 @@ final readonly class PongbackSettings
     public const DEFAULTS = [
         'pongback.discovery.httpHeader' => true,
         'pongback.discovery.metaTag' => true,
-        'pongback.receive.autoPublish' => true,
+        'pongback.receive.autoPublish' => false,
+        'pongback.receive.rateLimit' => 20,
         'pongback.send.tables' => ['pages', 'tt_content'],
         'pongback.notification.emailTo' => '',
         'pongback.notification.emailFrom' => '',
@@ -39,6 +40,7 @@ final readonly class PongbackSettings
         public bool $discoveryHttpHeader,
         public bool $discoveryMetaTag,
         public bool $receiveAutoPublish,
+        public int $receiveRateLimit,
         public array $sendTables,
         public string $notificationEmailTo,
         public string $notificationEmailFrom,
@@ -53,6 +55,7 @@ final readonly class PongbackSettings
             discoveryHttpHeader: (bool) $get('pongback.discovery.httpHeader'),
             discoveryMetaTag: (bool) $get('pongback.discovery.metaTag'),
             receiveAutoPublish: (bool) $get('pongback.receive.autoPublish'),
+            receiveRateLimit: max(0, (int) $get('pongback.receive.rateLimit')),
             sendTables: array_values(array_filter(
                 array_map(trim(...), (array) $get('pongback.send.tables')),
                 static fn(string $table): bool => $table !== '',

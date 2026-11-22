@@ -28,7 +28,11 @@ settings:
     category: pongback.discovery
   pongback.receive.autoPublish:
     type: bool
-    default: true
+    default: false
+    category: pongback.receive
+  pongback.receive.rateLimit:
+    type: int
+    default: 20
     category: pongback.receive
   pongback.send.tables:
     type: stringlist

@@ -19,10 +19,15 @@ namespace Webicorns\Pongback\Domain\Model;
 
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
+/**
+ * A received mention.
+ *
+ * - pingClient: title of the source page
+ * - pingResource: uid of the target page
+ * - serializedInformation: plain text excerpt around the link in the source page (never HTML)
+ */
 class Pingback extends AbstractEntity
 {
-    protected array $validationError = [];
-
     protected bool $hidden = false;
 
     protected string $pingClient = '';
@@ -95,23 +100,4 @@ class Pingback extends AbstractEntity
         $this->targetLink = $targetLink;
     }
 
-    public function getValidationError(): array
-    {
-        return $this->validationError;
-    }
-
-    public function setValidationError(array $validationError): void
-    {
-        $this->validationError = $validationError;
-    }
-
-    public function addValidationError(mixed $validationError): void
-    {
-        $this->validationError[] = $validationError;
-    }
-
-    public function hasValidationErrors(): bool
-    {
-        return $this->validationError !== [];
-    }
 }

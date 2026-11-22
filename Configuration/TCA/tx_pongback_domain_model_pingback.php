@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
+use TYPO3\CMS\Core\Information\Typo3Version;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 if (! defined('TYPO3')) {
     die('Access denied.');
 }
 
-return [
+$tca = [
     'ctrl' => [
         'title' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback',
         'label' => 'source_link',
@@ -30,7 +33,6 @@ return [
         'typeicon_classes' => [
             'default' => 'tx-pongback-pong',
         ],
-        'searchFields' => 'source_link,ping_client,ping_resource,target_link,serialized_information,',
     ],
     'types' => [
         '1' => [
@@ -91,6 +93,7 @@ return [
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.starttime',
             'config' => [
                 'type' => 'datetime',
+                'searchable' => false,
                 'default' => 0,
                 'behaviour' => [
                     'allowLanguageSynchronization' => true,
@@ -102,6 +105,7 @@ return [
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.endtime',
             'config' => [
                 'type' => 'datetime',
+                'searchable' => false,
                 'default' => 0,
                 'behaviour' => [
                     'allowLanguageSynchronization' => true,
@@ -155,3 +159,10 @@ return [
         ],
     ],
 ];
+
+// TYPO3 v13 needs "searchFields", v14 uses the "searchable" field option instead and deprecates "searchFields".
+if (GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion() < 14) {
+    $tca['ctrl']['searchFields'] = 'source_link,ping_client,ping_resource,target_link,serialized_information';
+}
+
+return $tca;
