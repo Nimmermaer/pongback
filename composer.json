@@ -84,7 +84,7 @@
 		"ci:rector": "rector process --dry-run",
 		"ci:tests:functional": "phpunit -c Build/phpunit/FunctionalTests.xml",
 		"ci:tests:mutation": "infection --threads=max --no-progress --only-covered",
-		"ci:tests:unit": "phpunit -c Build/phpunit/UnitTests.xml",
+		"ci:tests:unit": "phpunit",
 		"fix:cgl": "php-cs-fixer fix",
 		"fix:rector": "rector process"
 	}
