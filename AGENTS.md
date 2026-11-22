@@ -20,10 +20,14 @@ its checklist in sync.
 | Path                                   | Responsibility                                            |
 |----------------------------------------|-----------------------------------------------------------|
 | `Classes/Middleware/PingbackDiscoveryMiddleware.php` | `X-Pingback` header and `<link rel="pingback">` |
-| `Classes/Middleware/PingbackReceiverMiddleware.php`  | Receives XML-RPC calls on page type `Constants::PINGBACK_PAGE_TYPE` via EXT:reactions |
+| `Classes/Middleware/PingbackReceiverMiddleware.php`  | Answers POST requests on page type `Constants::PINGBACK_PAGE_TYPE`, before TypoScript rendering |
+| `Classes/Pingback/PingbackEndpoint.php` | XML-RPC `pingback.ping`: parameters, rate limit, fault codes |
+| `Classes/Mention/`                     | Protocol neutral receiving (also for a future Webmention endpoint): `MentionReceiverInterface`, `TargetResolver` (routing + page visibility), `MentionStorage`, `MentionRateLimiter` |
+| `Classes/Mention/Source/`              | Untrusted source handling: `UrlGuard` (SSRF), `SourceFetcher` (limits, redirects, IP pinning), `SourceInspector` (link check, plain text excerpt) |
 | `Classes/XmlRpc/XmlRpcCodec.php`       | XML-RPC parsing/encoding (replaces PECL `ext-xmlrpc`)     |
-| `Classes/Controller/PingbackController.php` | Frontend plugins (list, latest) and `pingback()` processing |
-| `Classes/Listener/`                    | DataHandler hook for sending, enrichment of received pingbacks, site config |
+| `Classes/Event/BeforePingbackCreateEvent.php` | Listeners may modify or reject a verified mention before it is stored |
+| `Classes/Controller/PingbackController.php` | Frontend plugins (list, latest) |
+| `Classes/Listener/`                    | DataHandler hook for sending, v13 route enhancer listener |
 | `Classes/Message/PingbackMessage.php`  | Messenger/webhook message on page changes                 |
 | `Classes/Controller/Backend/`          | Backend module (`Web > Pongback`)                         |
 | `Classes/Widget/`                      | Dashboard widget, only registered if EXT:dashboard exists |
@@ -39,9 +43,12 @@ composer ci:cgl             # php-cs-fixer (dry run)
 composer ci:rector          # rector + ssch/typo3-rector (dry run)
 composer ci:phpstan         # static analysis
 composer ci:tests:unit      # unit tests
+composer ci:tests:functional # functional tests (SQLite, no database server needed)
+composer ci:tests:mutation  # Infection, fails below 90 % covered MSI
 ```
 
-Run all four before you commit. If a tool cannot be installed in your
+Run all of them before you commit. Green tests are not enough: new logic must keep the
+covered mutation score (MSI) of Infection at 90 % or above. If a tool cannot be installed in your
 environment, say so explicitly in your summary instead of claiming it passed.
 
 ## Rules for agents

@@ -26,16 +26,19 @@
 		"ext-dom": "*",
 		"ext-libxml": "*",
 		"ext-simplexml": "*",
+		"guzzlehttp/guzzle": "^7.16 || ^8.3",
+		"guzzlehttp/psr7": "^2.13 || ^3.1",
+		"symfony/rate-limiter": "^7.4",
 		"typo3/cms-backend": "^13.4 || ^14.0",
 		"typo3/cms-core": "^13.4 || ^14.0",
 		"typo3/cms-extbase": "^13.4 || ^14.0",
 		"typo3/cms-fluid": "^13.4 || ^14.0",
 		"typo3/cms-frontend": "^13.4 || ^14.0",
-		"typo3/cms-reactions": "^13.4 || ^14.0",
 		"typo3/cms-webhooks": "^13.4 || ^14.0"
 	},
 	"require-dev": {
 		"friendsofphp/php-cs-fixer": "^3.64",
+		"infection/infection": "^0.29",
 		"phpstan/phpstan": "^2.1",
 		"phpunit/phpunit": "^11.5",
 		"ssch/typo3-rector": "^3.0",
@@ -58,7 +61,8 @@
 	"config": {
 		"allow-plugins": {
 			"typo3/class-alias-loader": true,
-			"typo3/cms-composer-installers": true
+			"typo3/cms-composer-installers": true,
+			"infection/extension-installer": false
 		},
 		"bin-dir": ".Build/bin",
 		"sort-packages": true,
@@ -67,6 +71,10 @@
 	"extra": {
 		"typo3/cms": {
 			"extension-key": "pongback",
+			"version": "0.9.0",
+			"Package": {
+				"providesPackages": {}
+			},
 			"web-dir": ".Build/public"
 		}
 	},
@@ -74,6 +82,8 @@
 		"ci:cgl": "php-cs-fixer fix --dry-run --diff",
 		"ci:phpstan": "phpstan analyse --no-progress",
 		"ci:rector": "rector process --dry-run",
+		"ci:tests:functional": "phpunit -c Build/phpunit/FunctionalTests.xml",
+		"ci:tests:mutation": "infection --threads=max --no-progress --only-covered",
 		"ci:tests:unit": "phpunit -c Build/phpunit/UnitTests.xml",
 		"fix:cgl": "php-cs-fixer fix",
 		"fix:rector": "rector process"

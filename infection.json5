@@ -1,0 +1,21 @@
+{
+    "$schema": ".Build/vendor/infection/infection/resources/schema.json",
+    "source": {
+        "directories": ["Classes"],
+        // Needs EXT:dashboard, covered by functional tests at most
+        "excludes": ["Widget"]
+    },
+    "phpUnit": {
+        "configDir": "Build/phpunit",
+        "customPath": ".Build/bin/phpunit"
+    },
+    "testFrameworkOptions": "--configuration=Build/phpunit/UnitTests.xml",
+    "logs": {
+        "text": ".Build/infection/infection.log",
+        "summary": ".Build/infection/summary.log"
+    },
+    "mutators": {"@default": true},
+    // Share of injected bugs in covered code that must be detected by the unit tests
+    "minCoveredMsi": 90,
+    "timeout": 20
+}

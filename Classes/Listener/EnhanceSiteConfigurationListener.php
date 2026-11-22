@@ -18,6 +18,9 @@ declare(strict_types=1);
 namespace Webicorns\Pongback\Listener;
 
 use TYPO3\CMS\Core\Configuration\Event\SiteConfigurationLoadedEvent;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Configuration\Loader\YamlFileLoader;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 
@@ -34,10 +37,15 @@ final readonly class EnhanceSiteConfigurationListener
 
     public function __construct(
         private YamlFileLoader $yamlFileLoader,
+        private ExtensionConfiguration $extensionConfiguration,
     ) {}
 
     public function __invoke(SiteConfigurationLoadedEvent $event): void
     {
+        if (! $this->isEnabled()) {
+            return;
+        }
+
         $routeEnhancers = $this->yamlFileLoader->load(self::ROUTE_ENHANCERS_FILE)['routeEnhancers'] ?? [];
         $configuration = $event->getConfiguration();
 
@@ -47,5 +55,15 @@ final readonly class EnhanceSiteConfigurationListener
             $configuration['routeEnhancers'] ?? [],
         );
         $event->setConfiguration($configuration);
+    }
+
+    private function isEnabled(): bool
+    {
+        try {
+            return (bool) $this->extensionConfiguration->get('pongback', 'includePongbackYaml');
+        } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException) {
+            // Not written yet (e.g. before "extension:setup"): default of ext_conf_template.txt
+            return true;
+        }
     }
 }

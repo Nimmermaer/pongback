@@ -6,7 +6,6 @@ use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
 use TYPO3\CMS\Core\Cache\Frontend\VariableFrontend;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 use Webicorns\Pongback\Controller\PingbackController;
-use Webicorns\Pongback\Domain\Validator\PingbackValidator;
 use Webicorns\Pongback\Hooks\PingbackDataMap;
 use Webicorns\Pongback\Listener\PageModificationListener;
 use Webicorns\Pongback\Message\PingbackMessage;
@@ -15,7 +14,7 @@ use Webicorns\Pongback\Utility\Constants;
 defined('TYPO3') || die();
 
 (static function (string $extensionKey): void {
-    foreach (['list', 'latest', 'server'] as $pluginName) {
+    foreach (['list', 'latest'] as $pluginName) {
         ExtensionUtility::configurePlugin(
             $extensionKey,
             $pluginName,
@@ -46,7 +45,4 @@ defined('TYPO3') || die();
         PingbackDataMap::class;
 
     $GLOBALS['TYPO3_CONF_VARS']['SYS']['messenger']['routing'][PingbackMessage::class] = 'doctrine';
-
-    $GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$extensionKey]['validatePingback'][] =
-        PingbackValidator::class . '->validateTargetUri';
 })('pongback');

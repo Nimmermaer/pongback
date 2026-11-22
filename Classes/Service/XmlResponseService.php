@@ -22,17 +22,17 @@ class XmlResponseService
     /**
      * XML-RPC faults are transported with HTTP 200, the error is part of the payload.
      */
-    public static function xmlErrorResponse(int|string $faultCode, string $faultString): ResponseInterface
+    public static function xmlErrorResponse(int $faultCode, string $faultString): ResponseInterface
     {
-        return self::xmlResponse((new XmlRpcCodec())->encodeFault((int) $faultCode, $faultString));
+        return self::xmlResponse((new XmlRpcCodec())->encodeFault($faultCode, $faultString));
     }
 
-    public static function xmlSuccessResponse(mixed $value): ResponseInterface
+    public static function xmlSuccessResponse(string $value): ResponseInterface
     {
         return self::xmlResponse((new XmlRpcCodec())->encodeResponse($value));
     }
 
-    public static function xmlResponse(string $xml): ResponseInterface
+    private static function xmlResponse(string $xml): ResponseInterface
     {
         $body = new Stream('php://temp', 'rw');
         $body->write($xml);

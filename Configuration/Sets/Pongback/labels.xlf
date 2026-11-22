@@ -42,7 +42,13 @@
 				<source>Publish received Pingbacks immediately</source>
 			</trans-unit>
 			<trans-unit id="settings.description.pongback.receive.autoPublish">
-				<source>If disabled, received Pingbacks are stored hidden and need to be approved in the backend module.</source>
+				<source>If disabled (default), received Pingbacks are stored hidden and need to be approved in the backend module.</source>
+			</trans-unit>
+			<trans-unit id="settings.pongback.receive.rateLimit">
+				<source>Maximum Pingbacks per client and hour</source>
+			</trans-unit>
+			<trans-unit id="settings.description.pongback.receive.rateLimit">
+				<source>Further Pingbacks from the same IP address are rejected for the rest of the hour. 0 disables the limit.</source>
 			</trans-unit>
 			<trans-unit id="settings.pongback.send.tables">
 				<source>Tables that trigger sending Pingbacks</source>
