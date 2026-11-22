@@ -29,6 +29,7 @@ its checklist in sync.
 | `Classes/Widget/`                      | Dashboard widget, only registered if EXT:dashboard exists |
 | `Classes/Upgrades/`                    | Upgrade wizards                                           |
 | `Configuration/Sets/Pongback/`         | Site set (preferred way to include TypoScript)            |
+| `Configuration/Sets/Pongback/route-enhancers.yaml` | Route enhancer for the endpoint; native in v14, merged by `EnhanceSiteConfigurationListener` in v13 |
 
 ## Commands
 
