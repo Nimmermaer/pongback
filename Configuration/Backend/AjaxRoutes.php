@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Webicorns\Pongback\Controller\Backend\PingbackModuleController;
 
 return [

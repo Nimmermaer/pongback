@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Webicorns\Pongback\Widget;
 
 use Psr\Http\Message\ServerRequestInterface;
@@ -22,8 +24,7 @@ class PongbackWidget implements WidgetInterface, RequestAwareWidgetInterface
         private readonly WidgetConfigurationInterface $configuration,
         private readonly ?ButtonProviderInterface $buttonProvider = null,
         private readonly array $options = [],
-    ) {
-    }
+    ) {}
 
     public function setRequest(ServerRequestInterface $request): void
     {

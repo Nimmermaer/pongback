@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Webicorns\Pongback\Controller\Backend;
 
 use Psr\Http\Message\ServerRequestInterface;
@@ -8,18 +10,18 @@ use TYPO3\CMS\Backend\Template\Components\Buttons\DropDown\DropDownItem;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Core\Http\ResponseFactory;
-use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
+use TYPO3\CMS\Core\Imaging\IconSize;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 use Webicorns\Pongback\Domain\Repository\PingbackRepository;
-use Webicorns\Pongback\Traits\PaginationTrait;
+use Webicorns\Pongback\Traits\BackendPaginationTrait;
 
 abstract class AbstractModuleController
 {
-    use PaginationTrait;
+    use BackendPaginationTrait;
 
     protected int $id = 0;
 
@@ -37,8 +39,7 @@ abstract class AbstractModuleController
         protected readonly ResponseFactory $responseFactory,
         protected readonly PingbackRepository $pingbackRepository,
         protected readonly PersistenceManager $persistenceManager,
-    ) {
-    }
+    ) {}
 
     public function injectAction(): void
     {
@@ -63,23 +64,25 @@ abstract class AbstractModuleController
         $buttonBar = $this->moduleTemplate->getDocHeaderComponent()
             ->getButtonBar();
 
+        $pingbackListItem = GeneralUtility::makeInstance(DropDownItem::class);
+        $pingbackListItem
+            ->setLabel('Pongbacks')
+            ->setHref((string) $this->uriBuilder->buildUriFromRoute('pingback_list', [
+                'id' => $id,
+            ]));
+        $administrationItem = GeneralUtility::makeInstance(DropDownItem::class);
+        $administrationItem
+            ->setLabel('Administration')
+            ->setHref((string) $this->uriBuilder->buildUriFromRoute('pongback_admin', [
+                'id' => $id,
+            ]));
+
         $dropDownButton = $buttonBar->makeDropDownButton()
             ->setLabel($label)
             ->setTitle('Pongback')
-            ->setIcon($this->iconFactory->getIcon('tx-pongback-pong', Icon::SIZE_SMALL))
-            ->addItem(
-                GeneralUtility::makeInstance(DropDownItem::class)
-                    ->setLabel('Pongbacks')
-                    ->setHref((string) $this->uriBuilder->buildUriFromRoute('pingback_list', [
-                        'id' => $id,
-                    ])),
-            )->addItem(
-                GeneralUtility::makeInstance(DropDownItem::class)
-                    ->setLabel('Administration')
-                    ->setHref((string) $this->uriBuilder->buildUriFromRoute('pongback_admin', [
-                        'id' => $id,
-                    ])),
-            )
+            ->setIcon($this->iconFactory->getIcon('tx-pongback-pong', IconSize::SMALL))
+            ->addItem($pingbackListItem)
+            ->addItem($administrationItem)
             ->setShowLabelText(true);
         $buttonBar->addButton($dropDownButton, buttonGroup: 2);
     }
@@ -88,7 +91,7 @@ abstract class AbstractModuleController
         ModuleTemplate $moduleTemplate,
         string $name,
         string $action = '',
-        int $taskUid = 0
+        int $taskUid = 0,
     ): void {
         $buttonBar = $moduleTemplate->getDocHeaderComponent()
             ->getButtonBar();

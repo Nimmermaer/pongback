@@ -21,16 +21,17 @@ use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Context\Context;
-use TYPO3\CMS\Core\Http\Stream;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Extbase\Persistence\QueryInterface;
+use TYPO3\CMS\Frontend\Page\PageInformation;
 use Webicorns\Pongback\Domain\Model\Pingback;
 use Webicorns\Pongback\Domain\Repository\PingbackRepository;
 use Webicorns\Pongback\Event\BeforePingbackCreateEvent;
 use Webicorns\Pongback\Service\XmlResponseService;
 use Webicorns\Pongback\Traits\PaginationTrait;
 use Webicorns\Pongback\Utility\Constants;
+use Webicorns\Pongback\XmlRpc\XmlRpcCodec;
 
 class PingbackController extends ActionController
 {
@@ -39,8 +40,8 @@ class PingbackController extends ActionController
     public function __construct(
         private readonly PingbackRepository $pingbackRepository,
         private readonly ExtensionConfiguration $extensionConfiguration,
-    ) {
-    }
+        private readonly XmlRpcCodec $xmlRpcCodec,
+    ) {}
 
     public function listAction(): ResponseInterface
     {
@@ -56,23 +57,35 @@ class PingbackController extends ActionController
 
     public function serverAction(): ResponseInterface
     {
-        /** @var Stream $stream */
-        $stream = $this->request->getBody();
-        $HTTP_RAW_POST_DATA = $stream->getContents();
-        $xmlrpcServerHandler = xmlrpc_server_create();
-        xmlrpc_server_register_method($xmlrpcServerHandler, 'pingback.ping', $this->pingback(...));
-        $response = xmlrpc_server_call_method($xmlrpcServerHandler, $HTTP_RAW_POST_DATA, null);
-        return XmlResponseService::xmlResponse($response);
+        try {
+            $call = $this->xmlRpcCodec->decodeMethodCall((string) $this->request->getBody());
+        } catch (\InvalidArgumentException $invalidArgumentException) {
+            // -32700: parse error (XML-RPC fault code interoperability specification)
+            return XmlResponseService::xmlErrorResponse(-32700, $invalidArgumentException->getMessage());
+        }
+
+        if ($call['methodName'] !== 'pingback.ping') {
+            // -32601: requested method not found
+            return XmlResponseService::xmlErrorResponse(-32601, 'Unknown method ' . $call['methodName']);
+        }
+
+        $result = $this->pingback($call['methodName'], $call['params']);
+        if ($result instanceof ResponseInterface) {
+            return $result;
+        }
+
+        return XmlResponseService::xmlSuccessResponse((string) $result);
     }
 
     public function getCachedData(int $limit = 0, string $cacheTag = 'list'): mixed
     {
+        /** @var PageInformation $pageInformation */
+        $pageInformation = $this->request->getAttribute('frontend.page.information');
         $pageId = ($this->request->getAttribute('currentContentObject')
             ->data['uid'] !== 0)
             ? $this->request->getAttribute('currentContentObject')
                 ->data['uid']
-            : $this->request->getAttribute('frontend.controller')
-                ->id;
+            : $pageInformation->getId();
         $pluginId = ($this->request->getAttribute('currentContentObject')
             ->data['uid'] !== 0)
             ? $this->request->getAttribute('currentContentObject')
@@ -93,7 +106,7 @@ class PingbackController extends ActionController
                 [
                     'crdate' => QueryInterface::ORDER_DESCENDING,
                 ],
-                $limit
+                $limit,
             ));
 
             $data = $this->view->render();
@@ -112,7 +125,7 @@ class PingbackController extends ActionController
 
         if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['pongback']['validatePingback'])) {
             foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['pongback']['validatePingback'] as $validation) {
-                if ((is_countable($pingback->validationError) ? count($pingback->validationError) : 0) < 1) {
+                if (! $pingback->hasValidationErrors()) {
                     $params = [
                         'pingback' => $pingback,
                         'params' => $xmlRpcParams,
@@ -125,12 +138,12 @@ class PingbackController extends ActionController
             }
         }
 
-        if ((is_countable($pingback->validationError) ? count($pingback->validationError) : 0) > 0) {
-            return $pingback->validationError[0];
+        if ($pingback->hasValidationErrors()) {
+            return $pingback->getValidationError()[0];
         }
 
         if (! $this->extensionConfiguration->get('pongback', 'enableAutoPublishing')) {
-            $pingback->hidden = true;
+            $pingback->setHidden(true);
         }
 
         /** @var BeforePingbackCreateEvent $event */

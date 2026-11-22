@@ -33,14 +33,13 @@ readonly class ReactionHandler
     public function __construct(
         private ReactionRegistry $reactionRegistry,
         private LoggerInterface $logger,
-        private LanguageServiceFactory $languageServiceFactory
-    ) {
-    }
+        private LanguageServiceFactory $languageServiceFactory,
+    ) {}
 
     public function handleReaction(
         ServerRequestInterface $request,
         ?ReactionInstruction $reactionInstruction,
-        ReactionUserAuthentication $user
+        ReactionUserAuthentication $user,
     ): ResponseInterface {
         if (! $reactionInstruction instanceof ReactionInstruction) {
             $this->logger->warning('No reaction given', [
@@ -96,7 +95,7 @@ readonly class ReactionHandler
                     json_encode(new \SimpleXMLElement($body), JSON_THROW_ON_ERROR),
                     true,
                     512,
-                    JSON_THROW_ON_ERROR
+                    JSON_THROW_ON_ERROR,
                 ),
                 'json' => json_decode($body, true, 512, JSON_THROW_ON_ERROR),
                 default => throw new \Exception(sprintf('Unsupported type: %s', $type))
@@ -115,7 +114,7 @@ readonly class ReactionHandler
         return $response
             ->withHeader(
                 'X-Pongback-Reaction-Success',
-                $response->getStatusCode() >= 200 && $response->getStatusCode() < 300 ? 'true' : 'false'
+                $response->getStatusCode() >= 200 && $response->getStatusCode() < 300 ? 'true' : 'false',
             );
     }
 }

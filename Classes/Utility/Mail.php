@@ -29,8 +29,7 @@ final readonly class Mail
 {
     public function __construct(
         private ExtensionConfiguration $extensionConfiguration,
-    ) {
-    }
+    ) {}
 
     public function sendNotification(string $content = '', string $template = 'Default', string $subject = ''): void
     {

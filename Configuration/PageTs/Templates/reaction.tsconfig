@@ -1,5 +1,0 @@
-templates {
-    typo3/cms-reactions {
-        1709669731870 = webicorns/pongback:Resources/Private/Backend/Reaction/
-    }
-}

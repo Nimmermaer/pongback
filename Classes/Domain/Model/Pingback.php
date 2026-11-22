@@ -17,9 +17,7 @@ declare(strict_types=1);
 
 namespace Webicorns\Pongback\Domain\Model;
 
-use TYPO3\CMS\Extbase\Annotation\Validate;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
-use TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator;
 
 class Pingback extends AbstractEntity
 {
@@ -31,19 +29,10 @@ class Pingback extends AbstractEntity
 
     protected string $pingResource = '';
 
-    #[Validate([
-        'validator' => NotEmptyValidator::class,
-    ])]
     protected string $serializedInformation = '';
 
-    #[Validate([
-        'validator' => NotEmptyValidator::class,
-    ])]
     protected string $sourceLink = '';
 
-    #[Validate([
-        'validator' => NotEmptyValidator::class,
-    ])]
     protected string $targetLink = '';
 
     public function isHidden(): bool
@@ -114,5 +103,15 @@ class Pingback extends AbstractEntity
     public function setValidationError(array $validationError): void
     {
         $this->validationError = $validationError;
+    }
+
+    public function addValidationError(mixed $validationError): void
+    {
+        $this->validationError[] = $validationError;
+    }
+
+    public function hasValidationErrors(): bool
+    {
+        return $this->validationError !== [];
     }
 }

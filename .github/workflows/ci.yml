@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  code-quality:
+    name: Code quality (CGL, Rector)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: dom, intl, libxml, simplexml
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer update --no-interaction --no-progress --prefer-dist
+
+      - name: Validate composer.json
+        run: composer validate --no-check-lock
+
+      - name: Coding guidelines (php-cs-fixer)
+        run: composer ci:cgl
+
+      - name: Rector (dry run)
+        run: composer ci:rector
+
+  tests:
+    name: TYPO3 ${{ matrix.typo3 }} / PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        typo3: ['^13.4', '^14.0']
+        php: ['8.2', '8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, intl, libxml, simplexml
+          coverage: none
+          tools: composer:v2
+
+      - name: Install TYPO3 ${{ matrix.typo3 }}
+        run: |
+          composer require --no-update --no-interaction \
+            "typo3/cms-backend:${{ matrix.typo3 }}" \
+            "typo3/cms-core:${{ matrix.typo3 }}" \
+            "typo3/cms-extbase:${{ matrix.typo3 }}" \
+            "typo3/cms-fluid:${{ matrix.typo3 }}" \
+            "typo3/cms-frontend:${{ matrix.typo3 }}" \
+            "typo3/cms-install:${{ matrix.typo3 }}" \
+            "typo3/cms-reactions:${{ matrix.typo3 }}" \
+            "typo3/cms-webhooks:${{ matrix.typo3 }}"
+          composer require --dev --no-update --no-interaction "typo3/cms-dashboard:${{ matrix.typo3 }}"
+          composer update --no-interaction --no-progress --prefer-dist
+
+      - name: Lint PHP
+        run: find Classes Configuration Tests ext_emconf.php ext_localconf.php -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: PHPStan
+        run: composer ci:phpstan
+
+      - name: Unit tests
+        run: composer ci:tests:unit

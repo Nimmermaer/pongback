@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 $GLOBALS['SiteConfiguration']['site']['columns']['pingback_identifier'] = [
     'label' => 'Pingback Identifier',
     'description' => 'Identifier aus Reactions Datensatz hinterlegen',

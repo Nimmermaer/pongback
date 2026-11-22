@@ -23,7 +23,7 @@ use TYPO3\CMS\Core\Messaging\WebhookMessageInterface;
 
 #[WebhookMessage(
     identifier: 'pongback/pingback/page-modification',
-    description: 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:sys_webhook.webhook_type.pongback-pingback-page-modification'
+    description: 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:sys_webhook.webhook_type.pongback-pingback-page-modification',
 )]
 final readonly class PingbackMessage implements WebhookMessageInterface
 {
@@ -35,9 +35,8 @@ final readonly class PingbackMessage implements WebhookMessageInterface
         private string $url,
         private string $siteIdentifier,
         private ?BackendUserAuthentication $author = null,
-        private ?array $modifiedFields = null
-    ) {
-    }
+        private ?array $modifiedFields = null,
+    ) {}
 
     /**
      * @return array{action: string, identifier: int, record: mixed[], table: string, url: string, site: string, workspace: mixed, author?: array{uid: mixed, username: mixed, isAdmin: bool}, changedFields?: mixed[]}

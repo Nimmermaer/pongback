@@ -1,7 +1,8 @@
-![PHP Version](https://img.shields.io/badge/PHP-8.2-blue)
-![TYPO3 Version](https://img.shields.io/badge/TYPO3-12-orange)
-![Extension Status](https://img.shields.io/badge/Status-Alpha-lightblue)
-![Version](https://img.shields.io/badge/Version-0.0.1-blue)
+![PHP Version](https://img.shields.io/badge/PHP-8.2%2B-blue)
+![TYPO3 Version](https://img.shields.io/badge/TYPO3-13.4%20%7C%2014-orange)
+![Extension Status](https://img.shields.io/badge/Status-Beta-lightblue)
+![Version](https://img.shields.io/badge/Version-0.9.0-blue)
+[![CI](https://github.com/Nimmermaer/pongback/actions/workflows/ci.yml/badge.svg)](https://github.com/Nimmermaer/pongback/actions/workflows/ci.yml)
 
 [TOC]
 
@@ -36,7 +37,17 @@ Pongback has exciting future plans to enhance its functionality:
 ```
 
 2) Configuration
-    + Include the basic TypoScript
-    + Look at extension configuration for further configurations
-      ![Backend configuration](../Resources/Public/Documentation/backend_configuration.png)
+    + Add the site set **"Pongback: Pingback endpoint and plugins"**
+      (`webicorns/pongback`) to your site configuration. Alternatively include
+      the static TypoScript template "EXT:pongback" in your TypoScript record.
+    + Look at the extension configuration for further configurations
+      ![Backend configuration](Resources/Public/Documentation/backend_configuration.png)
 
+3) Upgrading from earlier versions
+    + Run the upgrade wizard "Pongback: Migrate plugins to content elements"
+      to migrate existing plugins to the new content types.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for coding standards, commit message
+format and quality checks.

@@ -30,10 +30,10 @@ class PingbackValidator
         $sourceLink = $params['params']['param'][1]['value']['string'] ?? $params['params'][1];
         $matchLink = $_SERVER['SERVER_NAME'];
         if (strpos((string) $targetLink, (string) $matchLink) > 0) {
-            $pingback->sourceLink = $sourceLink;
-            $pingback-> targetLink = $targetLink;
+            $pingback->setSourceLink((string) $sourceLink);
+            $pingback->setTargetLink((string) $targetLink);
         } else {
-            $pingback->validationError[] = XmlResponseService::xmlErrorResponse('32', 'Error');
+            $pingback->addValidationError(XmlResponseService::xmlErrorResponse(32, 'Error'));
         }
     }
 }

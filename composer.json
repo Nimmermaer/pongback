@@ -4,9 +4,9 @@
 	"keywords": [
 		"TYPO3",
 		"extension",
+		"pingback",
 		"blog"
 	],
-	"version": "1.0.0",
 	"type": "typo3-cms-extension",
 	"license": "GPL-2.0-or-later",
 	"authors": [
@@ -21,23 +21,62 @@
 			"role": "Product manager"
 		}
 	],
+	"require": {
+		"php": "^8.2",
+		"ext-dom": "*",
+		"ext-libxml": "*",
+		"ext-simplexml": "*",
+		"typo3/cms-backend": "^13.4 || ^14.0",
+		"typo3/cms-core": "^13.4 || ^14.0",
+		"typo3/cms-extbase": "^13.4 || ^14.0",
+		"typo3/cms-fluid": "^13.4 || ^14.0",
+		"typo3/cms-frontend": "^13.4 || ^14.0",
+		"typo3/cms-install": "^13.4 || ^14.0",
+		"typo3/cms-reactions": "^13.4 || ^14.0",
+		"typo3/cms-webhooks": "^13.4 || ^14.0"
+	},
+	"require-dev": {
+		"friendsofphp/php-cs-fixer": "^3.64",
+		"phpstan/phpstan": "^2.1",
+		"phpunit/phpunit": "^11.5",
+		"ssch/typo3-rector": "^3.0",
+		"typo3/cms-dashboard": "^13.4 || ^14.0",
+		"typo3/testing-framework": "^9.0"
+	},
+	"suggest": {
+		"typo3/cms-dashboard": "Provides the \"Latest Pingbacks\" dashboard widget"
+	},
 	"autoload": {
 		"psr-4": {
 			"Webicorns\\Pongback\\": "Classes/"
 		}
 	},
-	"extra": {
-		"typo3/cms": {
-			"extension-key": "pongback"
+	"autoload-dev": {
+		"psr-4": {
+			"Webicorns\\Pongback\\Tests\\": "Tests/"
 		}
 	},
-	"minimum-stability": "stable",
-	"require": {
-		"php": "~8.2",
-		"typo3/cms-core": "^12.4",
-		"typo3/cms-webhooks": "^12.4",
-		"typo3/cms-reactions": "^12.4",
-		"ext-simplexml": "*",
-		"ext-xmlrpc": "*"
+	"config": {
+		"allow-plugins": {
+			"typo3/class-alias-loader": true,
+			"typo3/cms-composer-installers": true
+		},
+		"bin-dir": ".Build/bin",
+		"sort-packages": true,
+		"vendor-dir": ".Build/vendor"
+	},
+	"extra": {
+		"typo3/cms": {
+			"extension-key": "pongback",
+			"web-dir": ".Build/public"
+		}
+	},
+	"scripts": {
+		"ci:cgl": "php-cs-fixer fix --dry-run --diff",
+		"ci:phpstan": "phpstan analyse --no-progress",
+		"ci:rector": "rector process --dry-run",
+		"ci:tests:unit": "phpunit -c Build/phpunit/UnitTests.xml",
+		"fix:cgl": "php-cs-fixer fix",
+		"fix:rector": "rector process"
 	}
 }

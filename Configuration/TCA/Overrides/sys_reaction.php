@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use Webicorns\Pongback\Reaction\PingbackType;
 
@@ -12,5 +14,5 @@ ExtensionManagementUtility::addTcaSelectItem(
         'label' => PingbackType::getDescription(),
         'value' => PingbackType::getType(),
         'icon' => PingbackType::getIconIdentifier(),
-    ]
+    ],
 );

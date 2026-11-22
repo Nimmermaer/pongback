@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Webicorns\Pongback\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
@@ -14,22 +16,21 @@ use TYPO3\CMS\Reactions\Model\ReactionInstruction;
 use TYPO3\CMS\Reactions\Repository\ReactionRepository;
 use Webicorns\Pongback\Http\ReactionHandler;
 use Webicorns\Pongback\Service\XmlResponseService;
+use Webicorns\Pongback\Utility\Constants;
 
 class PingbackReceiverMiddleware implements MiddlewareInterface
 {
     public function __construct(
         private readonly ReactionHandler $reactionHandler,
         private readonly ReactionRepository $reactionRepository,
-    ) {
-    }
+    ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         // 1. We only listen to the "pingback" endpoint
-        /** @var PageArguments $routeResult */
         $routeResult = $request->getAttribute('routing');
 
-        if (! ($routeResult instanceof PageArguments) || $routeResult->getPageType() !== '1709405325110') {
+        if (! ($routeResult instanceof PageArguments) || $routeResult->getPageType() !== (string) Constants::PINGBACK_PAGE_TYPE) {
             return $handler->handle($request);
         }
 

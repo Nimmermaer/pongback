@@ -35,8 +35,7 @@ class PingbackType implements ReactionInterface
 
     public function __construct(
         private readonly Registry $registry,
-    ) {
-    }
+    ) {}
 
     public static function getType(): string
     {
@@ -56,7 +55,7 @@ class PingbackType implements ReactionInterface
     public function react(
         ServerRequestInterface $request,
         array $payload,
-        ReactionInstruction $reaction
+        ReactionInstruction $reaction,
     ): ResponseInterface {
         $response = [];
         $this->updateRegistryEntry(trim(implode('-', $response)));
