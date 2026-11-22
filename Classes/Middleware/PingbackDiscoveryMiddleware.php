@@ -16,10 +16,10 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Routing\RouterInterface;
 use TYPO3\CMS\Core\Site\Entity\Site;
+use Webicorns\Pongback\Configuration\PongbackSettings;
 use Webicorns\Pongback\Utility\Constants;
 
 /**
@@ -31,7 +31,6 @@ use Webicorns\Pongback\Utility\Constants;
 final readonly class PingbackDiscoveryMiddleware implements MiddlewareInterface
 {
     public function __construct(
-        private ExtensionConfiguration $extensionConfiguration,
         private PageRenderer $pageRenderer,
     ) {}
 
@@ -42,9 +41,14 @@ final readonly class PingbackDiscoveryMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
+        $settings = PongbackSettings::fromSite($site);
+        if (! $settings->discoveryMetaTag && ! $settings->discoveryHttpHeader) {
+            return $handler->handle($request);
+        }
+
         $endpoint = $this->buildEndpointUri($site);
 
-        if ($this->isEnabled('includePingbackMetaTag')) {
+        if ($settings->discoveryMetaTag) {
             // Must happen before the page is rendered by the frontend request handler.
             $this->pageRenderer->addHeaderData(
                 '<link rel="pingback" href="' . htmlspecialchars($endpoint, ENT_QUOTES | ENT_HTML5) . '">',
@@ -53,7 +57,7 @@ final readonly class PingbackDiscoveryMiddleware implements MiddlewareInterface
 
         $response = $handler->handle($request);
 
-        if ($this->isEnabled('includePingbackHTTPHeader')) {
+        if ($settings->discoveryHttpHeader) {
             $response = $response->withHeader('X-Pingback', $endpoint);
         }
 
@@ -72,8 +76,4 @@ final readonly class PingbackDiscoveryMiddleware implements MiddlewareInterface
         );
     }
 
-    private function isEnabled(string $option): bool
-    {
-        return (bool) ($this->extensionConfiguration->get('pongback', $option) ?? false);
-    }
 }

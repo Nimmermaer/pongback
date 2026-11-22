@@ -18,31 +18,29 @@ declare(strict_types=1);
 namespace Webicorns\Pongback\Utility;
 
 use Symfony\Component\Mime\Address;
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Mail\FluidEmail;
 use TYPO3\CMS\Core\Mail\MailerInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MailUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
+use Webicorns\Pongback\Configuration\PongbackSettings;
 
-final readonly class Mail
+final class Mail
 {
-    public function __construct(
-        private ExtensionConfiguration $extensionConfiguration,
-    ) {}
-
-    public function sendNotification(string $content = '', string $template = 'Default', string $subject = ''): void
+    public function sendNotification(PongbackSettings $settings, string $content = '', string $template = 'Default', string $subject = ''): void
     {
+        if ($settings->notificationEmailTo === '') {
+            return;
+        }
+
         if ($subject === '' || $subject === '0') {
             $subject = LocalizationUtility::translate('pongback.notification.email.subject', 'pongback');
         }
 
-        $configuration = $this->extensionConfiguration->get('pongback');
-
         $email = GeneralUtility::makeInstance(FluidEmail::class);
         $email
-            ->to($configuration['notification']['email']['to'])
-            ->from($this->setDefaultFromAddress($configuration['notification']['email']['from']))
+            ->to($settings->notificationEmailTo)
+            ->from($this->setDefaultFromAddress($settings->notificationEmailFrom))
             ->subject($subject)
             ->format(FluidEmail::FORMAT_BOTH)
             ->setTemplate($template)

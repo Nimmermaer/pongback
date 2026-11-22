@@ -18,7 +18,7 @@ final class Constants
 
     /**
      * Page type ("typeNum") of the Pingback XML-RPC endpoint.
-     * Must match Configuration/TypoScript/setup.typoscript and Configuration/Sets/Pongback/route-enhancers.yaml.
+     * Must match Configuration/Sets/Pongback/setup.typoscript and Configuration/Sets/Pongback/route-enhancers.yaml.
      */
     public const PINGBACK_PAGE_TYPE = 1709405325110;
 }

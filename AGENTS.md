@@ -27,8 +27,8 @@ its checklist in sync.
 | `Classes/Message/PingbackMessage.php`  | Messenger/webhook message on page changes                 |
 | `Classes/Controller/Backend/`          | Backend module (`Web > Pongback`)                         |
 | `Classes/Widget/`                      | Dashboard widget, only registered if EXT:dashboard exists |
-| `Classes/Upgrades/`                    | Upgrade wizards                                           |
-| `Configuration/Sets/Pongback/`         | Site set (preferred way to include TypoScript)            |
+| `Classes/Configuration/PongbackSettings.php` | Typed site settings incl. fallback defaults            |
+| `Configuration/Sets/Pongback/`         | Site set: TypoScript, site settings (`settings.definitions.yaml`), labels |
 | `Configuration/Sets/Pongback/route-enhancers.yaml` | Route enhancer for the endpoint; native in v14, merged by `EnhanceSiteConfigurationListener` in v13 |
 
 ## Commands
@@ -57,3 +57,8 @@ environment, say so explicitly in your summary instead of claiming it passed.
   reference the issue (`Resolves: #<n>` or `Related: #<n>`).
 - Do not commit `.Build/`, `composer.lock` or cache files.
 - Do not edit generated or vendor code.
+- Site related options are site settings (`settings.definitions.yaml`), not
+  extension configuration or TypoScript constants. Keep the defaults in sync
+  with `PongbackSettings::DEFAULTS` (covered by a unit test).
+- There are no installations of earlier versions to migrate: no upgrade
+  wizards or backwards compatibility layers are needed before 1.0.0.

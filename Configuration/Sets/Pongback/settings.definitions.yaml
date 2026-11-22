@@ -1,0 +1,61 @@
+# Site settings of the "webicorns/pongback" set (TYPO3 v13+).
+# Labels: labels.xlf in this directory.
+# Keep the defaults of the "pongback.*" settings in sync with
+# Classes/Configuration/PongbackSettings.php (fallback for sites without this set).
+# The "plugin.tx_pongback.*" settings are available as TypoScript constants
+# in setup.typoscript.
+categories:
+  pongback: {}
+  pongback.discovery:
+    parent: pongback
+  pongback.receive:
+    parent: pongback
+  pongback.send:
+    parent: pongback
+  pongback.notification:
+    parent: pongback
+  pongback.templates:
+    parent: pongback
+
+settings:
+  pongback.discovery.httpHeader:
+    type: bool
+    default: true
+    category: pongback.discovery
+  pongback.discovery.metaTag:
+    type: bool
+    default: true
+    category: pongback.discovery
+  pongback.receive.autoPublish:
+    type: bool
+    default: true
+    category: pongback.receive
+  pongback.send.tables:
+    type: stringlist
+    default: ['pages', 'tt_content']
+    category: pongback.send
+  pongback.notification.emailTo:
+    type: string
+    default: ''
+    category: pongback.notification
+  pongback.notification.emailFrom:
+    type: string
+    default: ''
+    category: pongback.notification
+
+  plugin.tx_pongback.view.templateRootPath:
+    type: string
+    default: 'EXT:pongback/Resources/Private/Templates/'
+    category: pongback.templates
+  plugin.tx_pongback.view.partialRootPath:
+    type: string
+    default: 'EXT:pongback/Resources/Private/Partials/'
+    category: pongback.templates
+  plugin.tx_pongback.view.layoutRootPath:
+    type: string
+    default: 'EXT:pongback/Resources/Private/Layouts/'
+    category: pongback.templates
+  plugin.tx_pongback.persistence.storagePid:
+    type: page
+    default: 0
+    category: pongback.receive

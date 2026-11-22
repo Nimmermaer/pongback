@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file source-language="en" datatype="plaintext" original="EXT:pongback/Configuration/Sets/Pongback/labels.xlf" product-name="pongback">
+		<header/>
+		<body>
+			<trans-unit id="label">
+				<source>Pongback: Pingback endpoint and plugins</source>
+			</trans-unit>
+
+			<trans-unit id="categories.pongback">
+				<source>Pongback</source>
+			</trans-unit>
+			<trans-unit id="categories.pongback.discovery">
+				<source>Discovery</source>
+			</trans-unit>
+			<trans-unit id="categories.pongback.receive">
+				<source>Receiving</source>
+			</trans-unit>
+			<trans-unit id="categories.pongback.send">
+				<source>Sending</source>
+			</trans-unit>
+			<trans-unit id="categories.pongback.notification">
+				<source>Notification</source>
+			</trans-unit>
+			<trans-unit id="categories.pongback.templates">
+				<source>Templates</source>
+			</trans-unit>
+
+			<trans-unit id="settings.pongback.discovery.httpHeader">
+				<source>Send "X-Pingback" HTTP header</source>
+			</trans-unit>
+			<trans-unit id="settings.description.pongback.discovery.httpHeader">
+				<source>Announces the Pingback endpoint of this site in the HTTP response header of every page.</source>
+			</trans-unit>
+			<trans-unit id="settings.pongback.discovery.metaTag">
+				<source>Add &lt;link rel="pingback"&gt; tag</source>
+			</trans-unit>
+			<trans-unit id="settings.description.pongback.discovery.metaTag">
+				<source>Announces the Pingback endpoint of this site in the HTML head of every page.</source>
+			</trans-unit>
+			<trans-unit id="settings.pongback.receive.autoPublish">
+				<source>Publish received Pingbacks immediately</source>
+			</trans-unit>
+			<trans-unit id="settings.description.pongback.receive.autoPublish">
+				<source>If disabled, received Pingbacks are stored hidden and need to be approved in the backend module.</source>
+			</trans-unit>
+			<trans-unit id="settings.pongback.send.tables">
+				<source>Tables that trigger sending Pingbacks</source>
+			</trans-unit>
+			<trans-unit id="settings.description.pongback.send.tables">
+				<source>Changes to records of these tables trigger sending Pingbacks for the links on the affected page.</source>
+			</trans-unit>
+			<trans-unit id="settings.pongback.notification.emailTo">
+				<source>Notification recipient</source>
+			</trans-unit>
+			<trans-unit id="settings.description.pongback.notification.emailTo">
+				<source>Email address that is notified about new Pingbacks. Leave empty to disable notifications.</source>
+			</trans-unit>
+			<trans-unit id="settings.pongback.notification.emailFrom">
+				<source>Notification sender</source>
+			</trans-unit>
+			<trans-unit id="settings.description.pongback.notification.emailFrom">
+				<source>Sender address of notifications. Leave empty to use the system default sender.</source>
+			</trans-unit>
+
+			<trans-unit id="settings.plugin.tx_pongback.view.templateRootPath">
+				<source>Template root path</source>
+			</trans-unit>
+			<trans-unit id="settings.description.plugin.tx_pongback.view.templateRootPath">
+				<source>Additional path for Fluid templates of the Pongback plugins, takes precedence over the extension's templates.</source>
+			</trans-unit>
+			<trans-unit id="settings.plugin.tx_pongback.view.partialRootPath">
+				<source>Partial root path</source>
+			</trans-unit>
+			<trans-unit id="settings.description.plugin.tx_pongback.view.partialRootPath">
+				<source>Additional path for Fluid partials of the Pongback plugins.</source>
+			</trans-unit>
+			<trans-unit id="settings.plugin.tx_pongback.view.layoutRootPath">
+				<source>Layout root path</source>
+			</trans-unit>
+			<trans-unit id="settings.description.plugin.tx_pongback.view.layoutRootPath">
+				<source>Additional path for Fluid layouts of the Pongback plugins.</source>
+			</trans-unit>
+			<trans-unit id="settings.plugin.tx_pongback.persistence.storagePid">
+				<source>Storage folder</source>
+			</trans-unit>
+			<trans-unit id="settings.description.plugin.tx_pongback.persistence.storagePid">
+				<source>Page or folder used as storage for Pongback records created by the plugins.</source>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>
