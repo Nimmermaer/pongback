@@ -108,7 +108,10 @@ readonly class SourceInspector
     private function extractTitle(\DOMDocument $document): string
     {
         $title = $document->getElementsByTagName('title')->item(0);
-        return $this->limit($this->plainText($title instanceof \DOMNode ? $title->textContent : ''), self::MAX_TITLE_LENGTH);
+        // <title> is raw text in HTML5, depending on the libxml version markup inside stays literal text.
+        $text = strip_tags($title instanceof \DOMNode ? $title->textContent : '');
+
+        return $this->limit($this->plainText($text), self::MAX_TITLE_LENGTH);
     }
 
     private function extractExcerpt(\DOMElement $link): string

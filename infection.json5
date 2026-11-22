@@ -6,10 +6,10 @@
         "excludes": ["Widget"]
     },
     "phpUnit": {
-        "configDir": "Build/phpunit",
+        // Unit tests only (phpunit.xml.dist)
+        "configDir": ".",
         "customPath": ".Build/bin/phpunit"
     },
-    "testFrameworkOptions": "--configuration=Build/phpunit/UnitTests.xml",
     "logs": {
         "text": ".Build/infection/infection.log",
         "summary": ".Build/infection/summary.log"
