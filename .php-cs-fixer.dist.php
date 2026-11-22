@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 $finder = (new PhpCsFixer\Finder())
     ->in(__DIR__)
-    ->exclude(['.Build', 'node_modules'])
+    ->exclude(['.Build', 'node_modules', 'var'])
     ->notPath('ext_emconf.php');
 
 return (new PhpCsFixer\Config())
