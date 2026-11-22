@@ -22,12 +22,16 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\RequestOptions;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Site\SiteFinder;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Webicorns\Pongback\Event\BeforePingbackCreateEvent;
 use Webicorns\Pongback\Service\XmlResponseService;
 
 class GetWebsiteInformationEventListener
 {
+    public function __construct(
+        private readonly SiteFinder $siteFinder,
+        private readonly ConnectionPool $connectionPool,
+    ) {}
+
     public function __invoke(BeforePingbackCreateEvent $event): void
     {
         $pingback = $event->getPingback();
@@ -58,7 +62,7 @@ class GetWebsiteInformationEventListener
                 $informationString = strip_tags($informationString, '<a>');
                 $pingback->setSerializedInformation(str_replace($pseudoTag, $originalLink, $informationString));
             } else {
-                throw new \Exception('No Information found in source.');
+                throw new \Exception('No Information found in source.', 1732300011);
             }
         } catch (RequestException) {
             $pingback->addValidationError(XmlResponseService::xmlErrorResponse(16, 'Source Link Unreachable'));
@@ -72,9 +76,9 @@ class GetWebsiteInformationEventListener
 
     private function findPidByUri(string $targetLink): int
     {
-        $sites = GeneralUtility::makeInstance(SiteFinder::class)->getAllSites();
+        $sites = $this->siteFinder->getAllSites();
         $target = parse_url($targetLink);
-        $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('pages');
+        $connection = $this->connectionPool->getConnectionForTable('pages');
         $page = 0;
         foreach ($sites as $site) {
             if ($site->getBase()->getHost() === $target['host']) {

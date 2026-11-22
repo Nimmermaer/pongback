@@ -41,6 +41,8 @@ class PingbackController extends ActionController
         private readonly PingbackRepository $pingbackRepository,
         private readonly ExtensionConfiguration $extensionConfiguration,
         private readonly XmlRpcCodec $xmlRpcCodec,
+        private readonly Context $context,
+        private readonly CacheManager $cacheManager,
     ) {}
 
     public function listAction(): ResponseInterface
@@ -93,10 +95,10 @@ class PingbackController extends ActionController
             : $this->request->getAttribute('language')
                 ->getLanguageId();
 
-        $languageId = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('language', 'id');
+        $languageId = $this->context->getPropertyFromAspect('language', 'id');
         $cacheKey = 'pingback-latest-' . $pageId . '-' . $pluginId . '-' . $languageId;
 
-        $cache = GeneralUtility::makeInstance(CacheManager::class)
+        $cache = $this->cacheManager
             ->getCache(Constants::PONGBACK_CACHE);
         if (($data = $cache->get($cacheKey)) === false) {
             $this->buildSlideWindowPagination($this->pingbackRepository->findBy(
