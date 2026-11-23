@@ -34,6 +34,7 @@ defined('TYPO3') || die();
     $GLOBALS['TYPO3_CONF_VARS']['MAIL']['templateRootPaths'][1732600000] = 'EXT:pongback/Resources/Private/Templates/Email/';
 
     // Sending runs asynchronously: "vendor/bin/typo3 messenger:consume doctrine"
-    $GLOBALS['TYPO3_CONF_VARS']['SYS']['messenger']['routing'][SendPingbacksMessage::class] = 'doctrine';
-    $GLOBALS['TYPO3_CONF_VARS']['SYS']['messenger']['routing'][ReceiveWebmentionMessage::class] = 'doctrine';
+    // Only a default: ext_localconf.php runs after config/system/settings.php and additional.php.
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['messenger']['routing'][SendPingbacksMessage::class] ??= 'doctrine';
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['messenger']['routing'][ReceiveWebmentionMessage::class] ??= 'doctrine';
 })('pongback');

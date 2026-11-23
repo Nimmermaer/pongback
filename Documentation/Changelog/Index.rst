@@ -24,6 +24,10 @@ Features
 Changes
 -------
 
+*   The routing of the messages in :file:`config/system/additional.php`
+    is respected: the extension only sets `doctrine` as default. Before, it
+    always overwrote it.
+
 *   A linked page answering 404 or 410 is no longer retried when sending.
 *   The middleware `webicorns/pongback/pingback-discovery` is renamed to
     `webicorns/pongback/discovery`, :php:`PingbackQueue` to
