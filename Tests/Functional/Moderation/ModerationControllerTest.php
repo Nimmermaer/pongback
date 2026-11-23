@@ -37,6 +37,8 @@ final class ModerationControllerTest extends ModerationTestCase
         self::assertMatchesRegularExpression('#Subpage post.*Pending post.*Approved post#s', $html);
         self::assertStringNotContainsString('Other site post', $html);
         self::assertStringNotContainsString('Deleted post', $html);
+        self::assertSame(2, substr_count($html, '>Pingback</span>'));
+        self::assertSame(1, substr_count($html, '>Webmention</span>'));
         self::assertStringContainsString('<tr class="table-active" id="pingback-3">', $html);
         self::assertSame(2, substr_count($html, 'value="approve"'));
         self::assertSame(1, substr_count($html, 'value="hide"'));

@@ -16,22 +16,22 @@
 				<source>Excerpt</source>
 			</trans-unit>
 			<trans-unit id="notification.subject">
-				<source>New Pingback from %s</source>
+				<source>New %1$s from %2$s</source>
 			</trans-unit>
 			<trans-unit id="notification.headline">
-				<source>New Pingback</source>
+				<source>New %s</source>
 			</trans-unit>
 			<trans-unit id="notification.introduction">
-				<source>Another website links to your website and sent a Pingback.</source>
+				<source>Another website links to your website and told you so.</source>
 			</trans-unit>
 			<trans-unit id="notification.pending">
-				<source>The Pingback is waiting for approval.</source>
+				<source>It is waiting for approval.</source>
 			</trans-unit>
 			<trans-unit id="notification.published">
-				<source>The Pingback is already shown on your website.</source>
+				<source>It is already shown on your website.</source>
 			</trans-unit>
 			<trans-unit id="notification.moderate">
-				<source>Open the Pingback in the backend</source>
+				<source>Open it in the backend</source>
 			</trans-unit>
 			<trans-unit id="pagination.label">
 				<source>More Pingbacks</source>

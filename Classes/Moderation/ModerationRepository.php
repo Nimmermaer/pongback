@@ -91,6 +91,7 @@ readonly class ModerationRepository
                 'pingback.uid',
                 'pingback.pid',
                 'pingback.hidden',
+                'pingback.protocol',
                 'pingback.crdate',
                 'pingback.source_link',
                 'pingback.source_title',

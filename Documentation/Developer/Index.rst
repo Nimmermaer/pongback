@@ -167,6 +167,8 @@ Protocol neutral core
 
 Receiving is implemented independent of the Pingback protocol in the
 namespace :php:`\Webicorns\Pongback\Mention`
-(:php:`MentionReceiverInterface`). The Pingback endpoint only translates
-XML-RPC to an :php:`IncomingMention` and rejection reasons to fault codes.
-A Webmention endpoint is planned to use the same core.
+(:php:`MentionReceiverInterface`). The Pingback endpoint translates XML-RPC
+to an :php:`IncomingMention` and rejection reasons to fault codes, the
+Webmention endpoint form posts and HTTP status codes. Webmentions use
+:php:`MentionReceiverInterface::synchronize()`, which also updates and
+removes stored mentions.

@@ -17,11 +17,13 @@ example below an article.
 
 Pongback adds this to TYPO3:
 
-*   Every page announces the Pingback endpoint of its site via the
-    `X-Pingback` HTTP header and a `<link rel="pingback">` tag.
-*   The endpoint (`https://example.com/pingback.ping`) accepts XML-RPC calls
-    as defined by the `Pingback specification
-    <https://www.hixie.ch/specs/pingback/pingback>`__.
+*   Every page announces the Pingback and Webmention endpoints of its site
+    via HTTP headers and `<link>` tags.
+*   The Pingback endpoint (`https://example.com/pingback.ping`) accepts
+    XML-RPC calls as defined by the `Pingback specification
+    <https://www.hixie.ch/specs/pingback/pingback>`__, the Webmention
+    endpoint (`https://example.com/webmention`) form posts as defined by the
+    `W3C Webmention recommendation <https://www.w3.org/TR/webmention/>`__.
 *   A Pingback is only stored if the linking page really links to a visible
     page of your site. New Pingbacks need to be approved by default.
 
@@ -50,13 +52,15 @@ Ready
 *   Content elements "Pingbacks of this page" and "Latest Pingbacks", cached
     with the page
 *   Dashboard widget with the newest Pingbacks and their websites
+*   Webmention: receiving with verification in the background, updates and
+    deletions of the source; sending with Webmention preferred, see
+    :ref:`webmention`
 
 See the `roadmap <https://github.com/Nimmermaer/pongback/milestone/1>`__.
 
 Planned
 -------
 
-*   `Webmention <https://www.w3.org/TR/webmention/>`__ support
 *   Integration with EXT:news and EXT:blog
 
 ..  _requirements:

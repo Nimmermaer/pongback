@@ -12,7 +12,7 @@
                         <a href="{item.source_link}" target="_blank" rel="noreferrer noopener">{f:if(condition: item.source_title, then: item.source_title, else: item.source_link)}</a>
                         <f:if condition="{item.hidden}"><span class="badge badge-warning"><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang_mod.xlf:status.pending" /></span></f:if>
                         <br>
-                        <small class="text-body-secondary">{item.source_host} → {item.page_title} · {item.crdate -> f:format.date(format: 'Y-m-d H:i')}</small>
+                        <small class="text-body-secondary">{f:if(condition: '{item.protocol} == \'webmention\'', then: 'Webmention', else: 'Pingback')} · {item.source_host} → {item.page_title} · {item.crdate -> f:format.date(format: 'Y-m-d H:i')}</small>
                     </li>
                 </f:for>
             </ul>

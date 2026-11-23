@@ -32,7 +32,8 @@ Pongback
 ----
 
 Receive, moderate, display and send
-`Pingbacks <https://www.hixie.ch/specs/pingback/pingback>`__ with TYPO3:
+`Pingbacks <https://www.hixie.ch/specs/pingback/pingback>`__ and
+`Webmentions <https://www.w3.org/TR/webmention/>`__ with TYPO3:
 when another website links to one of your pages, it notifies your site, and
 the link can be shown on your page after approval.
 
@@ -81,6 +82,7 @@ the link can be shown on your page after approval.
     Configuration/Index
     Editors/Index
     Sending/Index
+    Webmention/Index
     Developer/Index
     Security/Index
     KnownProblems/Index

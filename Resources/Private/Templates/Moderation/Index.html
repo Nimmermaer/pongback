@@ -47,6 +47,7 @@
                                 <f:then><span class="badge badge-warning"><f:translate key="{ll}status.pending" /></span></f:then>
                                 <f:else><span class="badge badge-success"><f:translate key="{ll}status.approved" /></span></f:else>
                             </f:if>
+                            <span class="badge badge-default">{f:if(condition: '{pingback.protocol} == \'webmention\'', then: 'Webmention', else: 'Pingback')}</span>
                         </td>
                         <td>
                             <a href="{pingback.source_link}" target="_blank" rel="noreferrer noopener">{f:if(condition: pingback.source_title, then: pingback.source_title, else: pingback.source_link)}</a>
