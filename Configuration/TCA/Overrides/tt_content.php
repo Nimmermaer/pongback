@@ -14,9 +14,17 @@ defined('TYPO3') || die();
     $isTypo3v14OrHigher = GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion() >= 14;
 
     foreach (['list', 'latest'] as $pluginName) {
-        $label = 'LLL:EXT:' . $extensionKey . '/Resources/Private/Language/locallang_be.xlf:plugin.tx_pongback.pongback_' . $pluginName . '.title';
+        $labels = 'LLL:EXT:' . $extensionKey . '/Resources/Private/Language/locallang_be.xlf:plugin.tx_pongback.pongback_' . $pluginName;
 
-        $contentType = ExtensionUtility::registerPlugin($extensionKey, $pluginName, $label, 'tx-pongback-pong');
+        // Content element plugins show up in the new content element wizard automatically (group "plugins").
+        $contentType = ExtensionUtility::registerPlugin(
+            $extensionKey,
+            $pluginName,
+            $labels . '.title',
+            'tx-pongback-pong',
+            'plugins',
+            $labels . '.description',
+        );
         ExtensionManagementUtility::addToAllTCAtypes(
             'tt_content',
             '--div--;LLL:EXT:' . $extensionKey . '/Resources/Private/Language/locallang_be.xlf:plugin.pongback.configuration,pi_flexform',

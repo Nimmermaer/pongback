@@ -3,9 +3,6 @@
 	<file source-language="en" datatype="plaintext" original="messages" date="2024-02-05T14:21:36Z" product-name="pongback">
 		<header/>
 		<body>
-			<trans-unit id="plugin.tx_pongback.pongback.wizard">
-				<source>Pingback plugins</source>
-			</trans-unit>
 			<trans-unit id="plugin.tx_pongback.pongback_list.title">
 				<source>Pongback:: Pingback list</source>
 			</trans-unit>
