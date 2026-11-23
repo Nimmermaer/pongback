@@ -69,11 +69,12 @@ final class NotifyEditorsTest extends AbstractPongbackTestCase
 
         $html = (string) $email->getHtmlBody();
         self::assertSame('New Pingback from A <great> post', $email->getSubject());
+        self::assertStringContainsString('New Pingback', $html);
         self::assertStringContainsString('href="https://blog.example/post"', $html);
         self::assertStringContainsString('A &lt;great&gt; post', $html, 'Escaped');
         self::assertStringContainsString('waiting for approval', $html);
 
-        preg_match('#<a href="([^"]+)">Open the Pingback in the backend</a>#', $html, $link);
+        preg_match('#<a href="([^"]+)">Open it in the backend</a>#', $html, $link);
         $query = [];
         parse_str((string) parse_url(html_entity_decode($link[1] ?? ''), PHP_URL_QUERY), $query);
         self::assertSame('web_pongback', $query['redirect'] ?? null);
@@ -97,6 +98,17 @@ final class NotifyEditorsTest extends AbstractPongbackTestCase
     }
 
     #[Test]
+    public function namesTheProtocol(): void
+    {
+        $this->writeSiteSettings('main', ['pongback' => ['notification' => ['emailTo' => 'editor@main.example']]]);
+
+        $this->notify(true, 'webmention');
+
+        self::assertSame('New Webmention from A <great> post', $this->sent[0]->getSubject());
+        self::assertStringContainsString('New Webmention', (string) $this->sent[0]->getHtmlBody());
+    }
+
+    #[Test]
     public function mailProblemsAreLoggedOnly(): void
     {
         $this->writeSiteSettings('main', ['pongback' => ['notification' => ['emailTo' => 'editor@main.example']]]);
@@ -108,7 +120,7 @@ final class NotifyEditorsTest extends AbstractPongbackTestCase
         (new NotifyEditors($mailer, $this->get(UriBuilder::class), $this->get(LanguageServiceFactory::class), $logger))($this->event(true));
     }
 
-    private function notify(bool $pending): void
+    private function notify(bool $pending, string $protocol = 'pingback'): void
     {
         $mailer = $this->createMock(MailerInterface::class);
         $mailer->method('send')->willReturnCallback(function (RawMessage $message): void {
@@ -116,14 +128,15 @@ final class NotifyEditorsTest extends AbstractPongbackTestCase
             $this->sent[] = $message;
         });
 
-        (new NotifyEditors($mailer, $this->get(UriBuilder::class), $this->get(LanguageServiceFactory::class), new NullLogger()))($this->event($pending));
+        (new NotifyEditors($mailer, $this->get(UriBuilder::class), $this->get(LanguageServiceFactory::class), new NullLogger()))($this->event($pending, $protocol));
     }
 
-    private function event(bool $pending): AfterPingbackCreatedEvent
+    private function event(bool $pending, string $protocol = 'pingback'): AfterPingbackCreatedEvent
     {
         $pingback = new Pingback();
         $pingback->setPid(2);
         $pingback->setHidden($pending);
+        $pingback->setProtocol($protocol);
         $pingback->setSourceLink('https://blog.example/post');
         $pingback->setSourceTitle('A <great> post');
         $pingback->setTargetLink('https://main.example/article');

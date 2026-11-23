@@ -1,6 +1,6 @@
 <f:layout name="SystemEmail" />
 <f:comment>Plain text: values are not HTML escaped.</f:comment>
-<f:section name="Title"><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.headline" /></f:section>
+<f:section name="Title"><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.headline" arguments="{0: protocol}" /></f:section>
 <f:section name="Main"><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.introduction" />
 
 <f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:source_title" />: {f:if(condition: pingback.sourceTitle, then: pingback.sourceTitle, else: pingback.sourceLink) -> f:format.raw()}

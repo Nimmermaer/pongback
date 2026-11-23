@@ -8,9 +8,9 @@
 ,"uid","pid","username","password","admin","disable","deleted","usergroup","options"
 ,2,0,"editor","$1$tCrlLajZ$C0sikFQQ3SWaFAZ1Me0Z/1",0,0,0,"1",3
 "tx_pongback_domain_model_pingback"
-,"uid","pid","crdate","source_link","source_title","target_link","hidden","deleted","sys_language_uid"
-,1,2,100,"https://blog.example/pending","Pending post","https://main.example/article",1,0,0
-,2,2,200,"https://www.blog.example/approved","Approved post","https://main.example/article",0,0,0
-,3,4,300,"https://blog.example/subpage","Subpage post","https://main.example/article/subpage",1,0,0
-,4,11,400,"https://blog.example/other-site","Other site post","https://other.example/article",0,0,0
-,5,2,500,"https://blog.example/deleted","Deleted post","https://main.example/article",0,1,0
+,"uid","pid","crdate","source_link","source_title","target_link","hidden","deleted","sys_language_uid","protocol"
+,1,2,100,"https://blog.example/pending","Pending post","https://main.example/article",1,0,0,"pingback"
+,2,2,200,"https://www.blog.example/approved","Approved post","https://main.example/article",0,0,0,"pingback"
+,3,4,300,"https://blog.example/subpage","Subpage post","https://main.example/article/subpage",1,0,0,"webmention"
+,4,11,400,"https://blog.example/other-site","Other site post","https://other.example/article",0,0,0,"pingback"
+,5,2,500,"https://blog.example/deleted","Deleted post","https://main.example/article",0,1,0,"pingback"

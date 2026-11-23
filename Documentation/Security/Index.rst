@@ -50,6 +50,17 @@ Storage and output
 *   XML-RPC requests are parsed without external entities; documents with a
     DOCTYPE declaration are rejected.
 
+..  _security-webmention:
+
+Webmention endpoint
+===================
+
+*   The endpoint only checks the request and the target page and answers
+    `202 Accepted`; the source is fetched later by the worker, with the same
+    protection as above. Senders cannot use the endpoint to make your server
+    wait for slow or internal hosts.
+*   The rate limit applies to Webmentions as well.
+
 ..  _security-sending:
 
 Sending

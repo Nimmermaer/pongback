@@ -24,6 +24,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Webicorns\Pongback\Configuration\PongbackSettings;
 use Webicorns\Pongback\Controller\Backend\ModerationController;
 use Webicorns\Pongback\Event\AfterPingbackCreatedEvent;
+use Webicorns\Pongback\Mention\IncomingMention;
 
 /**
  * Emails the recipient of the site setting "pongback.notification.emailTo" about a new Pingback,
@@ -56,6 +57,7 @@ readonly class NotifyEditors
                 ->assignMultiple([
                     'pingback' => $event->pingback,
                     'pending' => $event->pingback->isHidden(),
+                    'protocol' => self::protocolName($event->pingback->getProtocol()),
                     'moderationUrl' => $this->moderationUrl($event),
                 ]);
             if ($settings->notificationEmailFrom !== '') {
@@ -84,7 +86,16 @@ readonly class NotifyEditors
             ->createFromSiteLanguage($event->target->site->getDefaultLanguage())
             ->sL('LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.subject');
 
-        return sprintf($label, $pingback->getSourceTitle() !== '' ? $pingback->getSourceTitle() : $pingback->getSourceLink());
+        return sprintf(
+            $label,
+            self::protocolName($pingback->getProtocol()),
+            $pingback->getSourceTitle() !== '' ? $pingback->getSourceTitle() : $pingback->getSourceLink(),
+        );
+    }
+
+    private static function protocolName(string $protocol): string
+    {
+        return $protocol === IncomingMention::PROTOCOL_WEBMENTION ? 'Webmention' : 'Pingback';
     }
 
     /**

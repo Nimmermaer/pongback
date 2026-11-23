@@ -6,6 +6,29 @@
 Changelog
 =========
 
+..  _changelog-upcoming:
+
+Upcoming
+========
+
+Features
+--------
+
+*   Webmention: receiving at `https://example.com/webmention` with
+    verification by the worker, updates and removals of the source; sending
+    with Webmention preferred over Pingback, see :ref:`webmention`.
+*   Site settings `pongback.receive.webmention` and
+    `pongback.send.webmention`.
+*   Module, dashboard widget and email show the protocol.
+
+Changes
+-------
+
+*   A linked page answering 404 or 410 is no longer retried when sending.
+*   The middleware `webicorns/pongback/pingback-discovery` is renamed to
+    `webicorns/pongback/discovery`, :php:`PingbackQueue` to
+    :php:`\Webicorns\Pongback\Messaging\MessageQueue`.
+
 ..  _changelog-unreleased:
 ..  _changelog-0-9-0:
 

@@ -27,12 +27,13 @@ How it works
     `<article>` if there is no `<main>`, otherwise from `<body>`. Links to
     any site of this TYPO3 installation are ignored, at most 50 links are
     used per page.
-#.  For every link the Pingback endpoint of the linked page is looked up
-    (`X-Pingback` header or `<link rel="pingback">`) and `pingback.ping` is
-    called.
+#.  For every link the endpoint of the linked page is looked up: Webmention
+    first, see :ref:`webmention-sending`, otherwise Pingback (`X-Pingback`
+    header or `<link rel="pingback">`), and the linked page is notified.
 
-Every Pingback is sent only once per page and link. The result is stored as
-record :guilabel:`Sent Pingback` on the page and can be viewed in the module
+Every Pingback is sent only once per page and link, Webmentions again when
+the page changes. The result, including the protocol, is stored as record
+:guilabel:`Sent Pingback` on the page and can be viewed in the module
 :guilabel:`Web > List`.
 
 ..  _sending-worker:

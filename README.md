@@ -7,7 +7,8 @@
 # TYPO3 Extension - Pongback
 
 Pongback, developed by Webicorns, lets your TYPO3 website receive, moderate,
-display and send [Pingbacks](https://www.hixie.ch/specs/pingback/pingback):
+display and send [Pingbacks](https://www.hixie.ch/specs/pingback/pingback)
+and [Webmentions](https://www.w3.org/TR/webmention/):
 when another website links to one of your pages, it can notify you, and the
 link shows up on your page after approval.
 
@@ -24,9 +25,12 @@ EXT:dashboard is optional (dashboard widget).
 - **Receiving Pingbacks** via an XML-RPC endpoint per site
   (`https://<your-site>/pingback.ping`), implementing the Pingback
   specification including all fault codes.
-- **Discovery**: every page announces the endpoint via the `X-Pingback`
-  HTTP header and a `<link rel="pingback">` tag (both can be switched off
-  per site).
+- **Receiving Webmentions** at `https://<your-site>/webmention`: quick
+  checks and `202 Accepted`, the source is verified in the background; a
+  Webmention sent again updates the mention, a deleted source removes it.
+- **Discovery**: every page announces both endpoints via HTTP headers
+  (`X-Pingback`, `Link: <…>; rel="webmention"`) and `<link>` tags (both can
+  be switched off per site).
 - **Verification**: a Pingback is only stored if the target is a page of the
   same site that is visible to anonymous visitors, and the source page really
   links to it.
@@ -38,10 +42,11 @@ EXT:dashboard is optional (dashboard widget).
   request forgery (public hosts and default ports only, every redirect checked,
   timeout and size limit). Title and excerpt of the source are stored as plain
   text only.
-- **Sending Pingbacks** to linked websites when a page or its content is
-  changed: in the background via the Symfony Messenger (worker:
-  `vendor/bin/typo3 messenger:consume doctrine`), each Pingback once, with
-  retries and a log of sent Pingbacks per page.
+- **Sending** to linked websites when a page or its content is changed:
+  Webmention if the linked page offers it, otherwise Pingback. In the
+  background via the Symfony Messenger (worker:
+  `vendor/bin/typo3 messenger:consume doctrine`), with retries and a log per
+  page. Webmentions are sent again on changes and for removed links.
 - **Moderation** in the backend module *Web > Pongback*: approve, hide and
   delete the Pingbacks of a page tree, limited to the pages an editor may
   edit.
@@ -54,8 +59,6 @@ EXT:dashboard is optional (dashboard widget).
 
 ### Planned after 1.0.0
 
-- [Webmention](https://www.w3.org/TR/webmention/) support (the receiving core
-  is already protocol neutral).
 - Integration with EXT:news and EXT:blog.
 - Advanced spam filters.
 
@@ -84,13 +87,16 @@ EXT:dashboard is optional (dashboard widget).
    | `pongback.discovery.metaTag`                  | `true`               |
    | `pongback.receive.autoPublish`                | `false` (moderation) |
    | `pongback.receive.rateLimit` (per IP and hour, `0` = off) | `20`     |
+   | `pongback.receive.webmention`                 | `true`               |
    | `pongback.send.enabled`                       | `true`               |
+   | `pongback.send.webmention` (prefer Webmention) | `true`              |
    | `pongback.send.tables`                        | `pages, tt_content`  |
    | `pongback.notification.emailTo` / `emailFrom` | empty                |
    | `plugin.tx_pongback.view.*RootPath`           | extension paths      |
    | `plugin.tx_pongback.persistence.storagePid`   | `0`                  |
 
-4) To send Pingbacks, run the message queue worker regularly, e.g. by cron:
+4) To send Pingbacks and Webmentions and to verify received Webmentions, run
+   the message queue worker regularly, e.g. by cron:
 
    ```bash
    vendor/bin/typo3 messenger:consume doctrine --time-limit=240

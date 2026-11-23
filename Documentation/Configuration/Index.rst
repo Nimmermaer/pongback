@@ -35,8 +35,10 @@ See also: `TYPO3 Explained, Using a site set as dependency in a site
 The endpoint URL
 ================
 
-The endpoint is the page type `1709405325110` of the root page. The site set
-maps it to the URL `https://example.com/pingback.ping`.
+The Pingback endpoint is the page type `1709405325110` of the root page, the
+Webmention endpoint the page type `1709405325111`. The site set maps them to
+the URLs `https://example.com/pingback.ping` and
+`https://example.com/webmention`.
 
 TYPO3 v14
     The route enhancer is part of the site set and applied automatically.

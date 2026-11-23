@@ -24,7 +24,7 @@ its checklist in sync.
 | `Classes/Pingback/PingbackEndpoint.php` | XML-RPC `pingback.ping`: parameters, rate limit, fault codes |
 | `Classes/Webmention/`                  | `WebmentionEndpoint` (quick checks, 202 Accepted), `ReceiveWebmentionHandler` (worker: `MentionReceiver::synchronize()` creates, updates or removes) |
 | `Classes/Messaging/MessageQueue.php`   | Always dispatch messages through it: explicit transport, TYPO3 13 would also use the sync `*` route |
-| `Classes/Mention/`                     | Protocol neutral receiving (also for a future Webmention endpoint): `MentionReceiverInterface`, `TargetResolver` (routing + page visibility), `MentionStorage`, `MentionRateLimiter` |
+| `Classes/Mention/`                     | Protocol neutral receiving (shared by the Pingback and Webmention endpoints): `MentionReceiverInterface`, `TargetResolver` (routing + page visibility), `MentionStorage`, `MentionRateLimiter` |
 | `Classes/Mention/Source/`              | Untrusted source handling: `UrlGuard` (SSRF), `SourceFetcher` (limits, redirects, IP pinning), `SourceInspector` (link check, plain text excerpt) |
 | `Classes/XmlRpc/XmlRpcCodec.php`       | XML-RPC parsing/encoding (replaces PECL `ext-xmlrpc`)     |
 | `Classes/Event/BeforePingbackCreateEvent.php` | Listeners may modify or reject a verified mention before it is stored |

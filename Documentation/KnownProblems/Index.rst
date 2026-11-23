@@ -12,6 +12,9 @@ Pongback is being prepared for version 1.0. Until then:
     detected, save them again to send their Pingbacks. Sending needs a
     worker for the message queue, see :ref:`sending-worker`. The worker must
     be able to request the pages of the site via their public URL.
+*   **Webmention**: received Webmentions are only verified while the worker
+    of the message queue runs, see :ref:`sending-worker`. Private
+    Webmentions (Vouch, tokens) are not supported.
 *   **TYPO3 v13**: the route enhancer of the endpoint is added by an event
     listener, because site sets cannot contain route enhancers in v13, see
     :ref:`route-enhancer`.
