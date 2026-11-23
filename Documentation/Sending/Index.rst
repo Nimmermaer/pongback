@@ -120,6 +120,48 @@ If the table `sys_messenger_messages` keeps growing, the worker does not
 run. Sent Pingbacks and Webmentions appear as records :guilabel:`Sent
 Pingback` on the page in :guilabel:`Web > List`.
 
+..  _sending-worker-none:
+
+Without a worker
+----------------
+
+What works without a worker:
+
+Receiving Pingbacks
+    Works. The endpoint verifies and stores Pingbacks right away.
+
+Receiving Webmentions
+    The endpoint answers `202 Accepted`, but the source is only verified,
+    and the Webmention stored, by the worker.
+
+Sending Pingbacks and Webmentions
+    Does not work. Saving only queues the message.
+
+Moderation, plugins and dashboard widget work with what is stored.
+
+If you cannot run a worker, for example on hosting without cron jobs, route
+the messages to the synchronous transport `default` of TYPO3. They are then
+processed immediately within the request:
+
+..  code-block:: php
+    :caption: config/system/additional.php
+
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['messenger']['routing'][
+        \Webicorns\Pongback\Sending\SendPingbacksMessage::class
+    ] = 'default';
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['messenger']['routing'][
+        \Webicorns\Pongback\Webmention\ReceiveWebmentionMessage::class
+    ] = 'default';
+
+The price:
+
+*   Saving a page in the backend waits until all linked pages are notified,
+    up to 10 seconds per unresponsive site.
+*   The sender of a Webmention waits until the source is verified.
+*   Retries happen right away instead of after 5 minutes and 1 hour.
+
+A worker remains the recommended setup.
+
 ..  _sending-worker-transport:
 
 Other transports
