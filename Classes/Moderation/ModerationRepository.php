@@ -19,6 +19,7 @@ use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\QueryHelper;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
+use Webicorns\Pongback\Sending\PingStatus;
 use Webicorns\Pongback\Utility\Constants;
 
 /**
@@ -82,6 +83,61 @@ readonly class ModerationRepository
             ->fetchOne();
     }
 
+    /**
+     * Sent Pingbacks and Webmentions of the page tree that did not reach the linked site:
+     * rejected, or failed after the last attempt. Newest first.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function findSendingProblemsOnPageTree(int $pageId, BackendUserAuthentication $user): array
+    {
+        $queryBuilder = $this->createSentQueryBuilder($user);
+        $queryBuilder
+            ->andWhere($queryBuilder->expr()->in(
+                'sent.pid',
+                $queryBuilder->createNamedParameter($this->pageTree($pageId), Connection::PARAM_INT_ARRAY),
+            ))
+            ->orderBy('sent.tstamp', 'DESC')
+            ->addOrderBy('sent.uid', 'DESC');
+
+        return $queryBuilder->executeQuery()->fetchAllAssociative();
+    }
+
+    public function countSendingProblems(BackendUserAuthentication $user): int
+    {
+        return (int) $this->createSentQueryBuilder($user)
+            ->count('sent.uid')
+            ->executeQuery()
+            ->fetchOne();
+    }
+
+    private function createSentQueryBuilder(BackendUserAuthentication $user): QueryBuilder
+    {
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable(Constants::SENT_TABLE);
+        $queryBuilder->getRestrictions()->removeAll()->add(new DeletedRestriction());
+        $queryBuilder
+            ->select(
+                'sent.uid',
+                'sent.pid',
+                'sent.tstamp',
+                'sent.source_link',
+                'sent.target_link',
+                'sent.protocol',
+                'sent.status',
+                'sent.message',
+                'sent.attempts',
+            )
+            ->addSelect('pages.title AS page_title')
+            ->from(Constants::SENT_TABLE, 'sent')
+            ->where($queryBuilder->expr()->in(
+                'sent.status',
+                $queryBuilder->createNamedParameter([PingStatus::Rejected->value, PingStatus::Failed->value], Connection::PARAM_STR_ARRAY),
+            ));
+        $this->restrictToVisiblePages($queryBuilder, 'sent', $user);
+
+        return $queryBuilder;
+    }
+
     private function createQueryBuilder(BackendUserAuthentication $user): QueryBuilder
     {
         $queryBuilder = $this->connectionPool->getQueryBuilderForTable(Constants::PINGBACK_TABLE);
@@ -99,17 +155,26 @@ readonly class ModerationRepository
                 'pingback.excerpt',
             )
             ->addSelect('pages.title AS page_title')
-            ->from(Constants::PINGBACK_TABLE, 'pingback')
-            ->join('pingback', 'pages', 'pages', $queryBuilder->expr()->eq('pages.uid', $queryBuilder->quoteIdentifier('pingback.pid')))
-            ->where($queryBuilder->expr()->eq('pages.deleted', 0));
+            ->from(Constants::PINGBACK_TABLE, 'pingback');
+        $this->restrictToVisiblePages($queryBuilder, 'pingback', $user);
+
+        return $queryBuilder;
+    }
+
+    /**
+     * Only records on pages the user may see.
+     */
+    private function restrictToVisiblePages(QueryBuilder $queryBuilder, string $alias, BackendUserAuthentication $user): void
+    {
+        $queryBuilder
+            ->join($alias, 'pages', 'pages', $queryBuilder->expr()->eq('pages.uid', $queryBuilder->quoteIdentifier($alias . '.pid')))
+            ->andWhere($queryBuilder->expr()->eq('pages.deleted', 0));
 
         // The permission clause refers to the table "pages", hence the alias.
         $permissions = QueryHelper::stripLogicalOperatorPrefix($user->getPagePermsClause(Permission::PAGE_SHOW));
         if ($permissions !== '') {
             $queryBuilder->andWhere($permissions);
         }
-
-        return $queryBuilder;
     }
 
     /**

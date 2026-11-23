@@ -20,20 +20,26 @@ use TYPO3\CMS\Core\Attribute\AsEventListener;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Mail\FluidEmail;
 use TYPO3\CMS\Core\Mail\MailerInterface;
+use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Webicorns\Pongback\Configuration\PongbackSettings;
 use Webicorns\Pongback\Controller\Backend\ModerationController;
 use Webicorns\Pongback\Event\AfterPingbackCreatedEvent;
+use Webicorns\Pongback\Event\SendingFailedEvent;
 use Webicorns\Pongback\Mention\IncomingMention;
+use Webicorns\Pongback\Sending\PingStatus;
 
 /**
- * Emails the recipient of the site setting "pongback.notification.emailTo" about a new Pingback,
- * with a link to it in the module "Web > Pongback".
+ * Emails the recipients of the site setting "pongback.notification.emailTo":
+ * about new Pingbacks and Webmentions, and about linked pages that could not be notified.
+ * Each email links to the module "Web > Pongback".
  */
-#[AsEventListener('pongback/notify-editors')]
 readonly class NotifyEditors
 {
     public const TEMPLATE = 'PongbackPingbackReceived';
+    public const TEMPLATE_SENDING_FAILED = 'PongbackSendingFailed';
+
+    private const LABELS = 'LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:';
 
     public function __construct(
         private MailerInterface $mailer,
@@ -42,33 +48,43 @@ readonly class NotifyEditors
         private LoggerInterface $logger,
     ) {}
 
-    public function __invoke(AfterPingbackCreatedEvent $event): void
+    #[AsEventListener('pongback/notify-editors')]
+    public function pingbackCreated(AfterPingbackCreatedEvent $event): void
     {
-        $settings = PongbackSettings::fromSite($event->target->site);
-        if ($settings->notificationEmailTo === '') {
-            return;
+        $pingback = $event->pingback;
+        $subject = sprintf(
+            $this->label($event->target->site, 'notification.subject'),
+            self::protocolName($pingback->getProtocol()),
+            $pingback->getSourceTitle() !== '' ? $pingback->getSourceTitle() : $pingback->getSourceLink(),
+        );
+
+        // The mention is stored, a mail problem must not turn it into an error for the sender.
+        $this->send($event->target->site, $subject, self::TEMPLATE, [
+            'pingback' => $pingback,
+            'pending' => $pingback->isHidden(),
+            'protocol' => self::protocolName($pingback->getProtocol()),
+            'moderationUrl' => $this->moduleUrl(['id' => $event->target->pageId, 'pingback' => $event->uid]),
+        ], ['uid' => $event->uid]);
+    }
+
+    #[AsEventListener('pongback/notify-editors-sending-failed')]
+    public function sendingFailed(SendingFailedEvent $event): void
+    {
+        $problems = [];
+        foreach ($event->problems as $target => $result) {
+            $problems[] = [
+                'target' => $target,
+                'protocol' => $result->protocol === '' ? '' : self::protocolName($result->protocol),
+                'rejected' => $result->status === PingStatus::Rejected,
+                'message' => $result->message,
+            ];
         }
 
-        try {
-            $email = $this->createEmail()
-                ->to(...array_map(static fn(string $address): Address => new Address($address), GeneralUtility::trimExplode(',', $settings->notificationEmailTo, true)))
-                ->subject($this->subject($event))
-                ->setTemplate(self::TEMPLATE)
-                ->assignMultiple([
-                    'pingback' => $event->pingback,
-                    'pending' => $event->pingback->isHidden(),
-                    'protocol' => self::protocolName($event->pingback->getProtocol()),
-                    'moderationUrl' => $this->moderationUrl($event),
-                ]);
-            if ($settings->notificationEmailFrom !== '') {
-                $email->from(new Address($settings->notificationEmailFrom));
-            }
-
-            $this->mailer->send($email);
-        } catch (\Throwable $throwable) {
-            // The Pingback is stored, a mail problem must not turn it into a fault for the sender.
-            $this->logger->error('Could not send the Pingback notification: ' . $throwable->getMessage(), ['uid' => $event->uid]);
-        }
+        $this->send($event->site, sprintf($this->label($event->site, 'notification.sendingFailed.subject'), $event->pageUrl), self::TEMPLATE_SENDING_FAILED, [
+            'pageUrl' => $event->pageUrl,
+            'problems' => $problems,
+            'moduleUrl' => $this->moduleUrl(['id' => $event->pageId]),
+        ], ['pageId' => $event->pageId]);
     }
 
     protected function createEmail(): FluidEmail
@@ -77,20 +93,38 @@ readonly class NotifyEditors
     }
 
     /**
-     * A plain text header: set here, a template section would escape it as HTML.
+     * @param array<string, mixed> $variables
+     * @param array<string, mixed> $logContext
      */
-    private function subject(AfterPingbackCreatedEvent $event): string
+    private function send(Site $site, string $subject, string $template, array $variables, array $logContext): void
     {
-        $pingback = $event->pingback;
-        $label = $this->languageServiceFactory
-            ->createFromSiteLanguage($event->target->site->getDefaultLanguage())
-            ->sL('LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.subject');
+        $settings = PongbackSettings::fromSite($site);
+        if ($settings->notificationEmailTo === '') {
+            return;
+        }
 
-        return sprintf(
-            $label,
-            self::protocolName($pingback->getProtocol()),
-            $pingback->getSourceTitle() !== '' ? $pingback->getSourceTitle() : $pingback->getSourceLink(),
-        );
+        try {
+            $email = $this->createEmail()
+                ->to(...array_map(static fn(string $address): Address => new Address($address), GeneralUtility::trimExplode(',', $settings->notificationEmailTo, true)))
+                ->subject($subject)
+                ->setTemplate($template)
+                ->assignMultiple($variables);
+            if ($settings->notificationEmailFrom !== '') {
+                $email->from(new Address($settings->notificationEmailFrom));
+            }
+
+            $this->mailer->send($email);
+        } catch (\Throwable $throwable) {
+            $this->logger->error('Could not send the Pongback notification: ' . $throwable->getMessage(), $logContext);
+        }
+    }
+
+    /**
+     * Subjects are plain text headers: set here, a template section would escape them as HTML.
+     */
+    private function label(Site $site, string $key): string
+    {
+        return $this->languageServiceFactory->createFromSiteLanguage($site->getDefaultLanguage())->sL(self::LABELS . $key);
     }
 
     private static function protocolName(string $protocol): string
@@ -102,13 +136,15 @@ readonly class NotifyEditors
      * Module URLs need a token of the logged in user. The link goes to the login, which forwards to the
      * module after logging in (or right away with a session). Opening it changes nothing: approving needs
      * a click in the module and the page permissions.
+     *
+     * @param array<string, int> $parameters
      */
-    private function moderationUrl(AfterPingbackCreatedEvent $event): string
+    private function moduleUrl(array $parameters): string
     {
         return (string) $this->uriBuilder->buildUriWithRedirect(
             'login',
             [],
-            RouteRedirect::create(ModerationController::MODULE, ['id' => $event->target->pageId, 'pingback' => $event->uid]),
+            RouteRedirect::create(ModerationController::MODULE, $parameters),
             UriBuilder::ABSOLUTE_URL,
         );
     }

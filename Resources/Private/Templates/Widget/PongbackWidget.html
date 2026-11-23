@@ -4,6 +4,9 @@
     <f:if condition="{pending}">
         <p><strong><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang_be.xlf:widgets.pongback.pending" arguments="{0: pending}" /></strong></p>
     </f:if>
+    <f:if condition="{sendingProblems}">
+        <p class="text-danger"><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang_be.xlf:widgets.pongback.sendingProblems" arguments="{0: sendingProblems}" /></p>
+    </f:if>
     <f:if condition="{items}">
         <f:then>
             <ul class="list-unstyled">

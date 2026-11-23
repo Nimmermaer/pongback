@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Webicorns\Pongback\Sending;
 
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
@@ -20,6 +21,7 @@ use TYPO3\CMS\Core\Routing\RouterInterface;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use Webicorns\Pongback\Configuration\PongbackSettings;
+use Webicorns\Pongback\Event\SendingFailedEvent;
 use Webicorns\Pongback\Mention\IncomingMention;
 use Webicorns\Pongback\Mention\MentionRejected;
 use Webicorns\Pongback\Mention\RejectionReason;
@@ -48,6 +50,7 @@ readonly class SendPingbacksHandler
         private WebmentionClient $webmentionClient,
         private SentPingbackLog $log,
         private MessageQueue $queue,
+        private EventDispatcherInterface $eventDispatcher,
         private LoggerInterface $logger,
     ) {}
 
@@ -79,8 +82,10 @@ readonly class SendPingbacksHandler
             : [];
 
         $retry = false;
+        $problems = [];
         foreach ([...$links, ...$removed] as $target) {
-            if (! $this->needsSending($message, $sourceUrl, $target)) {
+            $last = $this->log->lastResult($message->pageId, $sourceUrl, $target);
+            if (! $this->needsSending($message, $last)) {
                 continue;
             }
 
@@ -88,15 +93,22 @@ readonly class SendPingbacksHandler
             $result = $this->send($sourceUrl, $target, $settings->sendWebmention, onlyWebmention: $isRemoved);
             if ($isRemoved && $result->status->isFinal()) {
                 $this->log->forget($message->pageId, $sourceUrl, $target);
-            } else {
-                $this->log->record($message->pageId, $sourceUrl, $target, $result);
+                continue;
             }
 
+            $this->log->record($message->pageId, $sourceUrl, $target, $result);
             $retry = $retry || ! $result->status->isFinal();
+            if ($this->isNewProblem($message, $last, $result)) {
+                $problems[$target] = $result;
+            }
         }
 
         if ($retry) {
             $this->retryLater($message);
+        }
+
+        if ($problems !== []) {
+            $this->eventDispatcher->dispatch(new SendingFailedEvent($site, $message->pageId, $sourceUrl, $problems));
         }
     }
 
@@ -104,14 +116,25 @@ readonly class SendPingbacksHandler
      * Pingbacks are sent once. Webmentions are sent again whenever the page changed, so the receiver
      * can update the mention. Retries only repeat what failed.
      */
-    private function needsSending(SendPingbacksMessage $message, string $source, string $target): bool
+    private function needsSending(SendPingbacksMessage $message, ?PingResult $last): bool
     {
-        $last = $this->log->lastResult($message->pageId, $source, $target);
         if ($last === null || ! $last->status->isFinal()) {
             return true;
         }
 
         return $message->attempt === 1 && $last->protocol === IncomingMention::PROTOCOL_WEBMENTION;
+    }
+
+    /**
+     * Rejected for the first time, or still failing after the last attempt.
+     */
+    private function isNewProblem(SendPingbacksMessage $message, ?PingResult $last, PingResult $result): bool
+    {
+        return match ($result->status) {
+            PingStatus::Rejected => $last?->status !== PingStatus::Rejected,
+            PingStatus::Failed => $message->attempt >= self::MAX_ATTEMPTS,
+            default => false,
+        };
     }
 
     private function send(string $source, string $target, bool $webmention, bool $onlyWebmention): PingResult

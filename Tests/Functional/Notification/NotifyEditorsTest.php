@@ -24,9 +24,12 @@ use TYPO3\CMS\Core\Mail\MailerInterface;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use Webicorns\Pongback\Domain\Model\Pingback;
 use Webicorns\Pongback\Event\AfterPingbackCreatedEvent;
+use Webicorns\Pongback\Event\SendingFailedEvent;
 use Webicorns\Pongback\Mention\IncomingMention;
 use Webicorns\Pongback\Mention\ResolvedTarget;
 use Webicorns\Pongback\Notification\NotifyEditors;
+use Webicorns\Pongback\Sending\PingResult;
+use Webicorns\Pongback\Sending\PingStatus;
 use Webicorns\Pongback\Tests\Functional\AbstractPongbackTestCase;
 
 final class NotifyEditorsTest extends AbstractPongbackTestCase
@@ -39,9 +42,16 @@ final class NotifyEditorsTest extends AbstractPongbackTestCase
     #[Test]
     public function isRegisteredForNewPingbacks(): void
     {
-        $listeners = $this->get(ListenerProvider::class)->getAllListenerDefinitions()[AfterPingbackCreatedEvent::class] ?? [];
+        $definitions = $this->get(ListenerProvider::class)->getAllListenerDefinitions();
 
-        self::assertContains(NotifyEditors::class, array_column($listeners, 'service'));
+        self::assertContains(
+            ['service' => NotifyEditors::class, 'method' => 'pingbackCreated'],
+            array_map(static fn(array $listener): array => ['service' => $listener['service'], 'method' => $listener['method']], $definitions[AfterPingbackCreatedEvent::class] ?? []),
+        );
+        self::assertContains(
+            ['service' => NotifyEditors::class, 'method' => 'sendingFailed'],
+            array_map(static fn(array $listener): array => ['service' => $listener['service'], 'method' => $listener['method']], $definitions[SendingFailedEvent::class] ?? []),
+        );
     }
 
     #[Test]
@@ -115,9 +125,50 @@ final class NotifyEditorsTest extends AbstractPongbackTestCase
         $mailer = $this->createMock(MailerInterface::class);
         $mailer->method('send')->willThrowException(new \RuntimeException('SMTP down', 1732600100));
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('error')->with('Could not send the Pingback notification: SMTP down', ['uid' => 7]);
+        $logger->expects(self::once())->method('error')->with('Could not send the Pongback notification: SMTP down', ['uid' => 7]);
 
-        (new NotifyEditors($mailer, $this->get(UriBuilder::class), $this->get(LanguageServiceFactory::class), $logger))($this->event(true));
+        (new NotifyEditors($mailer, $this->get(UriBuilder::class), $this->get(LanguageServiceFactory::class), $logger))->pingbackCreated($this->event(true));
+    }
+
+    #[Test]
+    public function reportsSendingProblems(): void
+    {
+        $this->writeSiteSettings('main', ['pongback' => ['notification' => ['emailTo' => 'editor@main.example']]]);
+        $mailer = $this->createMock(MailerInterface::class);
+        $mailer->method('send')->willReturnCallback(function (RawMessage $message): void {
+            self::assertInstanceOf(FluidEmail::class, $message);
+            $this->sent[] = $message;
+        });
+
+        $this->subject($mailer)->sendingFailed(new SendingFailedEvent(
+            $this->get(SiteFinder::class)->getSiteByIdentifier('main'),
+            2,
+            'https://main.example/article',
+            [
+                'https://down.example/post' => new PingResult(PingStatus::Failed, 'HTTP 503 <busy>', 0, 'https://down.example/wm', 'webmention'),
+                'https://strict.example/post' => new PingResult(PingStatus::Rejected, 'No link', 17, 'https://strict.example/xmlrpc', 'pingback'),
+            ],
+        ));
+
+        self::assertCount(1, $this->sent);
+        $email = $this->sent[0];
+        self::assertSame('Linked pages could not be notified: https://main.example/article', $email->getSubject());
+        $html = (string) $email->getHtmlBody();
+        self::assertStringContainsString('href="https://down.example/post"', $html);
+        self::assertStringContainsString('(Webmention)', $html);
+        self::assertStringContainsString('HTTP 503 &lt;busy&gt;', $html);
+        self::assertStringContainsString('rejected by the linked site', $html);
+        self::assertStringContainsString('also after 3 attempts', $html);
+        self::assertStringContainsString('redirect=web_pongback', html_entity_decode($html));
+        self::assertStringContainsString('redirectParams=id%3D2', $html);
+        $text = (string) $email->getTextBody();
+        self::assertStringContainsString('- https://strict.example/post (Pingback): rejected by the linked site – No link', $text);
+        self::assertStringContainsString('HTTP 503 <busy>', $text);
+    }
+
+    private function subject(MailerInterface $mailer): NotifyEditors
+    {
+        return new NotifyEditors($mailer, $this->get(UriBuilder::class), $this->get(LanguageServiceFactory::class), new NullLogger());
     }
 
     private function notify(bool $pending, string $protocol = 'pingback'): void
@@ -128,7 +179,7 @@ final class NotifyEditorsTest extends AbstractPongbackTestCase
             $this->sent[] = $message;
         });
 
-        (new NotifyEditors($mailer, $this->get(UriBuilder::class), $this->get(LanguageServiceFactory::class), new NullLogger()))($this->event($pending, $protocol));
+        $this->subject($mailer)->pingbackCreated($this->event($pending, $protocol));
     }
 
     private function event(bool $pending, string $protocol = 'pingback'): AfterPingbackCreatedEvent

@@ -43,7 +43,9 @@ Email notification
 ------------------
 
 If the site setting `pongback.notification.emailTo` contains one or more
-email addresses, they are notified about every new Pingback. The link in
+email addresses, they are notified about every new Pingback and Webmention,
+and about linked pages that could not be notified, see
+:ref:`sending-problems`. The link in
 the email opens the Pingback in the module :guilabel:`Web > Pongback`,
 after logging in if necessary. The link itself changes nothing: approving
 needs a click in the module.

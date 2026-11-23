@@ -53,6 +53,7 @@ class PongbackWidget implements WidgetInterface, RequestAwareWidgetInterface
         $view->assignMultiple([
             'items' => array_map(self::withSourceHost(...), $this->repository->findLatest(self::ITEMS, $user)),
             'pending' => $this->repository->countPending($user),
+            'sendingProblems' => $this->repository->countSendingProblems($user),
             'button' => $this->buttonProvider,
             'options' => $this->options,
             'configuration' => $this->configuration,

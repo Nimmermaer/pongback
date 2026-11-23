@@ -66,6 +66,33 @@ final class ModerationRepositoryTest extends ModerationTestCase
         self::assertSame(2, $repository->countPending($admin));
     }
 
+    #[Test]
+    public function listsSendingProblemsOfThePageTree(): void
+    {
+        $repository = $this->get(ModerationRepository::class);
+        $admin = $this->loginAs(1);
+
+        self::assertSame([2, 1], $this->uids($repository->findSendingProblemsOnPageTree(1, $admin)), 'Rejected and failed, newest first');
+        self::assertSame([2], $this->uids($repository->findSendingProblemsOnPageTree(4, $admin)));
+        self::assertSame(3, $repository->countSendingProblems($admin));
+
+        $row = $repository->findSendingProblemsOnPageTree(2, $admin)[1];
+        self::assertSame(
+            ['https://down.example/post', 'webmention', 'failed', 'HTTP 503', 3, 'Article'],
+            [$row['target_link'], $row['protocol'], $row['status'], $row['message'], (int) $row['attempts'], $row['page_title']],
+        );
+    }
+
+    #[Test]
+    public function editorsOnlySeeSendingProblemsOfTheirPages(): void
+    {
+        $repository = $this->get(ModerationRepository::class);
+        $editor = $this->loginAs(2);
+
+        self::assertSame(2, $repository->countSendingProblems($editor));
+        self::assertSame([], $repository->findSendingProblemsOnPageTree(10, $editor));
+    }
+
     /**
      * @param list<array<string, mixed>> $rows
      * @return list<int>

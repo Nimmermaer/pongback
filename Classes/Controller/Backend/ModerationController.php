@@ -66,6 +66,7 @@ final readonly class ModerationController
                 'paginator' => $paginator,
                 'pagination' => new SlidingWindowPagination($paginator, 10),
                 'moderateUrl' => (string) $this->uriBuilder->buildUriFromRoute(self::MODULE . '.moderate'),
+                'sendingProblems' => $this->repository->findSendingProblemsOnPageTree($pageId, $this->getBackendUser()),
             ]);
         }
 

@@ -20,9 +20,54 @@
                     <f:be.infobox state="-1"><f:translate key="{ll}noPingbacks" /></f:be.infobox>
                 </f:else>
             </f:if>
+            <f:render section="SendingProblems" arguments="{_all}" />
         </f:then>
         <f:else>
             <f:be.infobox state="-1"><f:translate key="{ll}selectPage" /></f:be.infobox>
+        </f:else>
+    </f:if>
+</f:section>
+
+<f:section name="SendingProblems">
+    <h2><f:translate key="{ll}sending.title" /></h2>
+    <f:if condition="{sendingProblems}">
+        <f:then>
+            <p><f:translate key="{ll}sending.description" /></p>
+            <div class="table-fit">
+                <table class="table table-striped table-hover" id="sending-problems">
+                    <thead>
+                        <tr>
+                            <th><f:translate key="{ll}column.status" /></th>
+                            <th><f:translate key="{ll}sending.column.target" /></th>
+                            <th><f:translate key="{ll}sending.column.page" /></th>
+                            <th><f:translate key="{ll}sending.column.message" /></th>
+                            <th><f:translate key="{ll}sending.column.attempts" /></th>
+                            <th><f:translate key="{ll}sending.column.date" /></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <f:for each="{sendingProblems}" as="problem">
+                            <tr>
+                                <td>
+                                    <f:if condition="{problem.status} == 'rejected'">
+                                        <f:then><span class="badge badge-danger"><f:translate key="{ll}sending.status.rejected" /></span></f:then>
+                                        <f:else><span class="badge badge-warning"><f:translate key="{ll}sending.status.failed" /></span></f:else>
+                                    </f:if>
+                                    <f:if condition="{problem.protocol}"><span class="badge badge-default">{f:if(condition: '{problem.protocol} == \'webmention\'', then: 'Webmention', else: 'Pingback')}</span></f:if>
+                                </td>
+                                <td><a href="{problem.target_link}" target="_blank" rel="noreferrer noopener">{problem.target_link}</a></td>
+                                <td>{problem.page_title} [{problem.pid}]</td>
+                                <td>{problem.message}</td>
+                                <td>{problem.attempts}</td>
+                                <td>{problem.tstamp -> f:format.date(format: 'Y-m-d H:i')}</td>
+                            </tr>
+                        </f:for>
+                    </tbody>
+                </table>
+            </div>
+        </f:then>
+        <f:else>
+            <p><f:translate key="{ll}sending.none" /></p>
         </f:else>
     </f:if>
 </f:section>
