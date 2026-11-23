@@ -63,7 +63,7 @@ class PingbackController extends ActionController
     {
         $site = $this->request->getAttribute('site');
         $pageIds = $site instanceof Site
-            ? array_map('intval', $this->pageRepository->getPageIdsRecursive([$site->getRootPageId()], self::SITE_DEPTH))
+            ? array_map(intval(...), $this->pageRepository->getPageIdsRecursive([$site->getRootPageId()], self::SITE_DEPTH))
             : [$this->pageId()];
 
         $this->view->assign('pingbacks', $this->pingbackRepository->findOnPages($pageIds, $this->languageId(), $this->numberOfItems()));

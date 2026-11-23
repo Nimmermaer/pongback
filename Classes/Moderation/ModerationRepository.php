@@ -121,7 +121,7 @@ readonly class ModerationRepository
         for ($depth = 0; $depth < self::MAX_DEPTH && $parents !== []; $depth++) {
             $queryBuilder = $this->connectionPool->getQueryBuilderForTable('pages');
             $queryBuilder->getRestrictions()->removeAll()->add(new DeletedRestriction());
-            $parents = array_map('intval', $queryBuilder
+            $parents = array_map(intval(...), $queryBuilder
                 ->select('uid')
                 ->from('pages')
                 ->where(
