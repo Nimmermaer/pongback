@@ -143,9 +143,7 @@ final class ReceiveWebmentionHandlerTest extends TestCase
                 : throw new SiteNotFoundException('No site', 1732700001),
         );
         $bus = $this->createMock(MessageBusInterface::class);
-        $bus->method('dispatch')->willReturnCallback(function (object $message, array $stamps): Envelope {
-            return $this->queued[] = new Envelope($message, $stamps);
-        });
+        $bus->method('dispatch')->willReturnCallback(fn(object $message, array $stamps): Envelope => $this->queued[] = new Envelope($message, $stamps));
 
         (new ReceiveWebmentionHandler($siteFinder, $this->receiver, new MessageQueue($bus), $logger ?? $this->createMock(LoggerInterface::class)))($message);
     }
