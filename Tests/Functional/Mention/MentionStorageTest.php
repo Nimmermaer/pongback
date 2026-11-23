@@ -48,6 +48,44 @@ final class MentionStorageTest extends AbstractPongbackTestCase
         self::assertSame([2, 1, 1], [(int) $row['pid'], (int) $row['hidden'], (int) $row['sys_language_uid']]);
     }
 
+    #[Test]
+    public function findsUpdatesAndRemovesMentions(): void
+    {
+        $cacheManager = $this->createMock(CacheManager::class);
+        $cacheManager->expects(self::exactly(2))->method('flushCachesInGroupByTags')->with('pages', [Constants::PINGBACK_TABLE]);
+        $storage = $this->storage($cacheManager);
+        $pingback = $this->pingback(hidden: true);
+        $pingback->setProtocol('webmention');
+        $uid = $storage->add($pingback, 0);
+
+        self::assertSame($uid, $storage->find('https://blog.example/post', 'https://main.example/article'));
+        self::assertNull($storage->find('https://blog.example/post', 'https://main.example/other'));
+
+        $storage->update($uid, 'New title', 'New excerpt');
+        $row = $this->row($uid);
+        self::assertSame(['New title', 'New excerpt', 1, 'webmention'], [$row['source_title'], $row['excerpt'], (int) $row['hidden'], $row['protocol']]);
+
+        $storage->remove($uid);
+        self::assertSame(1, (int) $this->row($uid)['deleted']);
+        self::assertNull($storage->find('https://blog.example/post', 'https://main.example/article'));
+        self::assertFalse($storage->exists('https://blog.example/post', 'https://main.example/article'));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function row(int $uid): array
+    {
+        $queryBuilder = $this->get(ConnectionPool::class)->getQueryBuilderForTable(Constants::PINGBACK_TABLE);
+        $queryBuilder->getRestrictions()->removeAll();
+        $row = $queryBuilder->select('*')->from(Constants::PINGBACK_TABLE)
+            ->where($queryBuilder->expr()->eq('uid', $uid))
+            ->executeQuery()->fetchAssociative();
+        self::assertIsArray($row);
+
+        return $row;
+    }
+
     private function storage(CacheManager $cacheManager): MentionStorage
     {
         return new MentionStorage($this->get(ConnectionPool::class), $cacheManager);

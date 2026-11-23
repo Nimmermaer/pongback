@@ -19,9 +19,11 @@ its checklist in sync.
 
 | Path                                   | Responsibility                                            |
 |----------------------------------------|-----------------------------------------------------------|
-| `Classes/Middleware/PingbackDiscoveryMiddleware.php` | `X-Pingback` header and `<link rel="pingback">` |
+| `Classes/Middleware/DiscoveryMiddleware.php` | `X-Pingback` and `Link: rel="webmention"` headers, `<link rel="pingback">` and `<link rel="webmention">` |
 | `Classes/Middleware/PingbackReceiverMiddleware.php`  | Answers POST requests on page type `Constants::PINGBACK_PAGE_TYPE`, before TypoScript rendering |
 | `Classes/Pingback/PingbackEndpoint.php` | XML-RPC `pingback.ping`: parameters, rate limit, fault codes |
+| `Classes/Webmention/`                  | `WebmentionEndpoint` (quick checks, 202 Accepted), `ReceiveWebmentionHandler` (worker: `MentionReceiver::synchronize()` creates, updates or removes) |
+| `Classes/Messaging/MessageQueue.php`   | Always dispatch messages through it: explicit transport, TYPO3 13 would also use the sync `*` route |
 | `Classes/Mention/`                     | Protocol neutral receiving (also for a future Webmention endpoint): `MentionReceiverInterface`, `TargetResolver` (routing + page visibility), `MentionStorage`, `MentionRateLimiter` |
 | `Classes/Mention/Source/`              | Untrusted source handling: `UrlGuard` (SSRF), `SourceFetcher` (limits, redirects, IP pinning), `SourceInspector` (link check, plain text excerpt) |
 | `Classes/XmlRpc/XmlRpcCodec.php`       | XML-RPC parsing/encoding (replaces PECL `ext-xmlrpc`)     |
@@ -29,7 +31,7 @@ its checklist in sync.
 | `Classes/Controller/PingbackController.php` | Frontend plugins (list, latest), cached with the page via the cache tag `tx_pongback_domain_model_pingback` (DataHandler flushes it) |
 | `Classes/Listener/`                    | v13 route enhancer listener |
 | `Classes/Hooks/PageChangeHook.php`     | DataHandler hook: queues `SendPingbacksMessage` once per changed live page and language |
-| `Classes/Sending/`                     | Sending: `SendPingbacksHandler` (Messenger, retries), `PingbackQueue` (always dispatch through it: explicit transport, TYPO3 13 would also use the sync `*` route), `LinkExtractor`, `EndpointDiscovery`, `PingbackClient`, `SentPingbackLog` (table `tx_pongback_sent`) |
+| `Classes/Sending/`                     | Sending: `SendPingbacksHandler` (Messenger, retries), `LinkExtractor`, `EndpointDiscovery`, `PingbackClient`, `SentPingbackLog` (table `tx_pongback_sent`) |
 | `Classes/Html/HtmlDocumentLoader.php`  | Safe HTML parsing shared by receiving and sending |
 | `Classes/Controller/Backend/ModerationController.php` | Module `Web > Pongback`: list per page tree, POST approve/hide/delete |
 | `Classes/Moderation/`                  | `ModerationRepository` (permission aware queries for module and widget), `PingbackModerator` (DataHandler, so permissions, history and caches are handled by TYPO3) |

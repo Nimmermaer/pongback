@@ -33,4 +33,9 @@ final class Constants
      * Must match Configuration/Sets/Pongback/setup.typoscript and Configuration/Sets/Pongback/route-enhancers.yaml.
      */
     public const PINGBACK_PAGE_TYPE = 1709405325110;
+
+    /**
+     * Page type of the Webmention endpoint, see Configuration/Sets/Pongback/route-enhancers.yaml.
+     */
+    public const WEBMENTION_PAGE_TYPE = 1709405325111;
 }

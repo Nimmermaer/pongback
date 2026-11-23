@@ -47,7 +47,7 @@ final class EnhanceSiteConfigurationListenerTest extends TestCase
         $this->createSubject()($event);
 
         self::assertSame(
-            ['pingback.ping' => Constants::PINGBACK_PAGE_TYPE],
+            ['pingback.ping' => Constants::PINGBACK_PAGE_TYPE, 'webmention' => Constants::WEBMENTION_PAGE_TYPE],
             $event->getConfiguration()['routeEnhancers']['PageTypeSuffix']['map'],
         );
         self::assertSame('/', $event->getConfiguration()['base']);
@@ -76,6 +76,7 @@ final class EnhanceSiteConfigurationListenerTest extends TestCase
                 'type' => 'PageType',
                 'map' => [
                     'pingback.ping' => 42,
+                    'webmention' => Constants::WEBMENTION_PAGE_TYPE,
                     'feed.xml' => 9818,
                 ],
                 'default' => '.html',

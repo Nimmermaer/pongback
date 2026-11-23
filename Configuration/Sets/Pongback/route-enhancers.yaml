@@ -9,3 +9,5 @@ routeEnhancers:
     map:
       # Must match Constants::PINGBACK_PAGE_TYPE
       'pingback.ping': 1709405325110
+      # Must match Constants::WEBMENTION_PAGE_TYPE
+      'webmention': 1709405325111

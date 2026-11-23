@@ -19,7 +19,7 @@ use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use Webicorns\Pongback\Configuration\PongbackSettings;
-use Webicorns\Pongback\Sending\PingbackQueue;
+use Webicorns\Pongback\Messaging\MessageQueue;
 use Webicorns\Pongback\Sending\SendPingbacksMessage;
 
 /**
@@ -36,7 +36,7 @@ class PageChangeHook
     private array $pending = [];
 
     public function __construct(
-        private readonly PingbackQueue $queue,
+        private readonly MessageQueue $queue,
         private readonly SiteFinder $siteFinder,
         private readonly LoggerInterface $logger,
     ) {}

@@ -6,6 +6,7 @@ use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 use Webicorns\Pongback\Controller\PingbackController;
 use Webicorns\Pongback\Hooks\PageChangeHook;
 use Webicorns\Pongback\Sending\SendPingbacksMessage;
+use Webicorns\Pongback\Webmention\ReceiveWebmentionMessage;
 
 defined('TYPO3') || die();
 
@@ -34,4 +35,5 @@ defined('TYPO3') || die();
 
     // Sending runs asynchronously: "vendor/bin/typo3 messenger:consume doctrine"
     $GLOBALS['TYPO3_CONF_VARS']['SYS']['messenger']['routing'][SendPingbacksMessage::class] = 'doctrine';
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['messenger']['routing'][ReceiveWebmentionMessage::class] = 'doctrine';
 })('pongback');

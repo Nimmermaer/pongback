@@ -10,7 +10,7 @@ declare(strict_types=1);
  * of the License, or any later version.
  */
 
-namespace Webicorns\Pongback\Tests\Unit\Sending;
+namespace Webicorns\Pongback\Tests\Unit\Messaging;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -19,10 +19,10 @@ use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
-use Webicorns\Pongback\Sending\PingbackQueue;
+use Webicorns\Pongback\Messaging\MessageQueue;
 use Webicorns\Pongback\Sending\SendPingbacksMessage;
 
-final class PingbackQueueTest extends TestCase
+final class MessageQueueTest extends TestCase
 {
     /**
      * @var array<string, mixed>|null
@@ -90,7 +90,7 @@ final class PingbackQueueTest extends TestCase
             },
         );
 
-        $delay === 0 ? (new PingbackQueue($bus))->queue($message) : (new PingbackQueue($bus))->queue($message, $delay);
+        $delay === 0 ? (new MessageQueue($bus))->queue($message) : (new MessageQueue($bus))->queue($message, $delay);
 
         self::assertInstanceOf(Envelope::class, $dispatched);
         return $dispatched;

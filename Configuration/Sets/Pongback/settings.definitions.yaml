@@ -34,7 +34,15 @@ settings:
     type: int
     default: 20
     category: pongback.receive
+  pongback.receive.webmention:
+    type: bool
+    default: true
+    category: pongback.receive
   pongback.send.enabled:
+    type: bool
+    default: true
+    category: pongback.send
+  pongback.send.webmention:
     type: bool
     default: true
     category: pongback.send

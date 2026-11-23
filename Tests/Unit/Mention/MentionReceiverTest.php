@@ -44,7 +44,7 @@ final class MentionReceiverTest extends TestCase
     private const TARGET = 'https://www.target.example/article';
 
     private TargetResolver&MockObject $targetResolver;
-    public SourceFetcher&MockObject $sourceFetcher;
+    private SourceFetcher&MockObject $sourceFetcher;
     private MentionStorage&MockObject $storage;
 
     /**
@@ -205,26 +205,25 @@ final class MentionReceiverTest extends TestCase
     }
 
     /**
-     * @return array<string, array{\Closure(self): void}>
+     * @return array<string, array{FetchedSource|MentionRejected}>
      */
     public static function goneSourceProvider(): array
     {
         return [
-            'deleted (404/410)' => [static fn(self $test) => $test->sourceFetcher->method('fetch')->willThrowException(new MentionRejected(RejectionReason::SourceGone, 'Gone'))],
-            'link removed' => [static fn(self $test) => $test->sourceFetcher->method('fetch')->willReturn(new FetchedSource(self::SOURCE, '<p>No link any more</p>'))],
+            'deleted (404/410)' => [new MentionRejected(RejectionReason::SourceGone, 'Gone')],
+            'link removed' => [new FetchedSource(self::SOURCE, '<p>No link any more</p>')],
         ];
     }
 
-    /**
-     * @param \Closure(self): void $prepareSource
-     */
     #[Test]
     #[DataProvider('goneSourceProvider')]
-    public function synchronizeRemovesKnownMentionsWhoseSourceNoLongerLinks(\Closure $prepareSource): void
+    public function synchronizeRemovesKnownMentionsWhoseSourceNoLongerLinks(FetchedSource|MentionRejected $source): void
     {
         $site = $this->createSite([]);
         $this->targetResolver->method('resolve')->willReturn(new ResolvedTarget($site, 42, 0));
-        $prepareSource($this);
+        $source instanceof MentionRejected
+            ? $this->sourceFetcher->method('fetch')->willThrowException($source)
+            : $this->sourceFetcher->method('fetch')->willReturn($source);
         $this->storage->method('find')->willReturn(5);
         $this->storage->expects(self::once())->method('remove')->with(5);
 
