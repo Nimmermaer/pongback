@@ -50,6 +50,29 @@ Storage and output
 *   XML-RPC requests are parsed without external entities; documents with a
     DOCTYPE declaration are rejected.
 
+..  _security-sending:
+
+Sending
+=======
+
+*   Linked pages and their Pingback endpoints are requested with the same
+    protection as source pages: public hosts and default ports only, every
+    redirect checked, connection pinned to the checked IP address.
+*   The endpoint is called without following redirects.
+
+..  _security-backend:
+
+Backend
+=======
+
+*   Approving, hiding and deleting are POST requests with the token of the
+    backend route and are done by the DataHandler as the logged in user:
+    table, field and page permissions apply.
+*   Module and dashboard widget only show Pingbacks on pages the user may
+    see.
+*   The link in the notification email only opens the module after logging
+    in; it does not change anything by itself.
+
 ..  _security-report:
 
 Report a security issue
