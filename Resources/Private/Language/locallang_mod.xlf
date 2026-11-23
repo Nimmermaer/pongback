@@ -45,6 +45,36 @@
 			<trans-unit id="moderation.delete">
 				<source>Delete</source>
 			</trans-unit>
+			<trans-unit id="sending.title">
+				<source>Sending problems</source>
+			</trans-unit>
+			<trans-unit id="sending.description">
+				<source>Linked pages of this page tree that could not be notified. Temporary problems are retried after 5 minutes and 1 hour, and again when the page is saved.</source>
+			</trans-unit>
+			<trans-unit id="sending.none">
+				<source>All linked pages of this page tree were notified or offer no endpoint.</source>
+			</trans-unit>
+			<trans-unit id="sending.status.rejected">
+				<source>Rejected</source>
+			</trans-unit>
+			<trans-unit id="sending.status.failed">
+				<source>Temporary problem</source>
+			</trans-unit>
+			<trans-unit id="sending.column.target">
+				<source>Linked page</source>
+			</trans-unit>
+			<trans-unit id="sending.column.page">
+				<source>Our page</source>
+			</trans-unit>
+			<trans-unit id="sending.column.message">
+				<source>Answer</source>
+			</trans-unit>
+			<trans-unit id="sending.column.attempts">
+				<source>Attempts</source>
+			</trans-unit>
+			<trans-unit id="sending.column.date">
+				<source>Last attempt</source>
+			</trans-unit>
 			<trans-unit id="moderation.approve.done">
 				<source>The Pingback is approved and shown on the website.</source>
 			</trans-unit>

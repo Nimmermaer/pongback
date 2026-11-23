@@ -203,6 +203,22 @@ Failed
     Pongback tries again after 5 minutes and after 1 hour (3 attempts in
     total). Saving the page again starts a new attempt.
 
+..  _sending-problems:
+
+Sending problems
+================
+
+Linked pages that could not be notified, rejected or failed, are listed in
+the module :guilabel:`Web > Pongback` below the received Pingbacks of the
+selected page tree, with the answer of the linked site and the number of
+attempts. The dashboard widget shows how many there are.
+
+If the site setting `pongback.notification.emailTo` is set, the recipients
+get one email per page when linked pages could not be notified for good:
+
+*   rejected by the linked site (reported once, not again on every save),
+*   still failing after the last attempt.
+
 ..  _sending-disable:
 
 Switch off sending

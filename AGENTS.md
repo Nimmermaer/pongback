@@ -35,7 +35,7 @@ its checklist in sync.
 | `Classes/Html/HtmlDocumentLoader.php`  | Safe HTML parsing shared by receiving and sending |
 | `Classes/Controller/Backend/ModerationController.php` | Module `Web > Pongback`: list per page tree, POST approve/hide/delete |
 | `Classes/Moderation/`                  | `ModerationRepository` (permission aware queries for module and widget), `PingbackModerator` (DataHandler, so permissions, history and caches are handled by TYPO3) |
-| `Classes/Notification/NotifyEditors.php` | Listener of `AfterPingbackCreatedEvent`: email with login redirect link into the module |
+| `Classes/Notification/NotifyEditors.php` | Listener of `AfterPingbackCreatedEvent` and `SendingFailedEvent`: emails with login redirect link into the module |
 | `Classes/Widget/`                      | Dashboard widget and its button, only registered if EXT:dashboard exists (`Configuration/Services.php`) |
 | `Classes/Configuration/PongbackSettings.php` | Typed site settings incl. fallback defaults            |
 | `Configuration/Sets/Pongback/`         | Site set: TypoScript, site settings (`settings.definitions.yaml`), labels |

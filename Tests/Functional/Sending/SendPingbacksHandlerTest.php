@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Webicorns\Pongback\Tests\Functional\Sending;
 
 use PHPUnit\Framework\Attributes\Test;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\NullLogger;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Site\SiteFinder;
@@ -115,6 +116,7 @@ final class SendPingbacksHandlerTest extends AbstractPongbackTestCase
             $this->createMock(WebmentionClient::class),
             $this->get(SentPingbackLog::class),
             $this->get(MessageQueue::class),
+            $this->get(EventDispatcherInterface::class),
             new NullLogger(),
         );
 

@@ -1,0 +1,21 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<f:layout name="SystemEmail" />
+<f:section name="Title"><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.sendingFailed.headline" /></f:section>
+<f:section name="Main">
+    <p><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.sendingFailed.introduction" arguments="{0: pageUrl}" /></p>
+    <ul>
+        <f:for each="{problems}" as="problem">
+            <li>
+                <a href="{problem.target}">{problem.target}</a>
+                <f:if condition="{problem.protocol}">({problem.protocol})</f:if>:
+                <f:if condition="{problem.rejected}">
+                    <f:then><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.sendingFailed.rejected" /></f:then>
+                    <f:else><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.sendingFailed.failed" /></f:else>
+                </f:if>
+                <f:if condition="{problem.message}"><br><small>{problem.message}</small></f:if>
+            </li>
+        </f:for>
+    </ul>
+    <p><a href="{moduleUrl}"><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.sendingFailed.open" /></a></p>
+</f:section>
+</html>

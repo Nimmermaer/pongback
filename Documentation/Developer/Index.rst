@@ -142,6 +142,17 @@ extension is a listener of this event.
         }
     }
 
+..  _developer-event-sending-failed:
+
+React to sending problems
+=========================
+
+:php:`\Webicorns\Pongback\Event\SendingFailedEvent` is dispatched after
+the Pingbacks and Webmentions of a page were sent, if linked pages could not
+be notified for good. It provides the site, the page ID, the page URL and
+the problems (:php:`$problems`: the result per linked URL). The email
+notification of the extension is a listener of this event.
+
 ..  _developer-templates:
 
 Templates
@@ -154,8 +165,9 @@ Plugins
     `Pingback/Latest.html`, both render the partial `List/Item.html`.
 
 Email
-    The email template is `PongbackPingbackReceived` (HTML and text) in
-    :file:`EXT:pongback/Resources/Private/Templates/Email/`. Override it
+    The email templates are `PongbackPingbackReceived` and
+    `PongbackSendingFailed` (HTML and text) in
+    :file:`EXT:pongback/Resources/Private/Templates/Email/`. Override them
     with a template of the same name in a path of
     :php:`$GLOBALS['TYPO3_CONF_VARS']['MAIL']['templateRootPaths']` with a
     higher key than `1732600000`.

@@ -24,6 +24,9 @@ Features
 *   Site settings `pongback.receive.webmention` and
     `pongback.send.webmention`.
 *   Module, dashboard widget and email show the protocol.
+*   Sending problems (rejected, or failed after the last attempt) are listed
+    in the module, counted in the dashboard widget and reported by email,
+    see :ref:`sending-problems`; new event :php:`SendingFailedEvent`.
 
 Changes
 -------

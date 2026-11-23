@@ -33,6 +33,24 @@
 			<trans-unit id="notification.moderate">
 				<source>Open it in the backend</source>
 			</trans-unit>
+			<trans-unit id="notification.sendingFailed.subject">
+				<source>Linked pages could not be notified: %s</source>
+			</trans-unit>
+			<trans-unit id="notification.sendingFailed.headline">
+				<source>Linked pages could not be notified</source>
+			</trans-unit>
+			<trans-unit id="notification.sendingFailed.introduction">
+				<source>Your page %s links to the following pages, but they could not be told about it:</source>
+			</trans-unit>
+			<trans-unit id="notification.sendingFailed.rejected">
+				<source>rejected by the linked site</source>
+			</trans-unit>
+			<trans-unit id="notification.sendingFailed.failed">
+				<source>not reachable, also after 3 attempts; tried again when the page is saved</source>
+			</trans-unit>
+			<trans-unit id="notification.sendingFailed.open">
+				<source>See all sending problems in the backend</source>
+			</trans-unit>
 			<trans-unit id="pagination.label">
 				<source>More Pingbacks</source>
 			</trans-unit>

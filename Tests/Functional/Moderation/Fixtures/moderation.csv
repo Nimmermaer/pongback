@@ -14,3 +14,11 @@
 ,3,4,300,"https://blog.example/subpage","Subpage post","https://main.example/article/subpage",1,0,0,"webmention"
 ,4,11,400,"https://blog.example/other-site","Other site post","https://other.example/article",0,0,0,"pingback"
 ,5,2,500,"https://blog.example/deleted","Deleted post","https://main.example/article",0,1,0,"pingback"
+"tx_pongback_sent"
+,"uid","pid","tstamp","source_link","target_link","protocol","status","message","attempts","deleted"
+,1,2,100,"https://main.example/article","https://down.example/post","webmention","failed","HTTP 503",3,0
+,2,4,200,"https://main.example/article/subpage","https://strict.example/post","pingback","rejected","No link",1,0
+,3,2,300,"https://main.example/article","https://fine.example/post","webmention","sent","HTTP 202",1,0
+,4,11,400,"https://other.example/article","https://other-down.example/post","pingback","failed","Timeout",2,0
+,5,2,500,"https://main.example/article","https://deleted.example/post","pingback","rejected","Gone",1,1
+,6,2,600,"https://main.example/article","https://no-endpoint.example/post","","no_endpoint","",1,0

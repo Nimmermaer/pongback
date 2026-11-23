@@ -61,6 +61,7 @@ final class PongbackWidgetTest extends ModerationTestCase
         self::assertStringNotContainsString('Other site post', $html);
         self::assertStringContainsString('blog.example → Article', $html);
         self::assertStringContainsString('2 Pingbacks are waiting for approval.', $html);
+        self::assertStringContainsString('2 linked pages could not be notified', $html);
         self::assertSame(2, substr_count($html, 'badge-warning'));
         self::assertMatchesRegularExpression('#href="[^"]*/module/web/pongback\?token=[^"]*"[^>]*>\s*Moderate Pingbacks#', $html);
     }

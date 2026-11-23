@@ -37,13 +37,21 @@ final class ModerationControllerTest extends ModerationTestCase
         self::assertMatchesRegularExpression('#Subpage post.*Pending post.*Approved post#s', $html);
         self::assertStringNotContainsString('Other site post', $html);
         self::assertStringNotContainsString('Deleted post', $html);
-        self::assertSame(2, substr_count($html, '>Pingback</span>'));
-        self::assertSame(1, substr_count($html, '>Webmention</span>'));
+        $received = (string) strstr($html, 'id="sending-problems"', true);
+        self::assertSame(2, substr_count($received, '>Pingback</span>'));
+        self::assertSame(1, substr_count($received, '>Webmention</span>'));
         self::assertStringContainsString('<tr class="table-active" id="pingback-3">', $html);
         self::assertSame(2, substr_count($html, 'value="approve"'));
         self::assertSame(1, substr_count($html, 'value="hide"'));
         self::assertSame(3, substr_count($html, 'value="delete"'));
         self::assertMatchesRegularExpression('#<form method="post" action="[^"]*/module/web/pongback/moderate\?token=#', $html);
+
+        preg_match('#<table[^>]*id="sending-problems">(.*?)</table>#s', $html, $sending);
+        self::assertMatchesRegularExpression('#strict\.example.*down\.example#s', $sending[1] ?? '', 'Sending problems of the page tree, newest first');
+        self::assertStringNotContainsString('fine.example', $sending[1] ?? '');
+        self::assertStringNotContainsString('no-endpoint.example', $sending[1] ?? '');
+        self::assertStringContainsString('Temporary problem', $sending[1] ?? '');
+        self::assertStringContainsString('Rejected', $sending[1] ?? '');
     }
 
     #[Test]

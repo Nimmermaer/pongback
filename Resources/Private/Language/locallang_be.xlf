@@ -30,6 +30,9 @@
 			<trans-unit id="widgets.pongback.pending">
 				<source>%d Pingbacks are waiting for approval.</source>
 			</trans-unit>
+			<trans-unit id="widgets.pongback.sendingProblems">
+				<source>%d linked pages could not be notified, see the module Web > Pongback.</source>
+			</trans-unit>
 			<trans-unit id="widgets.pongback.empty">
 				<source>No Pingbacks yet.</source>
 			</trans-unit>

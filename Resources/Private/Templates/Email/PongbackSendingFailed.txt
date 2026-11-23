@@ -1,0 +1,8 @@
+<f:layout name="SystemEmail" />
+<f:comment>Plain text: values are not HTML escaped.</f:comment>
+<f:section name="Title"><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.sendingFailed.headline" /></f:section>
+<f:section name="Main"><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.sendingFailed.introduction" arguments="{0: pageUrl}" />
+<f:for each="{problems}" as="problem">
+- {problem.target -> f:format.raw()}<f:if condition="{problem.protocol}"> ({problem.protocol})</f:if>: <f:if condition="{problem.rejected}"><f:then><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.sendingFailed.rejected" /></f:then><f:else><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.sendingFailed.failed" /></f:else></f:if><f:if condition="{problem.message}"> – {problem.message -> f:format.raw()}</f:if></f:for>
+
+<f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.sendingFailed.open" />: {moduleUrl -> f:format.raw()}</f:section>
