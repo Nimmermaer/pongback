@@ -17,6 +17,7 @@ use Psr\Log\NullLogger;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use Webicorns\Pongback\Messaging\MessageQueue;
+use Webicorns\Pongback\Sending\DiscoveredEndpoint;
 use Webicorns\Pongback\Sending\EndpointDiscovery;
 use Webicorns\Pongback\Sending\LinkExtractor;
 use Webicorns\Pongback\Sending\PageFetcher;
@@ -26,6 +27,7 @@ use Webicorns\Pongback\Sending\PingStatus;
 use Webicorns\Pongback\Sending\SendPingbacksHandler;
 use Webicorns\Pongback\Sending\SendPingbacksMessage;
 use Webicorns\Pongback\Sending\SentPingbackLog;
+use Webicorns\Pongback\Sending\WebmentionClient;
 use Webicorns\Pongback\Tests\Functional\AbstractPongbackTestCase;
 use Webicorns\Pongback\Utility\Constants;
 
@@ -95,7 +97,7 @@ final class SendPingbacksHandlerTest extends AbstractPongbackTestCase
         });
 
         $discovery = $this->createMock(EndpointDiscovery::class);
-        $discovery->method('discover')->willReturn('https://blog.example/xmlrpc.php');
+        $discovery->method('discover')->willReturn(new DiscoveredEndpoint('pingback', 'https://blog.example/xmlrpc.php'));
 
         $client = $this->createMock(PingbackClient::class);
         $client->method('ping')->willReturnCallback(function (string $endpoint, string $source, string $target): PingResult {
@@ -110,6 +112,7 @@ final class SendPingbacksHandlerTest extends AbstractPongbackTestCase
             new LinkExtractor(),
             $discovery,
             $client,
+            $this->createMock(WebmentionClient::class),
             $this->get(SentPingbackLog::class),
             $this->get(MessageQueue::class),
             new NullLogger(),

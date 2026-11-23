@@ -35,13 +35,27 @@ return [
     ],
     'types' => [
         '0' => [
-            'showitem' => 'status, target_link, source_link, endpoint, fault_code, message, attempts',
+            'showitem' => 'status, protocol, target_link, source_link, endpoint, fault_code, message, attempts',
         ],
     ],
     'columns' => [
         'source_link' => $readOnlyInput('source_link'),
         'target_link' => $readOnlyInput('target_link'),
         'endpoint' => $readOnlyInput('endpoint'),
+        'protocol' => [
+            'label' => $ll . '.protocol',
+            'config' => [
+                'type' => 'select',
+                'renderType' => 'selectSingle',
+                'readOnly' => true,
+                'dbFieldLength' => 16,
+                'items' => [
+                    ['label' => '', 'value' => ''],
+                    ['label' => 'Pingback', 'value' => 'pingback'],
+                    ['label' => 'Webmention', 'value' => 'webmention'],
+                ],
+            ],
+        ],
         'status' => [
             'label' => $ll . '.status',
             'config' => [

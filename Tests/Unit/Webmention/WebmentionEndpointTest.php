@@ -17,6 +17,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -42,6 +43,8 @@ final class WebmentionEndpointTest extends TestCase
     private MentionRateLimiter&MockObject $rateLimiter;
     private Site&MockObject $site;
 
+    private ?LoggerInterface $logger = null;
+
     /**
      * @var list<object>
      */
@@ -64,14 +67,57 @@ final class WebmentionEndpointTest extends TestCase
         $this->targetResolver->expects(self::once())->method('resolve')->with(self::TARGET, $this->site)->willReturn(new ResolvedTarget($this->site, 2, 0));
         $this->rateLimiter->expects(self::once())->method('consume')->with('203.0.113.5', 7);
 
-        $response = $this->handle(['source' => ' ' . self::SOURCE . ' ', 'target' => self::TARGET]);
+        $response = $this->handle(['source' => ' ' . self::SOURCE . ' ', 'target' => ' ' . self::TARGET . ' ']);
 
         self::assertSame(202, $response->getStatusCode());
         self::assertSame('text/plain; charset=utf-8', $response->getHeaderLine('Content-Type'));
+        self::assertSame('Accepted, the Webmention will be verified.', (string) $response->getBody());
         self::assertEquals(
-            [new ReceiveWebmentionMessage(self::SOURCE, self::TARGET, 'main', '203.0.113.5', 'Test agent')],
+            [new ReceiveWebmentionMessage(self::SOURCE, self::TARGET, 'main', '203.0.113.5', 'Test agent', 1)],
             $this->queued,
         );
+        self::assertSame(1, $this->queued[0]->attempt);
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function validUrlProvider(): array
+    {
+        return [
+            'http' => ['http://blog.example/post'],
+            'upper case scheme' => ['HTTPS://blog.example/post'],
+            'longest allowed' => ['https://blog.example/' . str_repeat('a', 255 - 21)],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('validUrlProvider')]
+    public function acceptsHttpSources(string $source): void
+    {
+        self::assertSame(202, $this->handle(['source' => $source, 'target' => self::TARGET])->getStatusCode());
+    }
+
+    #[Test]
+    public function shortensTheUserAgent(): void
+    {
+        $this->handle(['source' => self::SOURCE, 'target' => self::TARGET], str_repeat('u', 300));
+
+        self::assertInstanceOf(ReceiveWebmentionMessage::class, $this->queued[0]);
+        self::assertSame(str_repeat('u', 255), $this->queued[0]->userAgent);
+    }
+
+    #[Test]
+    public function logsRejections(): void
+    {
+        $this->logger = $this->createMock(LoggerInterface::class);
+        $this->logger->expects(self::once())->method('info')->with('Webmention rejected', [
+            'reason' => 'invalid_request',
+            'source' => self::SOURCE,
+            'target' => 'nope',
+        ]);
+
+        $this->handle(['source' => self::SOURCE, 'target' => 'nope']);
     }
 
     /**
@@ -88,7 +134,8 @@ final class WebmentionEndpointTest extends TestCase
             'source no URL' => [['source' => 'not a url', 'target' => self::TARGET]],
             'target not http' => [['source' => self::SOURCE, 'target' => 'ftp://main.example/article']],
             'source not http' => [['source' => 'javascript:alert(1)', 'target' => self::TARGET]],
-            'source too long' => [['source' => 'https://blog.example/' . str_repeat('a', 300), 'target' => self::TARGET]],
+            'source too long' => [['source' => 'https://blog.example/' . str_repeat('a', 255 - 20), 'target' => self::TARGET]],
+            'http, but no valid URL' => [['source' => 'http://blog example/post', 'target' => self::TARGET]],
             'same URL' => [['source' => self::TARGET . '#comments', 'target' => self::TARGET]],
         ];
     }
@@ -145,12 +192,12 @@ final class WebmentionEndpointTest extends TestCase
         self::assertSame(202, $this->createSubject()->handle($request, $this->site)->getStatusCode());
     }
 
-    private function handle(mixed $body): ResponseInterface
+    private function handle(mixed $body, string $userAgent = 'Test agent'): ResponseInterface
     {
         $normalizedParams = $this->createMock(NormalizedParams::class);
         $normalizedParams->method('getRemoteAddress')->willReturn('203.0.113.5');
         $request = (new ServerRequest('https://main.example/webmention', 'POST'))
-            ->withHeader('User-Agent', 'Test agent')
+            ->withHeader('User-Agent', $userAgent)
             ->withAttribute('normalizedParams', $normalizedParams);
         if (is_array($body) || $body === null) {
             $request = $request->withParsedBody($body);
@@ -167,6 +214,6 @@ final class WebmentionEndpointTest extends TestCase
             return new Envelope($message);
         });
 
-        return new WebmentionEndpoint($this->targetResolver, $this->rateLimiter, new MessageQueue($bus), new NullLogger());
+        return new WebmentionEndpoint($this->targetResolver, $this->rateLimiter, new MessageQueue($bus), $this->logger ?? new NullLogger());
     }
 }

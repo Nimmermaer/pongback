@@ -15,6 +15,7 @@ namespace Webicorns\Pongback\Sending;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
+use Webicorns\Pongback\Mention\IncomingMention;
 use Webicorns\Pongback\Utility\Constants;
 
 /**
@@ -31,10 +32,53 @@ readonly class SentPingbackLog
      */
     public function isFinal(int $pageId, string $source, string $target): bool
     {
+        return $this->lastResult($pageId, $source, $target)?->status->isFinal() ?? false;
+    }
+
+    public function lastResult(int $pageId, string $source, string $target): ?PingResult
+    {
         $row = $this->find($pageId, $source, $target);
         $status = $row === null ? null : PingStatus::tryFrom((string) $row['status']);
+        if ($row === null || $status === null) {
+            return null;
+        }
 
-        return $status?->isFinal() ?? false;
+        return new PingResult($status, (string) $row['message'], (int) $row['fault_code'], (string) $row['endpoint'], (string) $row['protocol']);
+    }
+
+    /**
+     * Targets this page sent Webmentions to: if the page no longer links to them, they are notified once more.
+     *
+     * @return list<string>
+     */
+    public function webmentionTargets(int $pageId, string $source): array
+    {
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable(Constants::SENT_TABLE);
+        $queryBuilder->getRestrictions()->removeAll()->add(new DeletedRestriction());
+
+        return array_map(strval(...), $queryBuilder
+            ->select('target_link')
+            ->from(Constants::SENT_TABLE)
+            ->where(
+                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pageId, Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('source_link', $queryBuilder->createNamedParameter($source)),
+                $queryBuilder->expr()->eq('protocol', $queryBuilder->createNamedParameter(IncomingMention::PROTOCOL_WEBMENTION)),
+            )
+            ->orderBy('uid')
+            ->executeQuery()
+            ->fetchFirstColumn());
+    }
+
+    /**
+     * The page no longer links to the target and the target was told.
+     */
+    public function forget(int $pageId, string $source, string $target): void
+    {
+        $this->connectionPool->getConnectionForTable(Constants::SENT_TABLE)->delete(
+            Constants::SENT_TABLE,
+            ['pid' => $pageId, 'source_link' => $source, 'target_link' => $target],
+            ['pid' => Connection::PARAM_INT],
+        );
     }
 
     public function record(int $pageId, string $source, string $target, PingResult $result): void
@@ -43,6 +87,7 @@ readonly class SentPingbackLog
         $values = [
             'tstamp' => $now,
             'endpoint' => mb_substr($result->endpoint, 0, 2048),
+            'protocol' => $result->protocol,
             'status' => $result->status->value,
             'fault_code' => $result->faultCode,
             'message' => mb_substr($result->message, 0, 255),
@@ -91,7 +136,7 @@ readonly class SentPingbackLog
         $queryBuilder->getRestrictions()->removeAll()->add(new DeletedRestriction());
 
         $row = $queryBuilder
-            ->select('uid', 'status', 'attempts')
+            ->select('uid', 'status', 'attempts', 'protocol', 'endpoint', 'message', 'fault_code')
             ->from(Constants::SENT_TABLE)
             ->where(
                 $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pageId, Connection::PARAM_INT)),

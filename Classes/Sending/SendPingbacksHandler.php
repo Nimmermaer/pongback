@@ -20,6 +20,7 @@ use TYPO3\CMS\Core\Routing\RouterInterface;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use Webicorns\Pongback\Configuration\PongbackSettings;
+use Webicorns\Pongback\Mention\IncomingMention;
 use Webicorns\Pongback\Mention\MentionRejected;
 use Webicorns\Pongback\Mention\RejectionReason;
 use Webicorns\Pongback\Messaging\MessageQueue;
@@ -44,6 +45,7 @@ readonly class SendPingbacksHandler
         private LinkExtractor $linkExtractor,
         private EndpointDiscovery $endpointDiscovery,
         private PingbackClient $client,
+        private WebmentionClient $webmentionClient,
         private SentPingbackLog $log,
         private MessageQueue $queue,
         private LoggerInterface $logger,
@@ -52,7 +54,8 @@ readonly class SendPingbacksHandler
     public function __invoke(SendPingbacksMessage $message): void
     {
         $site = $this->findSite($message->pageId);
-        if ($site === null || ! PongbackSettings::fromSite($site)->sendEnabled || ! $this->isVisible($message->pageId)) {
+        $settings = PongbackSettings::fromSite($site);
+        if ($site === null || ! $settings->sendEnabled || ! $this->isVisible($message->pageId)) {
             return;
         }
 
@@ -69,14 +72,26 @@ readonly class SendPingbacksHandler
             return;
         }
 
+        $links = $this->linkExtractor->extract($html, $sourceUrl, $this->ownHosts());
+        // Webmention receivers remove a mention when the source no longer links to them, so they are told once more.
+        $removed = $settings->sendWebmention
+            ? array_values(array_diff($this->log->webmentionTargets($message->pageId, $sourceUrl), $links))
+            : [];
+
         $retry = false;
-        foreach ($this->linkExtractor->extract($html, $sourceUrl, $this->ownHosts()) as $target) {
-            if ($this->log->isFinal($message->pageId, $sourceUrl, $target)) {
+        foreach ([...$links, ...$removed] as $target) {
+            if (! $this->needsSending($message, $sourceUrl, $target)) {
                 continue;
             }
 
-            $result = $this->send($sourceUrl, $target);
-            $this->log->record($message->pageId, $sourceUrl, $target, $result);
+            $isRemoved = in_array($target, $removed, true);
+            $result = $this->send($sourceUrl, $target, $settings->sendWebmention, onlyWebmention: $isRemoved);
+            if ($isRemoved && $result->status->isFinal()) {
+                $this->log->forget($message->pageId, $sourceUrl, $target);
+            } else {
+                $this->log->record($message->pageId, $sourceUrl, $target, $result);
+            }
+
             $retry = $retry || ! $result->status->isFinal();
         }
 
@@ -85,10 +100,24 @@ readonly class SendPingbacksHandler
         }
     }
 
-    private function send(string $source, string $target): PingResult
+    /**
+     * Pingbacks are sent once. Webmentions are sent again whenever the page changed, so the receiver
+     * can update the mention. Retries only repeat what failed.
+     */
+    private function needsSending(SendPingbacksMessage $message, string $source, string $target): bool
+    {
+        $last = $this->log->lastResult($message->pageId, $source, $target);
+        if ($last === null || ! $last->status->isFinal()) {
+            return true;
+        }
+
+        return $message->attempt === 1 && $last->protocol === IncomingMention::PROTOCOL_WEBMENTION;
+    }
+
+    private function send(string $source, string $target, bool $webmention, bool $onlyWebmention): PingResult
     {
         try {
-            $endpoint = $this->endpointDiscovery->discover($target);
+            $endpoint = $this->endpointDiscovery->discover($target, $webmention);
         } catch (MentionRejected $rejected) {
             // Network and server problems are temporary, invalid or internal URLs are not.
             $temporary = in_array($rejected->reason, [RejectionReason::UpstreamError, RejectionReason::SourceNotFound], true);
@@ -96,11 +125,15 @@ readonly class SendPingbacksHandler
             return new PingResult($temporary ? PingStatus::Failed : PingStatus::Rejected, $rejected->getMessage());
         }
 
-        if ($endpoint === null) {
+        if ($endpoint === null || ($onlyWebmention && ! $endpoint->isWebmention())) {
             return new PingResult(PingStatus::NoEndpoint);
         }
 
-        return $this->client->ping($endpoint, $source, $target)->withEndpoint($endpoint);
+        $result = $endpoint->isWebmention()
+            ? $this->webmentionClient->send($endpoint->url, $source, $target)
+            : $this->client->ping($endpoint->url, $source, $target);
+
+        return $result->withEndpoint($endpoint);
     }
 
     private function retryLater(SendPingbacksMessage $message): void

@@ -33,6 +33,9 @@
 			<trans-unit id="tx_pongback_domain_model_pingback.excerpt.description">
 				<source>Text around the link in the linking page, plain text.</source>
 			</trans-unit>
+			<trans-unit id="tx_pongback_sent.protocol">
+				<source>Protocol</source>
+			</trans-unit>
 			<trans-unit id="tx_pongback_sent">
 				<source>Sent Pingback</source>
 			</trans-unit>
