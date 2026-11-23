@@ -27,6 +27,7 @@ use Webicorns\Pongback\Mention\IncomingMention;
 use Webicorns\Pongback\Mention\MentionReceiver;
 use Webicorns\Pongback\Mention\MentionRejected;
 use Webicorns\Pongback\Mention\MentionStorage;
+use Webicorns\Pongback\Mention\Protocol;
 use Webicorns\Pongback\Mention\RejectionReason;
 use Webicorns\Pongback\Mention\ResolvedTarget;
 use Webicorns\Pongback\Mention\Source\FetchedSource;
@@ -145,7 +146,7 @@ final class MentionReceiverTest extends TestCase
         self::assertRejected(
             RejectionReason::InvalidRequest,
             fn() => $this->createSubject()->receive(
-                new IncomingMention(self::TARGET . '/', self::TARGET, IncomingMention::PROTOCOL_PINGBACK),
+                new IncomingMention(self::TARGET . '/', self::TARGET, Protocol::Pingback),
                 $this->createSite([]),
             ),
         );
@@ -183,14 +184,14 @@ final class MentionReceiverTest extends TestCase
         $this->prepareValidMention($site);
         $this->storage->method('find')->with(self::SOURCE, self::TARGET)->willReturn(null);
         $this->storage->expects(self::once())->method('add')
-            ->with(self::callback(static fn(Pingback $pingback): bool => $pingback->getProtocol() === IncomingMention::PROTOCOL_WEBMENTION))
+            ->with(self::callback(static fn(Pingback $pingback): bool => $pingback->getProtocol() === Protocol::Webmention))
             ->willReturn(3);
 
         self::assertSame(SyncResult::Created, $this->createSubject()->synchronize($this->webmention(), $site));
         self::assertCount(1, $this->dispatchedEvents, 'Listeners can reject new Webmentions as well');
         self::assertCount(1, $this->createdEvents);
         self::assertSame(3, $this->createdEvents[0]->uid);
-        self::assertSame(IncomingMention::PROTOCOL_WEBMENTION, $this->createdEvents[0]->pingback->getProtocol());
+        self::assertSame(Protocol::Webmention, $this->createdEvents[0]->pingback->getProtocol());
     }
 
     #[Test]
@@ -238,7 +239,7 @@ final class MentionReceiverTest extends TestCase
 
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::once())->method('info')->with('Mention removed', [
-            'protocol' => IncomingMention::PROTOCOL_WEBMENTION,
+            'protocol' => Protocol::Webmention->value,
             'source' => self::SOURCE,
             'target' => self::TARGET,
             'uid' => 5,
@@ -279,14 +280,14 @@ final class MentionReceiverTest extends TestCase
         $this->sourceFetcher->expects(self::never())->method('fetch');
 
         self::assertRejected(RejectionReason::InvalidRequest, fn() => $this->createSubject()->synchronize(
-            new IncomingMention(self::TARGET, self::TARGET, IncomingMention::PROTOCOL_WEBMENTION),
+            new IncomingMention(self::TARGET, self::TARGET, Protocol::Webmention),
             $site,
         ));
     }
 
     private function webmention(): IncomingMention
     {
-        return new IncomingMention(self::SOURCE, self::TARGET, IncomingMention::PROTOCOL_WEBMENTION, '203.0.113.5');
+        return new IncomingMention(self::SOURCE, self::TARGET, Protocol::Webmention, '203.0.113.5');
     }
 
     private function prepareValidMention(Site $site): void
@@ -325,7 +326,7 @@ final class MentionReceiverTest extends TestCase
 
     private function mention(): IncomingMention
     {
-        return new IncomingMention(self::SOURCE, self::TARGET, IncomingMention::PROTOCOL_PINGBACK, '203.0.113.5');
+        return new IncomingMention(self::SOURCE, self::TARGET, Protocol::Pingback, '203.0.113.5');
     }
 
     /**
@@ -351,7 +352,7 @@ final class MentionReceiverTest extends TestCase
 
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::once())->method('info')->with('Mention registered', [
-            'protocol' => IncomingMention::PROTOCOL_PINGBACK,
+            'protocol' => Protocol::Pingback->value,
             'source' => self::SOURCE,
             'target' => self::TARGET,
             'uid' => 9,

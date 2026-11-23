@@ -14,14 +14,12 @@ namespace Webicorns\Pongback\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\StreamInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use TYPO3\CMS\Core\Http\Response;
-use TYPO3\CMS\Core\Http\Stream;
 use TYPO3\CMS\Core\Routing\PageArguments;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use Webicorns\Pongback\Configuration\PongbackSettings;
+use Webicorns\Pongback\Http\TextResponse;
 use Webicorns\Pongback\Pingback\PingbackEndpoint;
 use Webicorns\Pongback\Utility\Constants;
 
@@ -48,21 +46,10 @@ final readonly class PingbackReceiverMiddleware implements MiddlewareInterface
         }
 
         if ($request->getMethod() !== 'POST') {
-            return (new Response(null, 405))
-                ->withHeader('Allow', 'POST')
-                ->withHeader('Content-Type', 'text/plain; charset=utf-8')
-                ->withBody($this->textStream('This is the Pingback XML-RPC endpoint, send a POST request.'));
+            return (new TextResponse('This is the Pingback XML-RPC endpoint, send a POST request.', 405))->withHeader('Allow', 'POST');
         }
 
         return $this->endpoint->handle($request, $site);
     }
 
-    private function textStream(string $text): StreamInterface
-    {
-        $body = new Stream('php://temp', 'rw');
-        $body->write($text);
-        $body->rewind();
-
-        return $body;
-    }
 }

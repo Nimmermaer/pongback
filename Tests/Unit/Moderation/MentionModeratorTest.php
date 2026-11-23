@@ -16,9 +16,9 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
-use Webicorns\Pongback\Moderation\PingbackModerator;
+use Webicorns\Pongback\Moderation\MentionModerator;
 
-final class PingbackModeratorTest extends TestCase
+final class MentionModeratorTest extends TestCase
 {
     /**
      * @return array<string, array{string, array<string, mixed>, array<string, mixed>}>
@@ -28,9 +28,9 @@ final class PingbackModeratorTest extends TestCase
         $table = 'tx_pongback_domain_model_pingback';
 
         return [
-            'approve' => [PingbackModerator::APPROVE, [$table => [7 => ['hidden' => 0]]], []],
-            'hide' => [PingbackModerator::HIDE, [$table => [7 => ['hidden' => 1]]], []],
-            'delete' => [PingbackModerator::DELETE, [], [$table => [7 => ['delete' => 1]]]],
+            'approve' => [MentionModerator::APPROVE, [$table => [7 => ['hidden' => 0]]], []],
+            'hide' => [MentionModerator::HIDE, [$table => [7 => ['hidden' => 1]]], []],
+            'delete' => [MentionModerator::DELETE, [], [$table => [7 => ['delete' => 1]]]],
         ];
     }
 
@@ -65,12 +65,12 @@ final class PingbackModeratorTest extends TestCase
     #[Test]
     public function knowsAllOperations(): void
     {
-        self::assertSame(['approve', 'hide', 'delete'], PingbackModerator::OPERATIONS);
+        self::assertSame(['approve', 'hide', 'delete'], MentionModerator::OPERATIONS);
     }
 
-    private function createSubject(DataHandler $dataHandler): PingbackModerator
+    private function createSubject(DataHandler $dataHandler): MentionModerator
     {
-        return new class ($dataHandler) extends PingbackModerator {
+        return new class ($dataHandler) extends MentionModerator {
             public function __construct(private readonly DataHandler $dataHandler) {}
 
             protected function createDataHandler(): DataHandler

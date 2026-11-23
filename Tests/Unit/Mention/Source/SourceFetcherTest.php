@@ -23,6 +23,7 @@ use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Http\RequestFactory;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Http\Stream;
+use Webicorns\Pongback\Http\OutgoingRequest;
 use Webicorns\Pongback\Mention\RejectionReason;
 use Webicorns\Pongback\Mention\Source\SourceFetcher;
 use Webicorns\Pongback\Mention\Source\UrlGuard;
@@ -52,7 +53,7 @@ final class SourceFetcherTest extends TestCase
         self::assertSame('https://blog.example/post', $result->url);
         self::assertSame('<p>Hello</p>', $result->html);
         self::assertFalse($this->requests[0]['options']['allow_redirects']);
-        self::assertSame(SourceFetcher::TIMEOUT, $this->requests[0]['options']['timeout']);
+        self::assertSame(OutgoingRequest::TIMEOUT, $this->requests[0]['options']['timeout']);
     }
 
     #[Test]
@@ -175,7 +176,7 @@ final class SourceFetcherTest extends TestCase
         self::assertFalse($options['http_errors']);
         self::assertTrue($options['stream']);
         self::assertSame(5, $options['connect_timeout']);
-        self::assertSame(SourceFetcher::TIMEOUT, $options['timeout']);
+        self::assertSame(OutgoingRequest::TIMEOUT, $options['timeout']);
         self::assertSame('text/html,application/xhtml+xml;q=0.9', $options['headers']['Accept']);
         self::assertSame(Constants::USER_AGENT, $options['headers']['User-Agent']);
         self::assertSame([\CURLOPT_RESOLVE => ['blog.example:443:93.184.215.14']], $options['curl']);

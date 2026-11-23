@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace Webicorns\Pongback\Domain\Model;
 
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
+use Webicorns\Pongback\Mention\Protocol;
 
 /**
  * A received mention, stored on the target page (pid). Title and excerpt are plain text, never HTML.
@@ -36,17 +37,14 @@ class Pingback extends AbstractEntity
 
     protected ?\DateTimeImmutable $crdate = null;
 
-    /**
-     * "pingback" or "webmention", see IncomingMention::PROTOCOL_*
-     */
-    protected string $protocol = 'pingback';
+    protected Protocol $protocol = Protocol::Pingback;
 
-    public function getProtocol(): string
+    public function getProtocol(): Protocol
     {
         return $this->protocol;
     }
 
-    public function setProtocol(string $protocol): void
+    public function setProtocol(Protocol $protocol): void
     {
         $this->protocol = $protocol;
     }

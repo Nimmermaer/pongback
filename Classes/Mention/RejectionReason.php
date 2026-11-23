@@ -30,4 +30,12 @@ enum RejectionReason: string
     case AlreadyRegistered = 'already_registered';
     case AccessDenied = 'access_denied';
     case UpstreamError = 'upstream_error';
+
+    /**
+     * Network and server problems may go away, everything else will not change when trying again.
+     */
+    public function isTemporary(): bool
+    {
+        return $this === self::UpstreamError || $this === self::SourceNotFound;
+    }
 }

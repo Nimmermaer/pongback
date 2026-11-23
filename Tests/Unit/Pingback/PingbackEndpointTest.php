@@ -28,6 +28,7 @@ use Webicorns\Pongback\Mention\IncomingMention;
 use Webicorns\Pongback\Mention\MentionRateLimiter;
 use Webicorns\Pongback\Mention\MentionReceiverInterface;
 use Webicorns\Pongback\Mention\MentionRejected;
+use Webicorns\Pongback\Mention\Protocol;
 use Webicorns\Pongback\Mention\RejectionReason;
 use Webicorns\Pongback\Pingback\PingbackEndpoint;
 use Webicorns\Pongback\Tests\Unit\Fixtures\SetSettings;
@@ -53,7 +54,7 @@ final class PingbackEndpointTest extends TestCase
             ->with(
                 self::callback(static fn(IncomingMention $mention): bool => $mention->source === self::SOURCE
                     && $mention->target === self::TARGET
-                    && $mention->protocol === IncomingMention::PROTOCOL_PINGBACK
+                    && $mention->protocol === Protocol::Pingback
                     && $mention->clientIp === '203.0.113.5'
                     && $mention->userAgent === 'WordPress/6.9'),
                 $site,

@@ -20,8 +20,9 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Http\RequestFactory;
+use Webicorns\Pongback\Http\OutgoingRequest;
 use Webicorns\Pongback\Mention\Source\UrlGuard;
-use Webicorns\Pongback\Sending\PingStatus;
+use Webicorns\Pongback\Sending\SendStatus;
 use Webicorns\Pongback\Sending\WebmentionClient;
 use Webicorns\Pongback\Utility\Constants;
 
@@ -41,7 +42,7 @@ final class WebmentionClientTest extends TestCase
     {
         $result = $this->createSubject($this->response(202, 'Accepted'))->send(self::ENDPOINT, self::SOURCE, self::TARGET);
 
-        self::assertSame(PingStatus::Sent, $result->status);
+        self::assertSame(SendStatus::Sent, $result->status);
         self::assertSame('HTTP 202 Accepted', $result->message);
 
         self::assertCount(1, $this->requests);
@@ -53,35 +54,35 @@ final class WebmentionClientTest extends TestCase
         self::assertFalse($options['allow_redirects']);
         self::assertFalse($options['http_errors']);
         self::assertSame(5, $options['connect_timeout']);
-        self::assertSame(WebmentionClient::TIMEOUT, $options['timeout']);
+        self::assertSame(OutgoingRequest::TIMEOUT, $options['timeout']);
         self::assertSame(Constants::USER_AGENT, $options['headers']['User-Agent']);
         self::assertSame([\CURLOPT_RESOLVE => ['blog.example:443:93.184.215.14']], $options['curl']);
     }
 
     /**
-     * @return array<string, array{int, PingStatus}>
+     * @return array<string, array{int, SendStatus}>
      */
     public static function statusProvider(): array
     {
         return [
-            'HTTP 200' => [200, PingStatus::Sent],
-            'HTTP 201 created' => [201, PingStatus::Sent],
-            'HTTP 299' => [299, PingStatus::Sent],
-            'HTTP 300' => [300, PingStatus::Failed],
-            'HTTP 301 redirect' => [301, PingStatus::Failed],
-            'HTTP 199' => [199, PingStatus::Failed],
-            'HTTP 400 bad request' => [400, PingStatus::Rejected],
-            'HTTP 404' => [404, PingStatus::Rejected],
-            'HTTP 499' => [499, PingStatus::Rejected],
-            'HTTP 429 too many requests' => [429, PingStatus::Failed],
-            'HTTP 500' => [500, PingStatus::Failed],
-            'HTTP 503' => [503, PingStatus::Failed],
+            'HTTP 200' => [200, SendStatus::Sent],
+            'HTTP 201 created' => [201, SendStatus::Sent],
+            'HTTP 299' => [299, SendStatus::Sent],
+            'HTTP 300' => [300, SendStatus::Failed],
+            'HTTP 301 redirect' => [301, SendStatus::Failed],
+            'HTTP 199' => [199, SendStatus::Failed],
+            'HTTP 400 bad request' => [400, SendStatus::Rejected],
+            'HTTP 404' => [404, SendStatus::Rejected],
+            'HTTP 499' => [499, SendStatus::Rejected],
+            'HTTP 429 too many requests' => [429, SendStatus::Failed],
+            'HTTP 500' => [500, SendStatus::Failed],
+            'HTTP 503' => [503, SendStatus::Failed],
         ];
     }
 
     #[Test]
     #[DataProvider('statusProvider')]
-    public function mapsHttpStatusCodes(int $httpStatus, PingStatus $expected): void
+    public function mapsHttpStatusCodes(int $httpStatus, SendStatus $expected): void
     {
         self::assertSame($expected, $this->createSubject($this->response($httpStatus, ''))->send(self::ENDPOINT, self::SOURCE, self::TARGET)->status);
     }
@@ -100,7 +101,7 @@ final class WebmentionClientTest extends TestCase
     {
         $result = $this->createSubject()->send('https://intranet.example/webmention', self::SOURCE, self::TARGET);
 
-        self::assertSame(PingStatus::Rejected, $result->status);
+        self::assertSame(SendStatus::Rejected, $result->status);
         self::assertMatchesRegularExpression('/^Endpoint not allowed: \S/', $result->message);
         self::assertSame([], $this->requests);
     }
@@ -111,7 +112,7 @@ final class WebmentionClientTest extends TestCase
         $result = $this->createSubject(new ConnectException('Connection refused', new Request('POST', self::ENDPOINT)))
             ->send(self::ENDPOINT, self::SOURCE, self::TARGET);
 
-        self::assertSame(PingStatus::Failed, $result->status);
+        self::assertSame(SendStatus::Failed, $result->status);
         self::assertSame('Endpoint not reachable: Connection refused', $result->message);
     }
 

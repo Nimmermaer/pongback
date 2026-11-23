@@ -6,6 +6,30 @@
 Changelog
 =========
 
+..  _changelog-next:
+
+Upcoming
+========
+
+Fixes
+-----
+
+*   Links and endpoints longer than 255 characters are notified (up to 2048
+    characters, as stored). Before, they were rejected as "too long".
+*   Messages about rejected URLs say "The URL …" instead of "The source URI
+    …", as they also concern linked pages and endpoints when sending.
+
+Changes
+-------
+
+*   Setting values and defaults come only from
+    :file:`Configuration/Sets/Pongback/settings.definitions.yaml`. The
+    constant :php:`PongbackSettings::DEFAULTS` is removed.
+*   Internal classes are renamed now that they cover Pingback and
+    Webmention: :php:`SendMentionsHandler`, :php:`SentMentionLog`,
+    :php:`SendResult`, :php:`SendStatus`, :php:`MentionModerator`. The message
+    classes keep their names, queued messages stay readable.
+
 ..  _changelog-upcoming:
 ..  _changelog-0-10-0:
 

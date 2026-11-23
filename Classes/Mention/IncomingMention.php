@@ -19,13 +19,10 @@ namespace Webicorns\Pongback\Mention;
  */
 final readonly class IncomingMention
 {
-    public const PROTOCOL_PINGBACK = 'pingback';
-    public const PROTOCOL_WEBMENTION = 'webmention';
-
     public function __construct(
         public string $source,
         public string $target,
-        public string $protocol,
+        public Protocol $protocol,
         public string $clientIp = '',
         public string $userAgent = '',
     ) {}

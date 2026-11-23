@@ -20,9 +20,9 @@ use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use TYPO3\CMS\Core\Http\RequestFactory;
+use Webicorns\Pongback\Http\OutgoingRequest;
 use Webicorns\Pongback\Mention\MentionRejected;
 use Webicorns\Pongback\Mention\RejectionReason;
-use Webicorns\Pongback\Utility\Constants;
 
 /**
  * Downloads the HTML of a mention source with strict limits.
@@ -34,7 +34,6 @@ readonly class SourceFetcher
 {
     public const MAX_BYTES = 1048576;
     public const MAX_REDIRECTS = 3;
-    public const TIMEOUT = 10;
 
     public function __construct(
         private RequestFactory $requestFactory,
@@ -65,7 +64,7 @@ readonly class SourceFetcher
             );
         }
 
-        throw new MentionRejected(RejectionReason::UpstreamError, 'The source URI redirects too often.');
+        throw new MentionRejected(RejectionReason::UpstreamError, 'The URL redirects too often.');
     }
 
     private function send(string $url): ResponseInterface
@@ -75,9 +74,9 @@ readonly class SourceFetcher
         try {
             return $this->requestFactory->request($url, 'GET', $this->buildOptions($address));
         } catch (ConnectException $exception) {
-            throw new MentionRejected(RejectionReason::SourceNotFound, 'The source URI could not be reached.', $exception);
+            throw new MentionRejected(RejectionReason::SourceNotFound, 'The URL could not be reached.', $exception);
         } catch (GuzzleException $exception) {
-            throw new MentionRejected(RejectionReason::UpstreamError, 'The source URI could not be retrieved.', $exception);
+            throw new MentionRejected(RejectionReason::UpstreamError, 'The URL could not be retrieved.', $exception);
         }
     }
 
@@ -95,16 +94,16 @@ readonly class SourceFetcher
     {
         $status = $response->getStatusCode();
         if ($status === 404 || $status === 410) {
-            throw new MentionRejected(RejectionReason::SourceGone, 'The source URI does not exist.');
+            throw new MentionRejected(RejectionReason::SourceGone, 'The URL does not exist.');
         }
 
         if ($status < 200 || $status >= 300) {
-            throw new MentionRejected(RejectionReason::UpstreamError, sprintf('The source URI responded with HTTP %d.', $status));
+            throw new MentionRejected(RejectionReason::UpstreamError, sprintf('The URL responded with HTTP %d.', $status));
         }
 
         $contentType = strtolower($response->getHeaderLine('Content-Type'));
         if ($contentType !== '' && ! str_contains($contentType, 'html')) {
-            throw new MentionRejected(RejectionReason::NoLinkToTarget, 'The source URI is no HTML document.');
+            throw new MentionRejected(RejectionReason::NoLinkToTarget, 'The URL is no HTML document.');
         }
     }
 
@@ -113,19 +112,10 @@ readonly class SourceFetcher
      */
     private function buildOptions(CheckedAddress $address): array
     {
-        $options = [
-            RequestOptions::ALLOW_REDIRECTS => false,
-            RequestOptions::CONNECT_TIMEOUT => 5,
-            RequestOptions::TIMEOUT => self::TIMEOUT,
-            RequestOptions::HTTP_ERRORS => false,
+        return OutgoingRequest::options([
             RequestOptions::STREAM => true,
-            RequestOptions::HEADERS => [
-                'Accept' => 'text/html,application/xhtml+xml;q=0.9',
-                'User-Agent' => Constants::USER_AGENT,
-            ],
-        ];
-
-        return $options + $address->pinningRequestOptions();
+            RequestOptions::HEADERS => ['Accept' => 'text/html,application/xhtml+xml;q=0.9'],
+        ], $address);
     }
 
     private function readLimited(StreamInterface $body): string

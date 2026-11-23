@@ -17,8 +17,10 @@ services:
       - '../Classes/Mention/Source/SourceDocument.php'
       - '../Classes/XmlRpc/MethodCall.php'
       - '../Classes/XmlRpc/MethodResponse.php'
-      - '../Classes/Sending/PingResult.php'
+      - '../Classes/Sending/SendResult.php'
       - '../Classes/Sending/SendPingbacksMessage.php'
+      - '../Classes/Sending/SourcePage.php'
+      - '../Classes/Sending/DiscoveredEndpoint.php'
       - '../Classes/Webmention/ReceiveWebmentionMessage.php'
       - '../Classes/Mention/SyncResult.php'
       # EXT:dashboard is optional, the widget is registered in Services.php if available

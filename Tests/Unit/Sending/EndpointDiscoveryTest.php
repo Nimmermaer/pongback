@@ -16,6 +16,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Webicorns\Pongback\Mention\MentionRejected;
+use Webicorns\Pongback\Mention\Protocol;
 use Webicorns\Pongback\Mention\RejectionReason;
 use Webicorns\Pongback\Mention\Source\FetchedSource;
 use Webicorns\Pongback\Mention\Source\SourceFetcher;
@@ -36,7 +37,7 @@ final class EndpointDiscoveryTest extends TestCase
     {
         $page = new FetchedSource(self::TARGET, '<link rel="pingback" href="https://blog.example/link-endpoint">', 'https://blog.example/xmlrpc.php');
 
-        self::assertEquals(new DiscoveredEndpoint('pingback', 'https://blog.example/xmlrpc.php'), $this->discover($page));
+        self::assertEquals(new DiscoveredEndpoint(Protocol::Pingback, 'https://blog.example/xmlrpc.php'), $this->discover($page));
     }
 
     /**
@@ -67,7 +68,7 @@ final class EndpointDiscoveryTest extends TestCase
     {
         $endpoint = $this->discover(new FetchedSource(self::FINAL_URL, $html));
 
-        self::assertEquals($expected === null ? null : new DiscoveredEndpoint('pingback', $expected), $endpoint);
+        self::assertEquals($expected === null ? null : new DiscoveredEndpoint(Protocol::Pingback, $expected), $endpoint);
     }
 
     /**
@@ -107,7 +108,7 @@ final class EndpointDiscoveryTest extends TestCase
     {
         $endpoint = $this->discover(new FetchedSource(self::FINAL_URL, $html, '', $linkHeaders));
 
-        self::assertEquals($expected === null ? null : new DiscoveredEndpoint('webmention', $expected), $endpoint);
+        self::assertEquals($expected === null ? null : new DiscoveredEndpoint(Protocol::Webmention, $expected), $endpoint);
     }
 
     #[Test]
@@ -115,7 +116,7 @@ final class EndpointDiscoveryTest extends TestCase
     {
         $page = new FetchedSource(self::FINAL_URL, '<link rel="webmention" href="mailto:x@blog.example"><link rel="pingback" href="/xmlrpc.php">');
 
-        self::assertEquals(new DiscoveredEndpoint('pingback', 'https://www.blog.example/xmlrpc.php'), $this->discover($page));
+        self::assertEquals(new DiscoveredEndpoint(Protocol::Pingback, 'https://www.blog.example/xmlrpc.php'), $this->discover($page));
     }
 
     #[Test]
@@ -123,15 +124,15 @@ final class EndpointDiscoveryTest extends TestCase
     {
         $page = new FetchedSource(self::FINAL_URL, '<link rel="webmention" href="/webmention">', 'https://blog.example/xmlrpc.php', ['</webmention>; rel="webmention"']);
 
-        self::assertEquals(new DiscoveredEndpoint('pingback', 'https://blog.example/xmlrpc.php'), $this->discover($page, false));
+        self::assertEquals(new DiscoveredEndpoint(Protocol::Pingback, 'https://blog.example/xmlrpc.php'), $this->discover($page, false));
         self::assertNull($this->discover(new FetchedSource(self::FINAL_URL, '<link rel="webmention" href="/webmention">'), false));
     }
 
     #[Test]
     public function knowsWebmentionEndpoints(): void
     {
-        self::assertTrue((new DiscoveredEndpoint('webmention', 'https://blog.example/'))->isWebmention());
-        self::assertFalse((new DiscoveredEndpoint('pingback', 'https://blog.example/'))->isWebmention());
+        self::assertTrue((new DiscoveredEndpoint(Protocol::Webmention, 'https://blog.example/'))->isWebmention());
+        self::assertFalse((new DiscoveredEndpoint(Protocol::Pingback, 'https://blog.example/'))->isWebmention());
     }
 
     #[Test]
@@ -150,7 +151,7 @@ final class EndpointDiscoveryTest extends TestCase
         $fetcher = $this->createMock(SourceFetcher::class);
         $fetcher->method('fetch')->willReturn(new FetchedSource(self::FINAL_URL, '<link rel="webmention" href="/wm">', 'https://blog.example/xmlrpc.php'));
 
-        self::assertEquals(new DiscoveredEndpoint('webmention', 'https://www.blog.example/wm'), (new EndpointDiscovery($fetcher))->discover(self::TARGET));
+        self::assertEquals(new DiscoveredEndpoint(Protocol::Webmention, 'https://www.blog.example/wm'), (new EndpointDiscovery($fetcher))->discover(self::TARGET));
     }
 
     private function discover(FetchedSource $page, bool $webmention = true): ?DiscoveredEndpoint

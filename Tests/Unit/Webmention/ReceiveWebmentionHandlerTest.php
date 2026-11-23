@@ -27,6 +27,7 @@ use TYPO3\CMS\Core\Site\SiteFinder;
 use Webicorns\Pongback\Mention\IncomingMention;
 use Webicorns\Pongback\Mention\MentionReceiverInterface;
 use Webicorns\Pongback\Mention\MentionRejected;
+use Webicorns\Pongback\Mention\Protocol;
 use Webicorns\Pongback\Mention\RejectionReason;
 use Webicorns\Pongback\Mention\SyncResult;
 use Webicorns\Pongback\Messaging\MessageQueue;
@@ -61,7 +62,7 @@ final class ReceiveWebmentionHandlerTest extends TestCase
     {
         $this->receiver->expects(self::once())->method('synchronize')
             ->with(
-                new IncomingMention('https://blog.example/post', 'https://main.example/article', IncomingMention::PROTOCOL_WEBMENTION, '203.0.113.5', 'Agent'),
+                new IncomingMention('https://blog.example/post', 'https://main.example/article', Protocol::Webmention, '203.0.113.5', 'Agent'),
                 $this->site,
             )
             ->willReturn(SyncResult::Created);
@@ -96,7 +97,7 @@ final class ReceiveWebmentionHandlerTest extends TestCase
         return [
             'server error: again in 5 minutes' => [RejectionReason::UpstreamError, 1, 300_000],
             'unreachable: again in 1 hour' => [RejectionReason::SourceNotFound, 2, 3_600_000],
-            'last attempt' => [RejectionReason::UpstreamError, ReceiveWebmentionHandler::MAX_ATTEMPTS, null],
+            'last attempt' => [RejectionReason::UpstreamError, MessageQueue::MAX_ATTEMPTS, null],
             'no link: final' => [RejectionReason::NoLinkToTarget, 1, null],
             'gone: final' => [RejectionReason::SourceGone, 1, null],
             'rejected by a listener: final' => [RejectionReason::AccessDenied, 1, null],

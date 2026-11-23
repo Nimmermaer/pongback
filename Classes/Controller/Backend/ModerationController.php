@@ -27,8 +27,8 @@ use TYPO3\CMS\Core\Pagination\ArrayPaginator;
 use TYPO3\CMS\Core\Pagination\SlidingWindowPagination;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
+use Webicorns\Pongback\Moderation\MentionModerator;
 use Webicorns\Pongback\Moderation\ModerationRepository;
-use Webicorns\Pongback\Moderation\PingbackModerator;
 
 /**
  * Module "Web > Pongback": the Pingbacks of the selected page and its subpages.
@@ -45,7 +45,7 @@ final readonly class ModerationController
         private ModuleTemplateFactory $moduleTemplateFactory,
         private UriBuilder $uriBuilder,
         private ModerationRepository $repository,
-        private PingbackModerator $moderator,
+        private MentionModerator $moderator,
         private FlashMessageService $flashMessageService,
     ) {}
 
@@ -86,7 +86,7 @@ final readonly class ModerationController
         $operation = (string) ($body['operation'] ?? '');
         $uid = (int) ($body['pingback'] ?? 0);
 
-        if ($uid > 0 && in_array($operation, PingbackModerator::OPERATIONS, true)) {
+        if ($uid > 0 && in_array($operation, MentionModerator::OPERATIONS, true)) {
             $errors = $this->moderator->moderate($operation, $uid);
             $this->addFlashMessage(
                 $errors === [] ? $this->getLanguageService()->sL(self::LABELS . 'moderation.' . $operation . '.done') : implode("\n", $errors),

@@ -15,8 +15,8 @@ namespace Webicorns\Pongback\Sending;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use TYPO3\CMS\Core\Http\RequestFactory;
+use Webicorns\Pongback\Http\OutgoingRequest;
 use Webicorns\Pongback\Mention\Source\SourceFetcher;
-use Webicorns\Pongback\Utility\Constants;
 
 /**
  * Downloads a page of the own installation as anonymous visitors see it.
@@ -36,16 +36,11 @@ readonly class PageFetcher
     public function fetch(string $url): string
     {
         try {
-            $response = $this->requestFactory->request($url, 'GET', [
+            // Our own site: redirects are fine, and it may run on an internal address (no UrlGuard).
+            $response = $this->requestFactory->request($url, 'GET', OutgoingRequest::options([
                 RequestOptions::ALLOW_REDIRECTS => ['max' => 3],
-                RequestOptions::CONNECT_TIMEOUT => 5,
-                RequestOptions::TIMEOUT => SourceFetcher::TIMEOUT,
-                RequestOptions::HTTP_ERRORS => false,
-                RequestOptions::HEADERS => [
-                    'Accept' => 'text/html',
-                    'User-Agent' => Constants::USER_AGENT,
-                ],
-            ]);
+                RequestOptions::HEADERS => ['Accept' => 'text/html'],
+            ]));
         } catch (GuzzleException $exception) {
             throw new \RuntimeException('Page ' . $url . ' could not be retrieved: ' . $exception->getMessage(), 1732500100, $exception);
         }

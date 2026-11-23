@@ -22,7 +22,7 @@ use Webicorns\Pongback\Utility\Constants;
  * The DataHandler checks the permissions (table, page), writes the history and
  * flushes the caches of all pages showing Pingbacks.
  */
-class PingbackModerator
+class MentionModerator
 {
     public const APPROVE = 'approve';
     public const HIDE = 'hide';

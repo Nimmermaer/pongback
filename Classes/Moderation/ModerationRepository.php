@@ -19,7 +19,8 @@ use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\QueryHelper;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
-use Webicorns\Pongback\Sending\PingStatus;
+use Webicorns\Pongback\Mention\Protocol;
+use Webicorns\Pongback\Sending\SendStatus;
 use Webicorns\Pongback\Utility\Constants;
 
 /**
@@ -54,7 +55,7 @@ readonly class ModerationRepository
             ->addOrderBy('pingback.crdate', 'DESC')
             ->addOrderBy('pingback.uid', 'DESC');
 
-        return $queryBuilder->executeQuery()->fetchAllAssociative();
+        return self::withProtocolLabels($queryBuilder->executeQuery()->fetchAllAssociative());
     }
 
     /**
@@ -64,12 +65,12 @@ readonly class ModerationRepository
      */
     public function findLatest(int $limit, BackendUserAuthentication $user): array
     {
-        return $this->createQueryBuilder($user)
+        return self::withProtocolLabels($this->createQueryBuilder($user)
             ->orderBy('pingback.crdate', 'DESC')
             ->addOrderBy('pingback.uid', 'DESC')
             ->setMaxResults($limit)
             ->executeQuery()
-            ->fetchAllAssociative();
+            ->fetchAllAssociative());
     }
 
     public function countPending(BackendUserAuthentication $user): int
@@ -100,7 +101,7 @@ readonly class ModerationRepository
             ->orderBy('sent.tstamp', 'DESC')
             ->addOrderBy('sent.uid', 'DESC');
 
-        return $queryBuilder->executeQuery()->fetchAllAssociative();
+        return self::withProtocolLabels($queryBuilder->executeQuery()->fetchAllAssociative());
     }
 
     public function countSendingProblems(BackendUserAuthentication $user): int
@@ -131,7 +132,7 @@ readonly class ModerationRepository
             ->from(Constants::SENT_TABLE, 'sent')
             ->where($queryBuilder->expr()->in(
                 'sent.status',
-                $queryBuilder->createNamedParameter([PingStatus::Rejected->value, PingStatus::Failed->value], Connection::PARAM_STR_ARRAY),
+                $queryBuilder->createNamedParameter([SendStatus::Rejected->value, SendStatus::Failed->value], Connection::PARAM_STR_ARRAY),
             ));
         $this->restrictToVisiblePages($queryBuilder, 'sent', $user);
 
@@ -159,6 +160,20 @@ readonly class ModerationRepository
         $this->restrictToVisiblePages($queryBuilder, 'pingback', $user);
 
         return $queryBuilder;
+    }
+
+    /**
+     * Adds "protocol_label" for display; empty if no endpoint was found when sending.
+     *
+     * @param list<array<string, mixed>> $rows
+     * @return list<array<string, mixed>>
+     */
+    private static function withProtocolLabels(array $rows): array
+    {
+        return array_map(static function (array $row): array {
+            $row['protocol_label'] = Protocol::tryFrom((string) ($row['protocol'] ?? ''))?->label() ?? '';
+            return $row;
+        }, $rows);
     }
 
     /**

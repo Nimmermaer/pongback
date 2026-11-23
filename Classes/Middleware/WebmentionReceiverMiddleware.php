@@ -16,11 +16,10 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use TYPO3\CMS\Core\Http\Response;
-use TYPO3\CMS\Core\Http\Stream;
 use TYPO3\CMS\Core\Routing\PageArguments;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use Webicorns\Pongback\Configuration\PongbackSettings;
+use Webicorns\Pongback\Http\TextResponse;
 use Webicorns\Pongback\Utility\Constants;
 use Webicorns\Pongback\Webmention\WebmentionEndpoint;
 
@@ -47,13 +46,7 @@ final readonly class WebmentionReceiverMiddleware implements MiddlewareInterface
         }
 
         if ($request->getMethod() !== 'POST') {
-            $body = new Stream('php://temp', 'rw');
-            $body->write('This is the Webmention endpoint, send a POST request with "source" and "target".');
-            $body->rewind();
-
-            return (new Response($body, 405))
-                ->withHeader('Allow', 'POST')
-                ->withHeader('Content-Type', 'text/plain; charset=utf-8');
+            return (new TextResponse('This is the Webmention endpoint, send a POST request with "source" and "target".', 405))->withHeader('Allow', 'POST');
         }
 
         return $this->endpoint->handle($request, $site);
