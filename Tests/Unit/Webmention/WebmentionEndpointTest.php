@@ -24,13 +24,13 @@ use Symfony\Component\Messenger\MessageBusInterface;
 use TYPO3\CMS\Core\Http\NormalizedParams;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Site\Entity\Site;
-use TYPO3\CMS\Core\Site\Entity\SiteSettings;
 use Webicorns\Pongback\Mention\MentionRateLimiter;
 use Webicorns\Pongback\Mention\MentionRejected;
 use Webicorns\Pongback\Mention\RejectionReason;
 use Webicorns\Pongback\Mention\ResolvedTarget;
 use Webicorns\Pongback\Mention\TargetResolver;
 use Webicorns\Pongback\Messaging\MessageQueue;
+use Webicorns\Pongback\Tests\Unit\Fixtures\SetSettings;
 use Webicorns\Pongback\Webmention\ReceiveWebmentionMessage;
 use Webicorns\Pongback\Webmention\WebmentionEndpoint;
 
@@ -54,7 +54,7 @@ final class WebmentionEndpointTest extends TestCase
     {
         $this->site = $this->createMock(Site::class);
         $this->site->method('getIdentifier')->willReturn('main');
-        $this->site->method('getSettings')->willReturn(SiteSettings::createFromSettingsTree(['pongback' => ['receive' => ['rateLimit' => 7]]]));
+        $this->site->method('getSettings')->willReturn(SetSettings::create(['pongback.receive.rateLimit' => 7]));
         $this->targetResolver = $this->createMock(TargetResolver::class);
         $this->targetResolver->method('resolve')->willReturn(new ResolvedTarget($this->site, 2, 0));
         $this->rateLimiter = $this->createMock(MentionRateLimiter::class);

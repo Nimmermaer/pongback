@@ -26,12 +26,9 @@ use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Routing\RouterInterface;
-use TYPO3\CMS\Core\Settings\Settings;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
-use TYPO3\CMS\Core\Site\Entity\SiteSettings;
 use TYPO3\CMS\Core\Site\SiteFinder;
-use Webicorns\Pongback\Configuration\PongbackSettings;
 use Webicorns\Pongback\Event\SendingFailedEvent;
 use Webicorns\Pongback\Mention\MentionRejected;
 use Webicorns\Pongback\Mention\RejectionReason;
@@ -47,6 +44,7 @@ use Webicorns\Pongback\Sending\SendPingbacksHandler;
 use Webicorns\Pongback\Sending\SendPingbacksMessage;
 use Webicorns\Pongback\Sending\SentPingbackLog;
 use Webicorns\Pongback\Sending\WebmentionClient;
+use Webicorns\Pongback\Tests\Unit\Fixtures\SetSettings;
 
 final class SendPingbacksHandlerTest extends TestCase
 {
@@ -71,11 +69,11 @@ final class SendPingbacksHandlerTest extends TestCase
     private RouterInterface&MockObject $router;
 
     /**
-     * Flat site settings, as provided by the set.
+     * Overrides of the defaults of the set (flat identifiers).
      *
      * @var array<string, mixed>
      */
-    private array $settings = PongbackSettings::DEFAULTS;
+    private array $settings = [];
 
     /**
      * @var array<string, mixed>
@@ -585,7 +583,7 @@ final class SendPingbacksHandlerTest extends TestCase
             $languageBases,
             array_keys($languageBases),
         ));
-        $site->method('getSettings')->willReturn(SiteSettings::create(new Settings($this->settings)));
+        $site->method('getSettings')->willReturn(SetSettings::create($this->settings));
         if ($router !== null) {
             $site->method('getRouter')->willReturn($router);
         }

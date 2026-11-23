@@ -24,13 +24,13 @@ use TYPO3\CMS\Core\Http\NormalizedParams;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Http\Stream;
 use TYPO3\CMS\Core\Site\Entity\Site;
-use TYPO3\CMS\Core\Site\Entity\SiteSettings;
 use Webicorns\Pongback\Mention\IncomingMention;
 use Webicorns\Pongback\Mention\MentionRateLimiter;
 use Webicorns\Pongback\Mention\MentionReceiverInterface;
 use Webicorns\Pongback\Mention\MentionRejected;
 use Webicorns\Pongback\Mention\RejectionReason;
 use Webicorns\Pongback\Pingback\PingbackEndpoint;
+use Webicorns\Pongback\Tests\Unit\Fixtures\SetSettings;
 use Webicorns\Pongback\XmlRpc\XmlRpcCodec;
 
 final class PingbackEndpointTest extends TestCase
@@ -137,7 +137,7 @@ final class PingbackEndpointTest extends TestCase
     #[Test]
     public function limitsPingbacksPerClient(): void
     {
-        $site = $this->createSite(['pongback' => ['receive' => ['rateLimit' => 2]]]);
+        $site = $this->createSite(['pongback.receive.rateLimit' => 2]);
         $this->receiver->expects(self::exactly(2))->method('receive')->willReturn(1);
         $subject = $this->createSubject();
 
@@ -203,13 +203,13 @@ final class PingbackEndpointTest extends TestCase
     }
 
     /**
-     * @param array<string, mixed> $settingsTree
+     * @param array<string, mixed> $overrides flat setting identifiers
      */
-    private function createSite(array $settingsTree): Site&MockObject
+    private function createSite(array $overrides): Site&MockObject
     {
         $site = $this->createMock(Site::class);
         $site->method('getIdentifier')->willReturn('main');
-        $site->method('getSettings')->willReturn(SiteSettings::createFromSettingsTree($settingsTree));
+        $site->method('getSettings')->willReturn(SetSettings::create($overrides));
 
         return $site;
     }

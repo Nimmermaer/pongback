@@ -20,7 +20,6 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use TYPO3\CMS\Core\Site\Entity\Site;
-use TYPO3\CMS\Core\Site\Entity\SiteSettings;
 use Webicorns\Pongback\Domain\Model\Pingback;
 use Webicorns\Pongback\Event\AfterPingbackCreatedEvent;
 use Webicorns\Pongback\Event\BeforePingbackCreateEvent;
@@ -36,6 +35,7 @@ use Webicorns\Pongback\Mention\Source\SourceInspector;
 use Webicorns\Pongback\Mention\SyncResult;
 use Webicorns\Pongback\Mention\TargetResolver;
 use Webicorns\Pongback\Tests\Unit\Fixtures\AssertRejectionTrait;
+use Webicorns\Pongback\Tests\Unit\Fixtures\SetSettings;
 
 final class MentionReceiverTest extends TestCase
 {
@@ -105,7 +105,7 @@ final class MentionReceiverTest extends TestCase
     #[Test]
     public function publishesImmediatelyIfConfiguredForTheSite(): void
     {
-        $site = $this->createSite(['pongback' => ['receive' => ['autoPublish' => true]]]);
+        $site = $this->createSite(['pongback.receive.autoPublish' => true]);
         $this->prepareValidMention($site);
 
         $this->storage->expects(self::once())->method('add')
@@ -165,7 +165,7 @@ final class MentionReceiverTest extends TestCase
     #[Test]
     public function listenersCanModifyTheRecord(): void
     {
-        $site = $this->createSite(['pongback' => ['receive' => ['autoPublish' => true]]]);
+        $site = $this->createSite(['pongback.receive.autoPublish' => true]);
         $this->prepareValidMention($site);
         $this->listener = static fn(BeforePingbackCreateEvent $event) => $event->getPingback()->setHidden(true);
 
@@ -329,13 +329,13 @@ final class MentionReceiverTest extends TestCase
     }
 
     /**
-     * @param array<string, mixed> $settingsTree
+     * @param array<string, mixed> $overrides flat setting identifiers
      */
-    private function createSite(array $settingsTree): Site&MockObject
+    private function createSite(array $overrides): Site&MockObject
     {
         $site = $this->createMock(Site::class);
         $site->method('getIdentifier')->willReturn('main');
-        $site->method('getSettings')->willReturn(SiteSettings::createFromSettingsTree($settingsTree));
+        $site->method('getSettings')->willReturn(SetSettings::create($overrides));
 
         return $site;
     }

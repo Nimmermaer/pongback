@@ -37,7 +37,7 @@ its checklist in sync.
 | `Classes/Moderation/`                  | `ModerationRepository` (permission aware queries for module and widget), `PingbackModerator` (DataHandler, so permissions, history and caches are handled by TYPO3) |
 | `Classes/Notification/NotifyEditors.php` | Listener of `AfterPingbackCreatedEvent` and `SendingFailedEvent`: emails with login redirect link into the module |
 | `Classes/Widget/`                      | Dashboard widget and its button, only registered if EXT:dashboard exists (`Configuration/Services.php`) |
-| `Classes/Configuration/PongbackSettings.php` | Typed site settings incl. fallback defaults            |
+| `Classes/Configuration/PongbackSettings.php` | Typed access to the site settings; sites without the set get `enabled = false` |
 | `Configuration/Sets/Pongback/`         | Site set: TypoScript, site settings (`settings.definitions.yaml`), labels |
 | `Configuration/Sets/Pongback/route-enhancers.yaml` | Route enhancer for the endpoint; native in v14, merged by `EnhanceSiteConfigurationListener` in v13 |
 
@@ -96,8 +96,10 @@ Never put the TER token anywhere but the repository secret `TYPO3_API_TOKEN`.
 - Do not commit `.Build/`, `composer.lock` or cache files.
 - Do not edit generated or vendor code.
 - Site related options are site settings (`settings.definitions.yaml`), not
-  extension configuration or TypoScript constants. Keep the defaults in sync
-  with `PongbackSettings::DEFAULTS` (covered by a unit test).
+  extension configuration or TypoScript constants. Values, defaults and types
+  live only in the YAML file; `PongbackSettings::KEYS` lists the names (a unit
+  test keeps them in sync). Tests take the defaults from the YAML
+  (`Tests/Unit/Fixtures/SetSettings`).
 - Database tables and columns are created from TCA; there is no
   `ext_tables.sql`. Use TCA options (`max`, types) to shape columns.
 - Sites without the set `webicorns/pongback` get no features at all

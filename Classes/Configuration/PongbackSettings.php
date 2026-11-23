@@ -19,24 +19,27 @@ use TYPO3\CMS\Core\Site\Entity\SiteSettings;
 /**
  * Typed access to the site settings of the "webicorns/pongback" set.
  *
+ * Values and defaults are defined only in Configuration/Sets/Pongback/settings.definitions.yaml:
+ * for a site using the set, TYPO3 provides every setting, validated and converted to its type.
  * Sites that do not use the set (directly or as dependency of another set) get no Pingback
  * features at all: no discovery, no receiving, no sending.
- *
- * The defaults must match Configuration/Sets/Pongback/settings.definitions.yaml.
  */
 final readonly class PongbackSettings
 {
-    public const DEFAULTS = [
-        'pongback.discovery.httpHeader' => true,
-        'pongback.discovery.metaTag' => true,
-        'pongback.receive.autoPublish' => false,
-        'pongback.receive.rateLimit' => 20,
-        'pongback.receive.webmention' => true,
-        'pongback.send.enabled' => true,
-        'pongback.send.webmention' => true,
-        'pongback.send.tables' => ['pages', 'tt_content'],
-        'pongback.notification.emailTo' => '',
-        'pongback.notification.emailFrom' => '',
+    /**
+     * The settings of the set; all of them are present when a site uses it.
+     */
+    public const KEYS = [
+        'pongback.discovery.httpHeader',
+        'pongback.discovery.metaTag',
+        'pongback.receive.autoPublish',
+        'pongback.receive.rateLimit',
+        'pongback.receive.webmention',
+        'pongback.send.enabled',
+        'pongback.send.webmention',
+        'pongback.send.tables',
+        'pongback.notification.emailTo',
+        'pongback.notification.emailFrom',
     ];
 
     /**
@@ -59,38 +62,57 @@ final readonly class PongbackSettings
     public static function fromSite(?SiteInterface $site): self
     {
         $settings = $site instanceof Site ? $site->getSettings() : null;
-        $get = static fn(string $key): mixed => $settings?->get($key, self::DEFAULTS[$key]) ?? self::DEFAULTS[$key];
-        $enabled = self::usesTheSet($settings);
+        if (! $settings instanceof SiteSettings || ! self::usesTheSet($settings)) {
+            return self::disabled();
+        }
 
+        // TYPO3 validated the values against their type in settings.definitions.yaml, no casts needed.
         return new self(
-            enabled: $enabled,
-            discoveryHttpHeader: $enabled && (bool) $get('pongback.discovery.httpHeader'),
-            discoveryMetaTag: $enabled && (bool) $get('pongback.discovery.metaTag'),
-            receiveAutoPublish: (bool) $get('pongback.receive.autoPublish'),
-            receiveRateLimit: max(0, (int) $get('pongback.receive.rateLimit')),
-            receiveWebmention: $enabled && (bool) $get('pongback.receive.webmention'),
-            sendEnabled: $enabled && (bool) $get('pongback.send.enabled'),
-            sendWebmention: (bool) $get('pongback.send.webmention'),
+            enabled: true,
+            discoveryHttpHeader: $settings->get('pongback.discovery.httpHeader'),
+            discoveryMetaTag: $settings->get('pongback.discovery.metaTag'),
+            receiveAutoPublish: $settings->get('pongback.receive.autoPublish'),
+            receiveRateLimit: max(0, $settings->get('pongback.receive.rateLimit')),
+            receiveWebmention: $settings->get('pongback.receive.webmention'),
+            sendEnabled: $settings->get('pongback.send.enabled'),
+            sendWebmention: $settings->get('pongback.send.webmention'),
             sendTables: array_values(array_filter(
-                array_map(trim(...), (array) $get('pongback.send.tables')),
+                array_map(trim(...), $settings->get('pongback.send.tables')),
                 static fn(string $table): bool => $table !== '',
             )),
-            notificationEmailTo: trim((string) $get('pongback.notification.emailTo')),
-            notificationEmailFrom: trim((string) $get('pongback.notification.emailFrom')),
+            notificationEmailTo: trim($settings->get('pongback.notification.emailTo')),
+            notificationEmailFrom: trim($settings->get('pongback.notification.emailFrom')),
         );
     }
 
     /**
-     * The set provides a value for every setting it defines, so their presence tells whether a site uses it.
+     * For sites without the set: no feature is active.
      */
-    private static function usesTheSet(?SiteSettings $settings): bool
+    public static function disabled(): self
     {
-        foreach (array_keys(self::DEFAULTS) as $key) {
-            if ($settings?->has($key)) {
-                return true;
+        return new self(
+            enabled: false,
+            discoveryHttpHeader: false,
+            discoveryMetaTag: false,
+            receiveAutoPublish: false,
+            receiveRateLimit: 0,
+            receiveWebmention: false,
+            sendEnabled: false,
+            sendWebmention: false,
+            sendTables: [],
+            notificationEmailTo: '',
+            notificationEmailFrom: '',
+        );
+    }
+
+    private static function usesTheSet(SiteSettings $settings): bool
+    {
+        foreach (self::KEYS as $key) {
+            if (! $settings->has($key)) {
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 }

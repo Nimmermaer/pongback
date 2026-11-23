@@ -21,17 +21,16 @@ use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
-use TYPO3\CMS\Core\Settings\Settings;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\Entity\SiteSettings;
 use TYPO3\CMS\Core\Site\SiteFinder;
-use Webicorns\Pongback\Configuration\PongbackSettings;
 use Webicorns\Pongback\Mention\IncomingMention;
 use Webicorns\Pongback\Mention\MentionReceiverInterface;
 use Webicorns\Pongback\Mention\MentionRejected;
 use Webicorns\Pongback\Mention\RejectionReason;
 use Webicorns\Pongback\Mention\SyncResult;
 use Webicorns\Pongback\Messaging\MessageQueue;
+use Webicorns\Pongback\Tests\Unit\Fixtures\SetSettings;
 use Webicorns\Pongback\Webmention\ReceiveWebmentionHandler;
 use Webicorns\Pongback\Webmention\ReceiveWebmentionMessage;
 
@@ -48,13 +47,13 @@ final class ReceiveWebmentionHandlerTest extends TestCase
     /**
      * @var array<string, mixed>
      */
-    private array $settings = PongbackSettings::DEFAULTS;
+    private array $settings = [];
 
     protected function setUp(): void
     {
         $this->receiver = $this->createMock(MentionReceiverInterface::class);
         $this->site = $this->createMock(Site::class);
-        $this->site->method('getSettings')->willReturnCallback(fn(): SiteSettings => SiteSettings::create(new Settings($this->settings)));
+        $this->site->method('getSettings')->willReturnCallback(fn(): SiteSettings => SetSettings::create($this->settings));
     }
 
     #[Test]
