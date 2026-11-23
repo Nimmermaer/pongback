@@ -8,6 +8,7 @@ services:
     resource: '../Classes/*'
     exclude:
       - '../Classes/Domain/Model/*'
+      - '../Classes/Event/*'
       - '../Classes/Mention/IncomingMention.php'
       - '../Classes/Mention/MentionRejected.php'
       - '../Classes/Mention/ResolvedTarget.php'

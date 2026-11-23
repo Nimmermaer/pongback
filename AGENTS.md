@@ -26,13 +26,15 @@ its checklist in sync.
 | `Classes/Mention/Source/`              | Untrusted source handling: `UrlGuard` (SSRF), `SourceFetcher` (limits, redirects, IP pinning), `SourceInspector` (link check, plain text excerpt) |
 | `Classes/XmlRpc/XmlRpcCodec.php`       | XML-RPC parsing/encoding (replaces PECL `ext-xmlrpc`)     |
 | `Classes/Event/BeforePingbackCreateEvent.php` | Listeners may modify or reject a verified mention before it is stored |
-| `Classes/Controller/PingbackController.php` | Frontend plugins (list, latest) |
+| `Classes/Controller/PingbackController.php` | Frontend plugins (list, latest), cached with the page via the cache tag `tx_pongback_domain_model_pingback` (DataHandler flushes it) |
 | `Classes/Listener/`                    | v13 route enhancer listener |
 | `Classes/Hooks/PageChangeHook.php`     | DataHandler hook: queues `SendPingbacksMessage` once per changed live page and language |
 | `Classes/Sending/`                     | Sending: `SendPingbacksHandler` (Messenger, retries), `PingbackQueue` (always dispatch through it: explicit transport, TYPO3 13 would also use the sync `*` route), `LinkExtractor`, `EndpointDiscovery`, `PingbackClient`, `SentPingbackLog` (table `tx_pongback_sent`) |
 | `Classes/Html/HtmlDocumentLoader.php`  | Safe HTML parsing shared by receiving and sending |
-| `Classes/Controller/Backend/`          | Backend module (`Web > Pongback`)                         |
-| `Classes/Widget/`                      | Dashboard widget, only registered if EXT:dashboard exists |
+| `Classes/Controller/Backend/ModerationController.php` | Module `Web > Pongback`: list per page tree, POST approve/hide/delete |
+| `Classes/Moderation/`                  | `ModerationRepository` (permission aware queries for module and widget), `PingbackModerator` (DataHandler, so permissions, history and caches are handled by TYPO3) |
+| `Classes/Notification/NotifyEditors.php` | Listener of `AfterPingbackCreatedEvent`: email with login redirect link into the module |
+| `Classes/Widget/`                      | Dashboard widget and its button, only registered if EXT:dashboard exists (`Configuration/Services.php`) |
 | `Classes/Configuration/PongbackSettings.php` | Typed site settings incl. fallback defaults            |
 | `Configuration/Sets/Pongback/`         | Site set: TypoScript, site settings (`settings.definitions.yaml`), labels |
 | `Configuration/Sets/Pongback/route-enhancers.yaml` | Route enhancer for the endpoint; native in v14, merged by `EnhanceSiteConfigurationListener` in v13 |

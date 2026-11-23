@@ -42,18 +42,15 @@ EXT:dashboard is optional (dashboard widget).
   changed: in the background via the Symfony Messenger (worker:
   `vendor/bin/typo3 messenger:consume doctrine`), each Pingback once, with
   retries and a log of sent Pingbacks per page.
+- **Moderation** in the backend module *Web > Pongback*: approve, hide and
+  delete the Pingbacks of a page tree, limited to the pages an editor may
+  edit.
+- **Email notification** about new Pingbacks with a link into the module.
+- **Content elements** "Pingbacks of this page" (with pagination) and
+  "Latest Pingbacks" of the site, cached with the page.
+- **Dashboard widget** with the newest Pingbacks and their websites.
 - **Site set** with site settings: everything is configured per site in the
   backend, no TypoScript constants or extension settings needed.
-
-### Being reworked for 1.0.0
-
-These parts exist but are currently being rebuilt, see the
-[roadmap](https://github.com/Nimmermaer/pongback/milestone/1):
-
-- **Backend module** for moderation, **email notification** with approval,
-  **frontend plugins** showing the Pingbacks of a page and the
-  **dashboard widget** with the latest Pingbacks
-  ([#5](https://github.com/Nimmermaer/pongback/issues/5)).
 
 ### Planned after 1.0.0
 
@@ -123,6 +120,9 @@ final class BlockSpamDomains
     }
 }
 ```
+
+`AfterPingbackCreatedEvent` is dispatched after a Pingback has been stored;
+the email notification is a listener of it.
 
 ### Quality
 

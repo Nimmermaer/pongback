@@ -1,0 +1,21 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<f:layout name="SystemEmail" />
+<f:section name="Title"><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.headline" /></f:section>
+<f:section name="Main">
+    <p><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.introduction" /></p>
+    <p>
+        <strong><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:source_title" />:</strong>
+        <a href="{pingback.sourceLink}">{f:if(condition: pingback.sourceTitle, then: pingback.sourceTitle, else: pingback.sourceLink)}</a><br>
+        <strong><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:target_link" />:</strong>
+        <a href="{pingback.targetLink}">{pingback.targetLink}</a>
+    </p>
+    <f:if condition="{pingback.excerpt}"><blockquote>{pingback.excerpt}</blockquote></f:if>
+    <p>
+        <f:if condition="{pending}">
+            <f:then><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.pending" /></f:then>
+            <f:else><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.published" /></f:else>
+        </f:if>
+    </p>
+    <p><a href="{moderationUrl}"><f:translate key="LLL:EXT:pongback/Resources/Private/Language/locallang.xlf:notification.moderate" /></a></p>
+</f:section>
+</html>

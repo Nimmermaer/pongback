@@ -1,0 +1,20 @@
+page = PAGE
+page.10 = COA
+page.10 {
+    10 = COA
+    10.wrap = <section id="list">|</section>
+    10.10 = EXTBASEPLUGIN
+    10.10 {
+        extensionName = Pongback
+        pluginName = list
+        settings.listItem = 1
+    }
+    20 = COA
+    20.wrap = <section id="latest">|</section>
+    20.10 = EXTBASEPLUGIN
+    20.10 {
+        extensionName = Pongback
+        pluginName = latest
+        settings.listItem = 10
+    }
+}

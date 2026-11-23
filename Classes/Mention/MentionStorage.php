@@ -16,7 +16,6 @@ use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
-use Webicorns\Pongback\Cache\CacheTags;
 use Webicorns\Pongback\Domain\Model\Pingback;
 use Webicorns\Pongback\Utility\Constants;
 
@@ -77,8 +76,10 @@ readonly class MentionStorage
         );
         $uid = (int) $connection->lastInsertId();
 
-        $this->cacheManager->getCache(Constants::PONGBACK_CACHE)
-            ->flushByTags(CacheTags::affectedByPage((int) $pingback->getPid()));
+        if (! $pingback->isHidden()) {
+            // Pages showing Pingbacks carry this tag, as for changes made with the DataHandler.
+            $this->cacheManager->flushCachesInGroupByTags('pages', [Constants::PINGBACK_TABLE]);
+        }
 
         return $uid;
     }

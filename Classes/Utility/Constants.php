@@ -14,8 +14,9 @@ namespace Webicorns\Pongback\Utility;
 
 final class Constants
 {
-    public const PONGBACK_CACHE = 'tx_pongback_cache';
-
+    /**
+     * Also the cache tag of every page that shows Pingbacks: DataHandler flushes it on every change of a Pingback.
+     */
     public const PINGBACK_TABLE = 'tx_pongback_domain_model_pingback';
 
     public const SENT_TABLE = 'tx_pongback_sent';
