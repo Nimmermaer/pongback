@@ -20,21 +20,15 @@ namespace Webicorns\Pongback\Domain\Model;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 /**
- * A received mention.
- *
- * - pingClient: title of the source page
- * - pingResource: uid of the target page
- * - serializedInformation: plain text excerpt around the link in the source page (never HTML)
+ * A received mention, stored on the target page (pid). Title and excerpt are plain text, never HTML.
  */
 class Pingback extends AbstractEntity
 {
     protected bool $hidden = false;
 
-    protected string $pingClient = '';
+    protected string $sourceTitle = '';
 
-    protected string $pingResource = '';
-
-    protected string $serializedInformation = '';
+    protected string $excerpt = '';
 
     protected string $sourceLink = '';
 
@@ -50,34 +44,24 @@ class Pingback extends AbstractEntity
         $this->hidden = $hidden;
     }
 
-    public function getPingClient(): string
+    public function getSourceTitle(): string
     {
-        return $this->pingClient;
+        return $this->sourceTitle;
     }
 
-    public function setPingClient(string $pingClient): void
+    public function setSourceTitle(string $sourceTitle): void
     {
-        $this->pingClient = $pingClient;
+        $this->sourceTitle = $sourceTitle;
     }
 
-    public function getPingResource(): string
+    public function getExcerpt(): string
     {
-        return $this->pingResource;
+        return $this->excerpt;
     }
 
-    public function setPingResource(string $pingResource): void
+    public function setExcerpt(string $excerpt): void
     {
-        $this->pingResource = $pingResource;
-    }
-
-    public function getSerializedInformation(): string
-    {
-        return $this->serializedInformation;
-    }
-
-    public function setSerializedInformation(string $serializedInformation): void
-    {
-        $this->serializedInformation = $serializedInformation;
+        $this->excerpt = $excerpt;
     }
 
     public function getSourceLink(): string

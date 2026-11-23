@@ -20,7 +20,7 @@ use TYPO3\CMS\Core\Routing\SiteMatcher;
 use TYPO3\CMS\Core\Routing\SiteRouteResult;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
-use Webicorns\Pongback\Mention\Source\UrlGuard;
+use Webicorns\Pongback\Utility\Constants;
 
 /**
  * Resolves the target URI of a mention to a page of the receiving site that is visible
@@ -53,7 +53,7 @@ readonly class TargetResolver
     private function createRequest(string $targetUrl): ServerRequest
     {
         $scheme = strtolower((string) parse_url($targetUrl, PHP_URL_SCHEME));
-        if (strlen($targetUrl) > UrlGuard::MAX_URL_LENGTH || ! in_array($scheme, ['http', 'https'], true)) {
+        if (strlen($targetUrl) > Constants::MAX_URL_LENGTH || ! in_array($scheme, ['http', 'https'], true)) {
             throw new MentionRejected(RejectionReason::TargetNotAllowed, 'The target URI cannot be used as a target.');
         }
 

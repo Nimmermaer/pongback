@@ -16,6 +16,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use TYPO3\CMS\Core\Http\NormalizedParams;
+use TYPO3\CMS\Core\Http\Response;
+use TYPO3\CMS\Core\Http\Stream;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use Webicorns\Pongback\Configuration\PongbackSettings;
 use Webicorns\Pongback\Mention\IncomingMention;
@@ -23,7 +25,6 @@ use Webicorns\Pongback\Mention\MentionRateLimiter;
 use Webicorns\Pongback\Mention\MentionReceiverInterface;
 use Webicorns\Pongback\Mention\MentionRejected;
 use Webicorns\Pongback\Mention\RejectionReason;
-use Webicorns\Pongback\Service\XmlResponseService;
 use Webicorns\Pongback\XmlRpc\XmlRpcCodec;
 
 /**
@@ -67,22 +68,22 @@ readonly class PingbackEndpoint
     {
         $body = (string) $request->getBody();
         if (strlen($body) > self::MAX_BODY_BYTES) {
-            return XmlResponseService::xmlErrorResponse(self::FAULT_PARSE_ERROR, 'Request too large.');
+            return $this->fault(self::FAULT_PARSE_ERROR, 'Request too large.');
         }
 
         try {
             $call = $this->codec->decodeMethodCall($body);
         } catch (\InvalidArgumentException) {
-            return XmlResponseService::xmlErrorResponse(self::FAULT_PARSE_ERROR, 'Parse error, not well formed.');
+            return $this->fault(self::FAULT_PARSE_ERROR, 'Parse error, not well formed.');
         }
 
-        if ($call['methodName'] !== self::METHOD) {
-            return XmlResponseService::xmlErrorResponse(self::FAULT_METHOD_NOT_FOUND, 'Requested method not found.');
+        if ($call->methodName !== self::METHOD) {
+            return $this->fault(self::FAULT_METHOD_NOT_FOUND, 'Requested method not found.');
         }
 
-        [$source, $target] = $call['params'] + [null, null];
-        if (count($call['params']) !== 2 || ! is_string($source) || ! is_string($target)) {
-            return XmlResponseService::xmlErrorResponse(
+        [$source, $target] = $call->params + [null, null];
+        if (count($call->params) !== 2 || ! is_string($source) || ! is_string($target)) {
+            return $this->fault(
                 self::FAULT_INVALID_PARAMS,
                 'Invalid method parameters, expected pingback.ping(sourceURI, targetURI).',
             );
@@ -106,12 +107,36 @@ readonly class PingbackEndpoint
                 'target' => $mention->target,
             ]);
 
-            return XmlResponseService::xmlErrorResponse(self::faultCode($rejected->reason), $rejected->getMessage());
+            return $this->fault(self::faultCode($rejected->reason), $rejected->getMessage());
         }
 
-        return XmlResponseService::xmlSuccessResponse(
+        return $this->success(
             sprintf('Pingback from %s to %s registered.', $mention->source, $mention->target),
         );
+    }
+
+    private function success(string $message): ResponseInterface
+    {
+        return $this->xmlResponse($this->codec->encodeResponse($message));
+    }
+
+    /**
+     * XML-RPC faults are transported with HTTP 200, the error is part of the payload.
+     */
+    private function fault(int $faultCode, string $faultString): ResponseInterface
+    {
+        return $this->xmlResponse($this->codec->encodeFault($faultCode, $faultString));
+    }
+
+    private function xmlResponse(string $xml): ResponseInterface
+    {
+        $body = new Stream('php://temp', 'rw');
+        $body->write($xml);
+        $body->rewind();
+
+        return (new Response())
+            ->withHeader('Content-Type', 'text/xml; charset=utf-8')
+            ->withBody($body);
     }
 
     private static function faultCode(RejectionReason $reason): int

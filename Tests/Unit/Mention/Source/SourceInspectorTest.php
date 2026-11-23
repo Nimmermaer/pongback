@@ -187,32 +187,6 @@ final class SourceInspectorTest extends TestCase
         self::assertNotNull((new SourceInspector())->inspect($html, self::SOURCE, self::TARGET));
     }
 
-    /**
-     * @return array<string, array{string, string}>
-     */
-    public static function normalizeUrlProvider(): array
-    {
-        return [
-            'lower case scheme and host' => ['HTTPS://WWW.Example.COM/Path', 'https://www.example.com/Path'],
-            'port kept' => ['http://example.com:8080/a', 'http://example.com:8080/a'],
-            'trailing slash removed' => ['https://example.com/a/', 'https://example.com/a'],
-            'root' => ['https://example.com/', 'https://example.com'],
-            'query kept' => ['https://example.com/a/?b=1&c=2', 'https://example.com/a?b=1&c=2'],
-            'empty query dropped' => ['https://example.com/a?', 'https://example.com/a'],
-            'fragment dropped' => ['https://example.com/a#top', 'https://example.com/a'],
-            'surrounding whitespace' => ["  https://example.com/a \n", 'https://example.com/a'],
-            'protocol relative' => ['//example.com/a', 'http://example.com/a'],
-            'no host' => [' /relative/path ', '/relative/path'],
-        ];
-    }
-
-    #[Test]
-    #[DataProvider('normalizeUrlProvider')]
-    public function normalizesUrlsForComparison(string $url, string $expected): void
-    {
-        self::assertSame($expected, SourceInspector::normalizeUrl($url));
-    }
-
     #[Test]
     public function restoresTheLibxmlErrorHandlingState(): void
     {

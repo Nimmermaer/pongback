@@ -16,6 +16,7 @@ use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
+use Webicorns\Pongback\Cache\CacheTags;
 use Webicorns\Pongback\Domain\Model\Pingback;
 use Webicorns\Pongback\Utility\Constants;
 
@@ -25,8 +26,6 @@ use Webicorns\Pongback\Utility\Constants;
  */
 readonly class MentionStorage
 {
-    public const TABLE = 'tx_pongback_domain_model_pingback';
-
     public function __construct(
         private ConnectionPool $connectionPool,
         private CacheManager $cacheManager,
@@ -37,12 +36,12 @@ readonly class MentionStorage
      */
     public function exists(string $source, string $target): bool
     {
-        $queryBuilder = $this->connectionPool->getQueryBuilderForTable(self::TABLE);
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable(Constants::PINGBACK_TABLE);
         $queryBuilder->getRestrictions()->removeAll()->add(new DeletedRestriction());
 
         return (int) $queryBuilder
             ->count('uid')
-            ->from(self::TABLE)
+            ->from(Constants::PINGBACK_TABLE)
             ->where(
                 $queryBuilder->expr()->eq('source_link', $queryBuilder->createNamedParameter($source)),
                 $queryBuilder->expr()->eq('target_link', $queryBuilder->createNamedParameter($target)),
@@ -54,9 +53,9 @@ readonly class MentionStorage
     public function add(Pingback $pingback, int $languageId): int
     {
         $now = time();
-        $connection = $this->connectionPool->getConnectionForTable(self::TABLE);
+        $connection = $this->connectionPool->getConnectionForTable(Constants::PINGBACK_TABLE);
         $connection->insert(
-            self::TABLE,
+            Constants::PINGBACK_TABLE,
             [
                 'pid' => (int) $pingback->getPid(),
                 'sys_language_uid' => $languageId,
@@ -65,9 +64,8 @@ readonly class MentionStorage
                 'tstamp' => $now,
                 'source_link' => $pingback->getSourceLink(),
                 'target_link' => $pingback->getTargetLink(),
-                'ping_client' => $pingback->getPingClient(),
-                'ping_resource' => $pingback->getPingResource(),
-                'serialized_information' => $pingback->getSerializedInformation(),
+                'source_title' => $pingback->getSourceTitle(),
+                'excerpt' => $pingback->getExcerpt(),
             ],
             [
                 'pid' => Connection::PARAM_INT,
@@ -79,12 +77,8 @@ readonly class MentionStorage
         );
         $uid = (int) $connection->lastInsertId();
 
-        // Same tags as used by the frontend plugins and the DataHandler hook.
-        $this->cacheManager->getCache(Constants::PONGBACK_CACHE)->flushByTags([
-            'pageId_' . (int) $pingback->getPid(),
-            'pingback_latest_view',
-            'pingback_list_view',
-        ]);
+        $this->cacheManager->getCache(Constants::PONGBACK_CACHE)
+            ->flushByTags(CacheTags::affectedByPage((int) $pingback->getPid()));
 
         return $uid;
     }

@@ -12,17 +12,11 @@
 			<trans-unit id="tx_pongback_domain_model_pingback.source_link.description">
 				<source>Stores the link to the source of the pingback.</source>
 			</trans-unit>
-			<trans-unit id="tx_pongback_domain_model_pingback.ping_client">
-				<source>Ping Client</source>
+			<trans-unit id="tx_pongback_domain_model_pingback.source_title">
+				<source>Source title</source>
 			</trans-unit>
-			<trans-unit id="tx_pongback_domain_model_pingback.ping_client.description">
-				<source>Contains validation errors for the pingback object.</source>
-			</trans-unit>
-			<trans-unit id="tx_pongback_domain_model_pingback.ping_resource">
-				<source>Resource</source>
-			</trans-unit>
-			<trans-unit id="tx_pongback_domain_model_pingback.ping_resource.description">
-				<source>Represents the name or ID of the resource object being pinged.</source>
+			<trans-unit id="tx_pongback_domain_model_pingback.source_title.description">
+				<source>Title of the linking page, plain text.</source>
 			</trans-unit>
 			<trans-unit id="tx_pongback_domain_model_pingback.target_link">
 				<source>Target Link</source>
@@ -30,11 +24,11 @@
 			<trans-unit id="tx_pongback_domain_model_pingback.target_link.description">
 				<source>Stores the link to the target of the pingback.</source>
 			</trans-unit>
-			<trans-unit id="tx_pongback_domain_model_pingback.serialized_information">
-				<source>Serialized Information</source>
+			<trans-unit id="tx_pongback_domain_model_pingback.excerpt">
+				<source>Excerpt</source>
 			</trans-unit>
-			<trans-unit id="tx_pongback_domain_model_pingback.serialized_information.description">
-				<source>Contains additional information about the pingback in serialized format.</source>
+			<trans-unit id="tx_pongback_domain_model_pingback.excerpt.description">
+				<source>Text around the link in the linking page, plain text.</source>
 			</trans-unit>
 			<trans-unit id="sys_webhook.webhook_type.pongback-pingback-page-modification">
 				<source>Sends an pingback if edit the page or content</source>

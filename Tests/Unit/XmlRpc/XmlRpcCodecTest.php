@@ -39,13 +39,10 @@ final class XmlRpcCodecTest extends TestCase
             </methodCall>
             XML;
 
-        self::assertSame(
-            [
-                'methodName' => 'pingback.ping',
-                'params' => ['https://source.example/post', 'https://target.example/article'],
-            ],
-            $this->subject->decodeMethodCall($xml),
-        );
+        $call = $this->subject->decodeMethodCall($xml);
+
+        self::assertSame('pingback.ping', $call->methodName);
+        self::assertSame(['https://source.example/post', 'https://target.example/article'], $call->params);
     }
 
     #[Test]
@@ -65,7 +62,7 @@ final class XmlRpcCodecTest extends TestCase
 
         self::assertSame(
             [42, true, [1, 'two'], ['key' => 1.5]],
-            $this->subject->decodeMethodCall($xml)['params'],
+            $this->subject->decodeMethodCall($xml)->params,
         );
     }
 
@@ -131,10 +128,10 @@ final class XmlRpcCodecTest extends TestCase
             . '<param/>'
             . '</params></methodCall>';
 
-        self::assertSame(
-            ['methodName' => 'pingback.ping', 'params' => [42, 9007199254740993, true, false, 1.5, null, null]],
-            $this->subject->decodeMethodCall($xml),
-        );
+        $call = $this->subject->decodeMethodCall($xml);
+
+        self::assertSame('pingback.ping', $call->methodName);
+        self::assertSame([42, 9007199254740993, true, false, 1.5, null, null], $call->params);
     }
 
     #[Test]
@@ -153,7 +150,7 @@ final class XmlRpcCodecTest extends TestCase
 
         self::assertSame(
             [['first' => '1', 'second' => 2], [], ['kept']],
-            $this->subject->decodeMethodCall($xml)['params'],
+            $this->subject->decodeMethodCall($xml)->params,
         );
     }
 

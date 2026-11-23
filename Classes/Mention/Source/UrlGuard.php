@@ -14,6 +14,7 @@ namespace Webicorns\Pongback\Mention\Source;
 
 use Webicorns\Pongback\Mention\MentionRejected;
 use Webicorns\Pongback\Mention\RejectionReason;
+use Webicorns\Pongback\Utility\Constants;
 
 /**
  * Protects against server side request forgery: the source of a mention is chosen by the
@@ -21,8 +22,6 @@ use Webicorns\Pongback\Mention\RejectionReason;
  */
 readonly class UrlGuard
 {
-    public const MAX_URL_LENGTH = 255;
-
     private const ALLOWED_PORTS = ['http' => 80, 'https' => 443];
 
     /**
@@ -39,16 +38,13 @@ readonly class UrlGuard
     }
 
     /**
-     * @return array{host: string, port: int, ips: non-empty-list<string>}
-     *
      * @throws MentionRejected
      */
-    public function assertAllowed(string $url): array
+    public function assertAllowed(string $url): CheckedAddress
     {
         [$host, $port] = $this->parseUrl($url);
-        $ips = $this->resolvePublicIps($host);
 
-        return ['host' => $host, 'port' => $port, 'ips' => $ips];
+        return new CheckedAddress($host, $port, $this->resolvePublicIps($host));
     }
 
     /**
@@ -56,7 +52,7 @@ readonly class UrlGuard
      */
     private function parseUrl(string $url): array
     {
-        if (strlen($url) > self::MAX_URL_LENGTH) {
+        if (strlen($url) > Constants::MAX_URL_LENGTH) {
             throw new MentionRejected(RejectionReason::InvalidRequest, 'The source URI is too long.');
         }
 

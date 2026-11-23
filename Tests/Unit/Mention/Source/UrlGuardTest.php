@@ -18,6 +18,7 @@ use PHPUnit\Framework\TestCase;
 use Webicorns\Pongback\Mention\RejectionReason;
 use Webicorns\Pongback\Mention\Source\UrlGuard;
 use Webicorns\Pongback\Tests\Unit\Fixtures\AssertRejectionTrait;
+use Webicorns\Pongback\Utility\Constants;
 
 final class UrlGuardTest extends TestCase
 {
@@ -28,10 +29,12 @@ final class UrlGuardTest extends TestCase
     {
         $subject = $this->createSubject(['blog.example' => ['93.184.215.14', '2606:2800:21f:cb07:6820:80da:af6b:8b2c']]);
 
-        self::assertSame(
-            ['host' => 'blog.example', 'port' => 443, 'ips' => ['93.184.215.14', '2606:2800:21f:cb07:6820:80da:af6b:8b2c']],
-            $subject->assertAllowed('https://Blog.Example./post'),
-        );
+        $address = $subject->assertAllowed('https://Blog.Example./post');
+
+        self::assertSame('blog.example', $address->host);
+        self::assertSame(443, $address->port);
+        self::assertSame(['93.184.215.14', '2606:2800:21f:cb07:6820:80da:af6b:8b2c'], $address->ips);
+        self::assertSame('blog.example:443:93.184.215.14', $address->toCurlResolveEntry());
     }
 
     /**
@@ -132,18 +135,18 @@ final class UrlGuardTest extends TestCase
     {
         $subject = $this->createSubject(['blog.example' => ['93.184.215.14']]);
 
-        self::assertSame(443, $subject->assertAllowed('HTTPS://blog.example/')['port']);
-        self::assertSame(80, $subject->assertAllowed('http://blog.example:80/')['port']);
+        self::assertSame(443, $subject->assertAllowed('HTTPS://blog.example/')->port);
+        self::assertSame(80, $subject->assertAllowed('http://blog.example:80/')->port);
     }
 
     #[Test]
     public function acceptsUrlsUpToTheMaximumLength(): void
     {
         $url = 'https://blog.example/';
-        $url .= str_repeat('a', UrlGuard::MAX_URL_LENGTH - strlen($url));
+        $url .= str_repeat('a', Constants::MAX_URL_LENGTH - strlen($url));
 
-        self::assertSame(UrlGuard::MAX_URL_LENGTH, strlen($url));
-        self::assertSame('blog.example', $this->createSubject(['blog.example' => ['93.184.215.14']])->assertAllowed($url)['host']);
+        self::assertSame(Constants::MAX_URL_LENGTH, strlen($url));
+        self::assertSame('blog.example', $this->createSubject(['blog.example' => ['93.184.215.14']])->assertAllowed($url)->host);
         self::assertRejected(
             RejectionReason::InvalidRequest,
             fn() => $this->createSubject(['blog.example' => ['93.184.215.14']])->assertAllowed($url . 'a'),
@@ -155,7 +158,7 @@ final class UrlGuardTest extends TestCase
     {
         self::assertSame(
             ['2001:4860:4860::8888'],
-            $this->createSubject([])->assertAllowed('https://[2001:4860:4860::8888]/')['ips'],
+            $this->createSubject([])->assertAllowed('https://[2001:4860:4860::8888]/')->ips,
         );
     }
 }

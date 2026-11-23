@@ -64,6 +64,9 @@ final class PingbackEndpointTest extends TestCase
 
         self::assertSame(200, $response->getStatusCode());
         self::assertSame('text/xml; charset=utf-8', $response->getHeaderLine('Content-Type'));
+        // getContents() reads from the current position, so the body must be rewound.
+        self::assertStringContainsString('<string>Pingback from', $response->getBody()->getContents());
+        $response->getBody()->rewind();
         self::assertSame(
             'Pingback from ' . self::SOURCE . ' to ' . self::TARGET . ' registered.',
             $this->decodeResponse($response)['string'],

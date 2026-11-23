@@ -21,15 +21,11 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Webicorns\Pongback\Cache\CacheTags;
 use Webicorns\Pongback\Utility\Constants;
 
 class PingbackDataMap
 {
-    /**
-     * @var string
-     */
-    final public const TABLE = 'tx_pongback_domain_model_pingback';
-
     protected mixed $cacheManager = null;
 
     public function __construct()
@@ -63,13 +59,13 @@ class PingbackDataMap
 
     private function clearPongbackCache(string $table, string $id, string $status): void
     {
-        if ($table === self::TABLE) {
-            $this->cacheManager->flushByTags(['pageId_' . $id, 'pingback_latest_view', 'pingback_list_view']);
+        if ($table === Constants::PINGBACK_TABLE) {
+            $this->cacheManager->flushByTags(CacheTags::affectedByPage((int) $id));
         }
 
-        if ($table === self::TABLE && $status !== 'new') {
+        if ($table === Constants::PINGBACK_TABLE && $status !== 'new') {
             $record = BackendUtility::getRecord($table, $id);
-            $this->cacheManager->flushByTag('pageId_' . $record['pid']);
+            $this->cacheManager->flushByTag(CacheTags::forPage((int) $record['pid']));
         }
     }
 }

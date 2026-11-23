@@ -24,10 +24,12 @@ use Webicorns\Pongback\Mention\MentionReceiverInterface;
 use Webicorns\Pongback\Mention\MentionRejected;
 use Webicorns\Pongback\Mention\MentionStorage;
 use Webicorns\Pongback\Mention\RejectionReason;
+use Webicorns\Pongback\Mention\Source\FetchedSource;
 use Webicorns\Pongback\Mention\Source\SourceFetcher;
 use Webicorns\Pongback\Mention\Source\SourceInspector;
 use Webicorns\Pongback\Mention\TargetResolver;
 use Webicorns\Pongback\Tests\Functional\AbstractPongbackTestCase;
+use Webicorns\Pongback\Utility\Constants;
 
 /**
  * Receiving with real routing, site settings, event dispatcher and database.
@@ -49,9 +51,9 @@ final class MentionReceiverTest extends AbstractPongbackTestCase
     {
         $uid = $this->createReceiver()->receive($this->mention(), $this->site());
 
-        $queryBuilder = $this->get(ConnectionPool::class)->getQueryBuilderForTable(MentionStorage::TABLE);
+        $queryBuilder = $this->get(ConnectionPool::class)->getQueryBuilderForTable(Constants::PINGBACK_TABLE);
         $queryBuilder->getRestrictions()->removeAll();
-        $row = $queryBuilder->select('*')->from(MentionStorage::TABLE)
+        $row = $queryBuilder->select('*')->from(Constants::PINGBACK_TABLE)
             ->where($queryBuilder->expr()->eq('uid', $uid))
             ->executeQuery()
             ->fetchAssociative();
@@ -62,9 +64,8 @@ final class MentionReceiverTest extends AbstractPongbackTestCase
         self::assertSame(0, (int) $row['sys_language_uid']);
         self::assertSame(self::SOURCE, $row['source_link']);
         self::assertSame(self::TARGET, $row['target_link']);
-        self::assertSame('A blog post', $row['ping_client']);
-        self::assertSame('2', $row['ping_resource']);
-        self::assertSame('I liked this article a lot.', $row['serialized_information']);
+        self::assertSame('A blog post', $row['source_title']);
+        self::assertSame('I liked this article a lot.', $row['excerpt']);
         self::assertGreaterThan(0, (int) $row['crdate']);
     }
 
@@ -85,10 +86,10 @@ final class MentionReceiverTest extends AbstractPongbackTestCase
     private function createReceiver(): MentionReceiver
     {
         $sourceFetcher = $this->createMock(SourceFetcher::class);
-        $sourceFetcher->method('fetch')->with(self::SOURCE)->willReturn([
-            'url' => self::SOURCE,
-            'html' => '<html><head><title>A blog post</title></head><body><p>I liked <a href="' . self::TARGET . '">this article</a> a lot.</p></body></html>',
-        ]);
+        $sourceFetcher->method('fetch')->with(self::SOURCE)->willReturn(new FetchedSource(
+            self::SOURCE,
+            '<html><head><title>A blog post</title></head><body><p>I liked <a href="' . self::TARGET . '">this article</a> a lot.</p></body></html>',
+        ));
 
         return new MentionReceiver(
             $this->get(TargetResolver::class),
