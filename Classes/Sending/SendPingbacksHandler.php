@@ -22,6 +22,7 @@ use TYPO3\CMS\Core\Site\SiteFinder;
 use Webicorns\Pongback\Configuration\PongbackSettings;
 use Webicorns\Pongback\Mention\MentionRejected;
 use Webicorns\Pongback\Mention\RejectionReason;
+use Webicorns\Pongback\Messaging\MessageQueue;
 
 /**
  * Sends the Pingbacks of one page: every external link of the rendered page is pinged once.
@@ -44,7 +45,7 @@ readonly class SendPingbacksHandler
         private EndpointDiscovery $endpointDiscovery,
         private PingbackClient $client,
         private SentPingbackLog $log,
-        private PingbackQueue $queue,
+        private MessageQueue $queue,
         private LoggerInterface $logger,
     ) {}
 

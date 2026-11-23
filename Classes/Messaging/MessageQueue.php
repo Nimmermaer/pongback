@@ -10,19 +10,19 @@ declare(strict_types=1);
  * of the License, or any later version.
  */
 
-namespace Webicorns\Pongback\Sending;
+namespace Webicorns\Pongback\Messaging;
 
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 
 /**
- * Queues sending the Pingbacks of a page.
+ * Queues the messages of the extension (sending Pingbacks, verifying Webmentions).
  *
  * The transport is set explicitly: TYPO3 13 routes a message to every matching route,
  * so the default route "*" => "default" would also send it synchronously while saving in the backend.
  */
-readonly class PingbackQueue
+readonly class MessageQueue
 {
     public const DEFAULT_TRANSPORT = 'doctrine';
 
@@ -30,9 +30,9 @@ readonly class PingbackQueue
         private MessageBusInterface $bus,
     ) {}
 
-    public function queue(SendPingbacksMessage $message, int $delayInSeconds = 0): void
+    public function queue(object $message, int $delayInSeconds = 0): void
     {
-        $stamps = [new TransportNamesStamp($this->transports())];
+        $stamps = [new TransportNamesStamp($this->transports($message::class))];
         if ($delayInSeconds > 0) {
             $stamps[] = new DelayStamp($delayInSeconds * 1000);
         }
@@ -45,9 +45,9 @@ readonly class PingbackQueue
      *
      * @return list<string>
      */
-    private function transports(): array
+    private function transports(string $messageClass): array
     {
-        $configured = $GLOBALS['TYPO3_CONF_VARS']['SYS']['messenger']['routing'][SendPingbacksMessage::class] ?? null;
+        $configured = $GLOBALS['TYPO3_CONF_VARS']['SYS']['messenger']['routing'][$messageClass] ?? null;
         $transports = array_values(array_filter(
             (array) $configured,
             static fn(mixed $transport): bool => is_string($transport) && $transport !== '',

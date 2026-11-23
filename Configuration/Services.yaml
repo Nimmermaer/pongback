@@ -19,6 +19,8 @@ services:
       - '../Classes/XmlRpc/MethodResponse.php'
       - '../Classes/Sending/PingResult.php'
       - '../Classes/Sending/SendPingbacksMessage.php'
+      - '../Classes/Webmention/ReceiveWebmentionMessage.php'
+      - '../Classes/Mention/SyncResult.php'
       # EXT:dashboard is optional, the widget is registered in Services.php if available
       - '../Classes/Widget/*'
 

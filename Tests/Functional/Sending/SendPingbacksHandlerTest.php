@@ -16,11 +16,11 @@ use PHPUnit\Framework\Attributes\Test;
 use Psr\Log\NullLogger;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Site\SiteFinder;
+use Webicorns\Pongback\Messaging\MessageQueue;
 use Webicorns\Pongback\Sending\EndpointDiscovery;
 use Webicorns\Pongback\Sending\LinkExtractor;
 use Webicorns\Pongback\Sending\PageFetcher;
 use Webicorns\Pongback\Sending\PingbackClient;
-use Webicorns\Pongback\Sending\PingbackQueue;
 use Webicorns\Pongback\Sending\PingResult;
 use Webicorns\Pongback\Sending\PingStatus;
 use Webicorns\Pongback\Sending\SendPingbacksHandler;
@@ -111,7 +111,7 @@ final class SendPingbacksHandlerTest extends AbstractPongbackTestCase
             $discovery,
             $client,
             $this->get(SentPingbackLog::class),
-            $this->get(PingbackQueue::class),
+            $this->get(MessageQueue::class),
             new NullLogger(),
         );
 

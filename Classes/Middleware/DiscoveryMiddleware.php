@@ -23,12 +23,14 @@ use Webicorns\Pongback\Configuration\PongbackSettings;
 use Webicorns\Pongback\Utility\Constants;
 
 /**
- * Announces the Pingback endpoint of the current site
- * via "X-Pingback" HTTP header and/or <link rel="pingback"> tag.
+ * Announces the endpoints of the current site:
+ * Pingback via "X-Pingback" header and <link rel="pingback">,
+ * Webmention via "Link: <…>; rel="webmention"" header and <link rel="webmention">.
  *
  * @see https://www.hixie.ch/specs/pingback/pingback#TOC2
+ * @see https://www.w3.org/TR/webmention/#sender-discovers-receiver-webmention-endpoint
  */
-final readonly class PingbackDiscoveryMiddleware implements MiddlewareInterface
+final readonly class DiscoveryMiddleware implements MiddlewareInterface
 {
     public function __construct(
         private PageRenderer $pageRenderer,
@@ -46,34 +48,43 @@ final readonly class PingbackDiscoveryMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        $endpoint = $this->buildEndpointUri($site);
+        $pingback = $this->buildEndpointUri($site, Constants::PINGBACK_PAGE_TYPE);
+        $webmention = $settings->receiveWebmention ? $this->buildEndpointUri($site, Constants::WEBMENTION_PAGE_TYPE) : null;
 
         if ($settings->discoveryMetaTag) {
             // Must happen before the page is rendered by the frontend request handler.
-            $this->pageRenderer->addHeaderData(
-                '<link rel="pingback" href="' . htmlspecialchars($endpoint, ENT_QUOTES | ENT_HTML5) . '">',
-            );
+            $this->pageRenderer->addHeaderData($this->linkTag('pingback', $pingback));
+            if ($webmention !== null) {
+                $this->pageRenderer->addHeaderData($this->linkTag('webmention', $webmention));
+            }
         }
 
         $response = $handler->handle($request);
 
         if ($settings->discoveryHttpHeader) {
-            $response = $response->withHeader('X-Pingback', $endpoint);
+            $response = $response->withHeader('X-Pingback', $pingback);
+            if ($webmention !== null) {
+                $response = $response->withAddedHeader('Link', '<' . $webmention . '>; rel="webmention"');
+            }
         }
 
         return $response;
     }
 
-    private function buildEndpointUri(Site $site): string
+    private function linkTag(string $relation, string $endpoint): string
+    {
+        return '<link rel="' . $relation . '" href="' . htmlspecialchars($endpoint, ENT_QUOTES | ENT_HTML5) . '">';
+    }
+
+    private function buildEndpointUri(Site $site, int $pageType): string
     {
         return (string) $site->getRouter()->generateUri(
             $site->getRootPageId(),
             [
-                'type' => Constants::PINGBACK_PAGE_TYPE,
+                'type' => $pageType,
             ],
             '',
             RouterInterface::ABSOLUTE_URL,
         );
     }
-
 }

@@ -33,11 +33,11 @@ use TYPO3\CMS\Core\Site\SiteFinder;
 use Webicorns\Pongback\Configuration\PongbackSettings;
 use Webicorns\Pongback\Mention\MentionRejected;
 use Webicorns\Pongback\Mention\RejectionReason;
+use Webicorns\Pongback\Messaging\MessageQueue;
 use Webicorns\Pongback\Sending\EndpointDiscovery;
 use Webicorns\Pongback\Sending\LinkExtractor;
 use Webicorns\Pongback\Sending\PageFetcher;
 use Webicorns\Pongback\Sending\PingbackClient;
-use Webicorns\Pongback\Sending\PingbackQueue;
 use Webicorns\Pongback\Sending\PingResult;
 use Webicorns\Pongback\Sending\PingStatus;
 use Webicorns\Pongback\Sending\SendPingbacksHandler;
@@ -331,7 +331,7 @@ final class SendPingbacksHandlerTest extends TestCase
             $this->discovery,
             $this->client,
             $this->log,
-            new PingbackQueue($this->bus),
+            new MessageQueue($this->bus),
             $this->logger,
         );
 
