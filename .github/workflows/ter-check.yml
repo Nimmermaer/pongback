@@ -1,0 +1,50 @@
+name: TER token check
+
+# Read-only check of the TER access token. Prints no secret values.
+# Temporary: remove once the release setup is verified.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/ter-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check TYPO3_API_TOKEN
+    runs-on: ubuntu-latest
+    steps:
+      - name: Where is the token configured?
+        env:
+          HAS_SECRET: ${{ secrets.TYPO3_API_TOKEN != '' }}
+          HAS_VARIABLE: ${{ vars.TYPO3_API_TOKEN != '' }}
+        run: |
+          echo "Repository secret TYPO3_API_TOKEN present:   $HAS_SECRET"
+          echo "Repository variable TYPO3_API_TOKEN present: $HAS_VARIABLE"
+          if [[ "$HAS_VARIABLE" == "true" ]]; then
+            echo "::warning::TYPO3_API_TOKEN is stored as a plain text variable. Delete it and use a secret instead."
+          fi
+          if [[ "$HAS_SECRET" != "true" ]]; then
+            echo "::error::No repository secret TYPO3_API_TOKEN found. The publish workflow reads secrets.TYPO3_API_TOKEN."
+            exit 1
+          fi
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: intl, mbstring, json, zip, curl
+          tools: composer:v2
+
+      - name: Install tailor
+        run: composer global require typo3/tailor --prefer-dist --no-progress
+
+      - name: Token works for pongback (read only)
+        env:
+          TYPO3_API_TOKEN: ${{ secrets.TYPO3_API_TOKEN }}
+        run: |
+          php ~/.composer/vendor/bin/tailor ter:details pongback
+          php ~/.composer/vendor/bin/tailor ter:versions pongback
