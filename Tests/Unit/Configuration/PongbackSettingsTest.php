@@ -19,31 +19,23 @@ use TYPO3\CMS\Core\Settings\Settings;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\Entity\SiteSettings;
 use Webicorns\Pongback\Configuration\PongbackSettings;
+use Webicorns\Pongback\Tests\Unit\Fixtures\SetSettings;
 
 final class PongbackSettingsTest extends TestCase
 {
-    private const SETTINGS_DEFINITIONS = __DIR__ . '/../../../Configuration/Sets/Pongback/settings.definitions.yaml';
-
     #[Test]
-    public function fallbackDefaultsMatchTheSiteSetDefinitions(): void
+    public function knowsExactlyTheSettingsOfTheSet(): void
     {
-        $definitions = Yaml::parseFile(self::SETTINGS_DEFINITIONS)['settings'];
-        $pongbackDefinitions = array_filter(
-            $definitions,
-            static fn(string $key): bool => str_starts_with($key, 'pongback.'),
-            ARRAY_FILTER_USE_KEY,
-        );
+        $definitions = Yaml::parseFile(SetSettings::DEFINITIONS)['settings'];
+        $pongbackKeys = array_values(array_filter(array_keys($definitions), static fn(string $key): bool => str_starts_with($key, 'pongback.')));
 
-        self::assertSame(
-            PongbackSettings::DEFAULTS,
-            array_map(static fn(array $definition): mixed => $definition['default'], $pongbackDefinitions),
-        );
+        self::assertEqualsCanonicalizing($pongbackKeys, PongbackSettings::KEYS);
     }
 
     #[Test]
     public function everySettingHasACategoryOfThisSet(): void
     {
-        $content = Yaml::parseFile(self::SETTINGS_DEFINITIONS);
+        $content = Yaml::parseFile(SetSettings::DEFINITIONS);
 
         foreach ($content['settings'] as $key => $definition) {
             self::assertArrayHasKey($definition['category'] ?? '', $content['categories'], 'Category of ' . $key);
@@ -51,97 +43,96 @@ final class PongbackSettingsTest extends TestCase
     }
 
     #[Test]
-    public function sitesWithTheSetUseTheDefaults(): void
+    public function readsTheValuesOfTheSet(): void
     {
-        $site = $this->createMock(Site::class);
-        // The set provides its defaults for every defined setting.
-        $site->method('getSettings')->willReturn(SiteSettings::create(new Settings(PongbackSettings::DEFAULTS)));
+        $defaults = SetSettings::defaults();
 
-        $settings = PongbackSettings::fromSite($site);
+        $settings = PongbackSettings::fromSite($this->site(SetSettings::create()));
 
         self::assertTrue($settings->enabled);
-        self::assertTrue($settings->discoveryHttpHeader);
-        self::assertTrue($settings->discoveryMetaTag);
-        self::assertFalse($settings->receiveAutoPublish);
-        self::assertSame(20, $settings->receiveRateLimit);
-        self::assertTrue($settings->sendEnabled);
-        self::assertSame(['pages', 'tt_content'], $settings->sendTables);
-        self::assertSame('', $settings->notificationEmailTo);
-        self::assertSame('', $settings->notificationEmailFrom);
+        self::assertSame($defaults['pongback.discovery.httpHeader'], $settings->discoveryHttpHeader);
+        self::assertSame($defaults['pongback.discovery.metaTag'], $settings->discoveryMetaTag);
+        self::assertSame($defaults['pongback.receive.autoPublish'], $settings->receiveAutoPublish);
+        self::assertSame($defaults['pongback.receive.rateLimit'], $settings->receiveRateLimit);
+        self::assertSame($defaults['pongback.receive.webmention'], $settings->receiveWebmention);
+        self::assertSame($defaults['pongback.send.enabled'], $settings->sendEnabled);
+        self::assertSame($defaults['pongback.send.webmention'], $settings->sendWebmention);
+        self::assertSame($defaults['pongback.send.tables'], $settings->sendTables);
+        self::assertSame($defaults['pongback.notification.emailTo'], $settings->notificationEmailTo);
+        self::assertSame($defaults['pongback.notification.emailFrom'], $settings->notificationEmailFrom);
     }
 
     #[Test]
-    public function sitesWithoutTheSetGetNoPingbackFeatures(): void
+    public function readsConfiguredValues(): void
     {
-        $site = $this->createMock(Site::class);
-        $site->method('getSettings')->willReturn(SiteSettings::createFromSettingsTree(['other' => ['setting' => 1]]));
-
-        foreach ([PongbackSettings::fromSite($site), PongbackSettings::fromSite(null)] as $settings) {
-            self::assertFalse($settings->enabled);
-            self::assertFalse($settings->discoveryHttpHeader);
-            self::assertFalse($settings->discoveryMetaTag);
-            self::assertFalse($settings->sendEnabled);
-        }
-    }
-
-    #[Test]
-    public function anySettingOfTheSetMarksTheSiteAsUsingIt(): void
-    {
-        foreach (array_keys(PongbackSettings::DEFAULTS) as $key) {
-            $site = $this->createMock(Site::class);
-            $site->method('getSettings')->willReturn(SiteSettings::create(new Settings([$key => PongbackSettings::DEFAULTS[$key]])));
-
-            self::assertTrue(PongbackSettings::fromSite($site)->enabled, $key);
-        }
-    }
-
-    #[Test]
-    public function normalizesConfiguredValues(): void
-    {
-        $site = $this->createMock(Site::class);
-        // Same structure as created by TYPO3's SiteSettingsFactory: flat identifiers, lists stay arrays.
-        $site->method('getSettings')->willReturn(SiteSettings::create(new Settings([
-            'pongback.discovery.httpHeader' => 0,
-            'pongback.discovery.metaTag' => 1,
-            'pongback.receive.autoPublish' => '1',
-            'pongback.receive.rateLimit' => '-5',
-            'pongback.send.tables' => [' pages ', '', 'tx_news_domain_model_news'],
-            'pongback.notification.emailTo' => ' editor@example.com ',
-            'pongback.notification.emailFrom' => "\tnoreply@example.com\n",
+        $settings = PongbackSettings::fromSite($this->site(SetSettings::create([
+            'pongback.discovery.httpHeader' => false,
+            'pongback.discovery.metaTag' => false,
+            'pongback.receive.autoPublish' => true,
+            'pongback.receive.rateLimit' => 5,
+            'pongback.receive.webmention' => false,
+            'pongback.send.enabled' => false,
+            'pongback.send.webmention' => false,
+            'pongback.send.tables' => ['pages', 'tx_news_domain_model_news'],
+            'pongback.notification.emailTo' => 'editor@example.com',
+            'pongback.notification.emailFrom' => 'noreply@example.com',
         ])));
 
-        $settings = PongbackSettings::fromSite($site);
-
         self::assertFalse($settings->discoveryHttpHeader);
-        self::assertTrue($settings->discoveryMetaTag);
+        self::assertFalse($settings->discoveryMetaTag);
         self::assertTrue($settings->receiveAutoPublish);
-        self::assertSame(0, $settings->receiveRateLimit);
+        self::assertSame(5, $settings->receiveRateLimit);
+        self::assertFalse($settings->receiveWebmention);
+        self::assertFalse($settings->sendEnabled);
+        self::assertFalse($settings->sendWebmention);
         self::assertSame(['pages', 'tx_news_domain_model_news'], $settings->sendTables);
         self::assertSame('editor@example.com', $settings->notificationEmailTo);
         self::assertSame('noreply@example.com', $settings->notificationEmailFrom);
     }
 
     #[Test]
-    public function castsValuesFromYamlOrTheBackend(): void
+    public function normalizesWhatTheTypesAllow(): void
     {
-        $site = $this->createMock(Site::class);
-        $site->method('getSettings')->willReturn(SiteSettings::create(new Settings([
-            'pongback.receive.rateLimit' => '7',
-            'pongback.send.tables' => 'pages',
+        $settings = PongbackSettings::fromSite($this->site(SetSettings::create([
+            'pongback.receive.rateLimit' => -5,
+            'pongback.send.tables' => ['', ' pages '],
+            'pongback.notification.emailTo' => ' editor@example.com ',
+            'pongback.notification.emailFrom' => "\tnoreply@example.com\n",
         ])));
 
-        $settings = PongbackSettings::fromSite($site);
-
-        self::assertSame(7, $settings->receiveRateLimit);
+        self::assertSame(0, $settings->receiveRateLimit);
         self::assertSame(['pages'], $settings->sendTables);
+        self::assertSame('editor@example.com', $settings->notificationEmailTo);
+        self::assertSame('noreply@example.com', $settings->notificationEmailFrom);
     }
 
     #[Test]
-    public function usesConfiguredRateLimits(): void
+    public function sitesWithoutTheSetGetNoFeatures(): void
+    {
+        $withoutSet = $this->site(SiteSettings::create(new Settings(['other.setting' => 1])));
+        $incomplete = $this->site(SiteSettings::create(new Settings(array_diff_key(SetSettings::defaults(), ['pongback.send.tables' => true]))));
+
+        foreach ([PongbackSettings::fromSite($withoutSet), PongbackSettings::fromSite($incomplete), PongbackSettings::fromSite(null)] as $settings) {
+            self::assertEquals(PongbackSettings::disabled(), $settings);
+            self::assertFalse($settings->enabled);
+            self::assertFalse($settings->discoveryHttpHeader);
+            self::assertFalse($settings->discoveryMetaTag);
+            self::assertFalse($settings->receiveAutoPublish);
+            self::assertSame(0, $settings->receiveRateLimit);
+            self::assertFalse($settings->receiveWebmention);
+            self::assertFalse($settings->sendEnabled);
+            self::assertFalse($settings->sendWebmention);
+            self::assertSame([], $settings->sendTables);
+            self::assertSame('', $settings->notificationEmailTo);
+            self::assertSame('', $settings->notificationEmailFrom);
+        }
+    }
+
+    private function site(SiteSettings $settings): Site
     {
         $site = $this->createMock(Site::class);
-        $site->method('getSettings')->willReturn(SiteSettings::createFromSettingsTree(['pongback' => ['receive' => ['rateLimit' => 5]]]));
+        $site->method('getSettings')->willReturn($settings);
 
-        self::assertSame(5, PongbackSettings::fromSite($site)->receiveRateLimit);
+        return $site;
     }
 }
