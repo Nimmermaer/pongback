@@ -15,8 +15,29 @@
 			<trans-unit id="excerpt">
 				<source>Excerpt</source>
 			</trans-unit>
-			<trans-unit id="pongback.notification.email.subject">
-				<source>New pingback was arrived in your System</source>
+			<trans-unit id="notification.subject">
+				<source>New Pingback from %s</source>
+			</trans-unit>
+			<trans-unit id="notification.headline">
+				<source>New Pingback</source>
+			</trans-unit>
+			<trans-unit id="notification.introduction">
+				<source>Another website links to your website and sent a Pingback.</source>
+			</trans-unit>
+			<trans-unit id="notification.pending">
+				<source>The Pingback is waiting for approval.</source>
+			</trans-unit>
+			<trans-unit id="notification.published">
+				<source>The Pingback is already shown on your website.</source>
+			</trans-unit>
+			<trans-unit id="notification.moderate">
+				<source>Open the Pingback in the backend</source>
+			</trans-unit>
+			<trans-unit id="pagination.label">
+				<source>More Pingbacks</source>
+			</trans-unit>
+			<trans-unit id="list.empty">
+				<source>No Pingbacks yet.</source>
 			</trans-unit>
 		</body>
 	</file>

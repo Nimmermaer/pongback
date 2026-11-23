@@ -1,10 +1,58 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file source-language="en" datatype="plaintext" original="messages" date="2024-02-05T14:21:36Z" product-name="pongback">
+	<file source-language="en" datatype="plaintext" original="messages" date="2026-11-23T00:00:00Z" product-name="pongback">
 		<header/>
 		<body>
 			<trans-unit id="mlang_tabs_tab">
-				<source>Pongback Admin</source>
+				<source>Pongback</source>
+			</trans-unit>
+			<trans-unit id="mlang_labels_tablabel">
+				<source>Moderate Pingbacks</source>
+			</trans-unit>
+			<trans-unit id="mlang_labels_tabdescr">
+				<source>Approve, hide and delete the Pingbacks of the selected page and its subpages.</source>
+			</trans-unit>
+			<trans-unit id="selectPage">
+				<source>Select a page in the page tree to see its Pingbacks and those of its subpages.</source>
+			</trans-unit>
+			<trans-unit id="noPingbacks">
+				<source>There are no Pingbacks on this page and its subpages.</source>
+			</trans-unit>
+			<trans-unit id="column.status">
+				<source>Status</source>
+			</trans-unit>
+			<trans-unit id="column.source">
+				<source>Linking page</source>
+			</trans-unit>
+			<trans-unit id="column.target">
+				<source>Linked page</source>
+			</trans-unit>
+			<trans-unit id="column.date">
+				<source>Received</source>
+			</trans-unit>
+			<trans-unit id="status.pending">
+				<source>Pending</source>
+			</trans-unit>
+			<trans-unit id="status.approved">
+				<source>Approved</source>
+			</trans-unit>
+			<trans-unit id="moderation.approve">
+				<source>Approve</source>
+			</trans-unit>
+			<trans-unit id="moderation.hide">
+				<source>Hide</source>
+			</trans-unit>
+			<trans-unit id="moderation.delete">
+				<source>Delete</source>
+			</trans-unit>
+			<trans-unit id="moderation.approve.done">
+				<source>The Pingback is approved and shown on the website.</source>
+			</trans-unit>
+			<trans-unit id="moderation.hide.done">
+				<source>The Pingback is hidden.</source>
+			</trans-unit>
+			<trans-unit id="moderation.delete.done">
+				<source>The Pingback is deleted.</source>
 			</trans-unit>
 		</body>
 	</file>

@@ -7,6 +7,7 @@ use TYPO3\CMS\Core\Configuration\Event\SiteConfigurationLoadedEvent;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Dashboard\Widgets\WidgetInterface;
 use Webicorns\Pongback\Listener\EnhanceSiteConfigurationListener;
+use Webicorns\Pongback\Widget\ModuleButtonProvider;
 use Webicorns\Pongback\Widget\PongbackWidget;
 
 return static function (ContainerConfigurator $containerConfigurator): void {
@@ -25,11 +26,12 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 
     // EXT:dashboard is optional
     if (interface_exists(WidgetInterface::class)) {
+        $services->set(ModuleButtonProvider::class)->autowire();
         $services->set('dashboard.widget.pongback', PongbackWidget::class)
             ->autowire()
             ->tag('dashboard.widget', [
                 'identifier' => 'pongback',
-                'groupNames' => 'general',
+                'groupNames' => 'pongback',
                 'title' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_be.xlf:widgets.pongback.title',
                 'description' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_be.xlf:widgets.pongback.description',
                 'iconIdentifier' => 'tx-pongback-pong',

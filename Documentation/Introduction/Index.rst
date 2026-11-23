@@ -45,11 +45,11 @@ Ready
     background with retries, see :ref:`sending`
 *   Configuration per site with a site set and site settings
 
-Being reworked for version 1.0
-------------------------------
-
-*   Backend module for moderation, email notification with approval
-*   Frontend plugins and dashboard widget showing the Pingbacks
+*   Backend module :guilabel:`Web > Pongback` for moderation, respecting
+    page permissions, and email notification with a link to it
+*   Content elements "Pingbacks of this page" and "Latest Pingbacks", cached
+    with the page
+*   Dashboard widget with the newest Pingbacks and their websites
 
 See the `roadmap <https://github.com/Nimmermaer/pongback/milestone/1>`__.
 

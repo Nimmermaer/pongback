@@ -1,7 +1,7 @@
 <html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
-<f:translate key="source_title" />: {item.sourceTitle}<br>
-<f:translate key="excerpt" />: {item.excerpt}<br>
-<f:translate key="source_link" />: {item.sourceLink}<br>
-<f:translate key="target_link" />: {item.targetLink}<br>
-<hr>
+<li class="tx-pongback-item">
+    <a href="{pingback.sourceLink}" rel="nofollow ugc noopener" class="tx-pongback-source">{f:if(condition: pingback.sourceTitle, then: pingback.sourceTitle, else: pingback.sourceLink)}</a>
+    <f:if condition="{pingback.crdate}"><time datetime="{pingback.crdate -> f:format.date(format: 'c')}">{pingback.crdate -> f:format.date(format: 'd.m.Y')}</time></f:if>
+    <f:if condition="{pingback.excerpt}"><p class="tx-pongback-excerpt">{pingback.excerpt}</p></f:if>
+</li>
 </html>

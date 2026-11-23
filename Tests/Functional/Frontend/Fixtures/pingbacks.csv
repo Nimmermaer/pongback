@@ -1,0 +1,8 @@
+"tx_pongback_domain_model_pingback"
+,"uid","pid","crdate","source_link","source_title","target_link","hidden","deleted","sys_language_uid"
+,1,2,100,"https://blog.example/older","Older post","https://main.example/article",0,0,0
+,2,2,200,"https://blog.example/newer","Newer post","https://main.example/article",0,0,0
+,3,2,300,"https://blog.example/pending","Pending post","https://main.example/article",1,0,0
+,4,1,400,"https://blog.example/home","Home post","https://main.example/",0,0,0
+,5,11,500,"https://blog.example/other-site","Other site post","https://other.example/article",0,0,0
+,6,2,600,"https://blog.example/deleted","Deleted post","https://main.example/article",0,1,0

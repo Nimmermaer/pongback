@@ -66,7 +66,7 @@
 				<source>Notification recipient</source>
 			</trans-unit>
 			<trans-unit id="settings.description.pongback.notification.emailTo">
-				<source>Email address that is notified about new Pingbacks. Leave empty to disable notifications.</source>
+				<source>Email addresses (comma separated) that are notified about new Pingbacks, with a link to the module Web > Pongback. Leave empty to disable notifications.</source>
 			</trans-unit>
 			<trans-unit id="settings.pongback.notification.emailFrom">
 				<source>Notification sender</source>

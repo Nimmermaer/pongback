@@ -109,6 +109,57 @@ Besides the record, the event provides the incoming mention
 resolved target (:php:`getTarget()`: site, page ID, language ID).
 A rejection stops the event propagation.
 
+..  _developer-event-created:
+
+React to new Pingbacks
+======================
+
+The PSR-14 event
+:php:`\Webicorns\Pongback\Event\AfterPingbackCreatedEvent` is dispatched
+after a Pingback has been stored. It provides the record UID (:php:`$uid`),
+the record (:php:`$pingback`), the incoming mention (:php:`$mention`) and
+the resolved target (:php:`$target`). The email notification of the
+extension is a listener of this event.
+
+..  code-block:: php
+    :caption: EXT:my_sitepackage/Classes/EventListener/PingbackToChat.php
+
+    <?php
+
+    declare(strict_types=1);
+
+    namespace MyVendor\MySitepackage\EventListener;
+
+    use TYPO3\CMS\Core\Attribute\AsEventListener;
+    use Webicorns\Pongback\Event\AfterPingbackCreatedEvent;
+
+    #[AsEventListener]
+    final class PingbackToChat
+    {
+        public function __invoke(AfterPingbackCreatedEvent $event): void
+        {
+            // e.g. post $event->pingback->getSourceLink() to a chat
+        }
+    }
+
+..  _developer-templates:
+
+Templates
+=========
+
+Plugins
+    Override the Fluid templates with the site settings
+    `plugin.tx_pongback.view.templateRootPath`, `partialRootPath` and
+    `layoutRootPath`. The templates are `Pingback/List.html` and
+    `Pingback/Latest.html`, both render the partial `List/Item.html`.
+
+Email
+    The email template is `PongbackPingbackReceived` (HTML and text) in
+    :file:`EXT:pongback/Resources/Private/Templates/Email/`. Override it
+    with a template of the same name in a path of
+    :php:`$GLOBALS['TYPO3_CONF_VARS']['MAIL']['templateRootPaths']` with a
+    higher key than `1732600000`.
+
 ..  _developer-webmention:
 
 Protocol neutral core

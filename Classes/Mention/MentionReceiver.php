@@ -17,6 +17,7 @@ use Psr\Log\LoggerInterface;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use Webicorns\Pongback\Configuration\PongbackSettings;
 use Webicorns\Pongback\Domain\Model\Pingback;
+use Webicorns\Pongback\Event\AfterPingbackCreatedEvent;
 use Webicorns\Pongback\Event\BeforePingbackCreateEvent;
 use Webicorns\Pongback\Mention\Source\SourceFetcher;
 use Webicorns\Pongback\Mention\Source\SourceInspector;
@@ -78,6 +79,7 @@ readonly class MentionReceiver implements MentionReceiverInterface
             'target' => $mention->target,
             'uid' => $uid,
         ]);
+        $this->eventDispatcher->dispatch(new AfterPingbackCreatedEvent($uid, $pingback, $mention, $target));
 
         return $uid;
     }

@@ -15,12 +15,12 @@ $tca = [
         'label' => 'source_link',
         'tstamp' => 'tstamp',
         'crdate' => 'crdate',
-        'sortby' => 'sorting',
+        'default_sortby' => 'crdate DESC',
         'security' => [
             'ignorePageTypeRestriction' => true,
         ],
-        'versioningWS' => true,
-        'origUid' => 't3_origuid',
+        // Moderated in the module "Web > Pongback"
+        'hideTable' => true,
         'languageField' => 'sys_language_uid',
         'transOrigPointerField' => 'l10n_parent',
         'transOrigDiffSourceField' => 'l10n_diffsource',
@@ -36,79 +36,16 @@ $tca = [
     ],
     'types' => [
         '1' => [
-            'showitem' => 'sys_language_uid,
-            --palette--,l10n_parent,l10n_diffsource,hidden,
-            --palette--;;1,
-            source_link,
-            source_title,
-            target_link,
-            excerpt,
-            --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access,starttime,endtime',
-        ],
-    ],
-    'palettes' => [
-        '1' => [
-            'showitem' => '',
+            'showitem' => 'hidden, source_link, source_title, target_link, excerpt, sys_language_uid,
+                --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, starttime, endtime',
         ],
     ],
     'columns' => [
-        'sys_language_uid' => [
-            'exclude' => 1,
-            'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.language',
-            'config' => [
-                'type' => 'language',
-            ],
-        ],
-        'l10n_parent' => [
-            'displayCond' => 'FIELD:sys_language_uid:>:0',
-            'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.l18n_parent',
-            'config' => [
-                'type' => 'select',
-                'renderType' => 'selectSingle',
-                'items' => [
-                    [
-                        'label' => '',
-                        'value' => 0,
-                    ],
-                ],
-                'foreign_table' => 'tx_pongback_domain_model_pingback',
-                'foreign_table_where' => 'AND tx_pongback_domain_model_pingback.pid=###CURRENT_PID### AND tx_pongback_domain_model_pingback.sys_language_uid IN (-1,0)',
-            ],
-        ],
-        'l10n_diffsource' => [
+        // hidden, starttime, endtime and the language fields are added by TYPO3 from "ctrl" (TcaEnrichment, 13.4+)
+        // Mapped for the date shown in the frontend, Extbase only maps fields with a column definition.
+        'crdate' => [
             'config' => [
                 'type' => 'passthrough',
-            ],
-        ],
-        'hidden' => [
-            'exclude' => 1,
-            'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.hidden',
-            'config' => [
-                'type' => 'check',
-            ],
-        ],
-        'starttime' => [
-            'exclude' => 1,
-            'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.starttime',
-            'config' => [
-                'type' => 'datetime',
-                'searchable' => false,
-                'default' => 0,
-                'behaviour' => [
-                    'allowLanguageSynchronization' => true,
-                ],
-            ],
-        ],
-        'endtime' => [
-            'exclude' => 1,
-            'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.endtime',
-            'config' => [
-                'type' => 'datetime',
-                'searchable' => false,
-                'default' => 0,
-                'behaviour' => [
-                    'allowLanguageSynchronization' => true,
-                ],
             ],
         ],
         'source_link' => [

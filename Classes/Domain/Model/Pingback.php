@@ -34,6 +34,13 @@ class Pingback extends AbstractEntity
 
     protected string $targetLink = '';
 
+    protected ?\DateTimeImmutable $crdate = null;
+
+    public function getCrdate(): ?\DateTimeImmutable
+    {
+        return $this->crdate;
+    }
+
     public function isHidden(): bool
     {
         return $this->hidden;

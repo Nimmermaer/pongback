@@ -1,16 +1,13 @@
 <html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
-
-<f:if condition="{pagination.allPageNumbers->f:count()} > 2">
-    <ul class="pagination">
-        <f:for each="{pagination.allPageNumbers}" as="page">
-            <li class="page-item">
-                <f:link.action arguments="{currentPageNumber:page}"
-                               class="page-link {f:if(condition:'{currentPageNumber}=={page}',then:'active')}">
-                    {page}
-                </f:link.action>
-            </li>
-        </f:for>
-    </ul>
+<f:if condition="{pagination.lastPageNumber} > 1">
+    <nav aria-label="{f:translate(key: 'pagination.label')}">
+        <ul class="pagination">
+            <f:for each="{pagination.allPageNumbers}" as="number">
+                <li class="page-item{f:if(condition: '{number} == {paginator.currentPageNumber}', then: ' active')}">
+                    <f:link.action action="list" arguments="{currentPage: number}" class="page-link">{number}</f:link.action>
+                </li>
+            </f:for>
+        </ul>
+    </nav>
 </f:if>
-
 </html>

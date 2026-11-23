@@ -2,40 +2,23 @@
 
 declare(strict_types=1);
 
-use Webicorns\Pongback\Controller\Backend\AdminModuleController;
-use Webicorns\Pongback\Controller\Backend\PingbackModuleController;
+use Webicorns\Pongback\Controller\Backend\ModerationController;
 
 return [
-    'pongback_admin' => [
+    ModerationController::MODULE => [
         'parent' => 'web',
-        'position' => ['top'],
         'access' => 'user',
         'workspaces' => 'live',
-        'path' => '/module/pongback/administration',
+        'path' => '/module/web/pongback',
         'labels' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_mod.xlf',
         'iconIdentifier' => 'tx-pongback-pong',
         'navigationComponent' => '@typo3/backend/tree/page-tree-element',
         'routes' => [
             '_default' => [
-                'target' => AdminModuleController::class . '::handleRequest',
+                'target' => ModerationController::class . '::indexAction',
             ],
-        ],
-    ],
-    'pingback_list' => [
-        'parent' => 'pongback_admin',
-        'position' => ['top'],
-        'access' => 'user',
-        'workspaces' => 'live',
-        'path' => '/module/pongback/list/pingback',
-        'labels' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_mod.xlf',
-        'iconIdentifier' => 'tx-pongback-pong',
-        'navigationComponent' => '@typo3/backend/tree/page-tree-element',
-        'routes' => [
-            '_default' => [
-                'target' => PingbackModuleController::class . '::handleRequest',
-            ],
-            'edit' => [
-                'target' => PingbackModuleController::class . '::editAction',
+            'moderate' => [
+                'target' => ModerationController::class . '::moderateAction',
                 'methods' => ['POST'],
             ],
         ],

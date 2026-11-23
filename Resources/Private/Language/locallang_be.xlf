@@ -4,28 +4,40 @@
 		<header/>
 		<body>
 			<trans-unit id="plugin.tx_pongback.pongback_list.title">
-				<source>Pongback:: Pingback list</source>
+				<source>Pingbacks of this page</source>
 			</trans-unit>
 			<trans-unit id="plugin.tx_pongback.pongback_list.description">
-				<source>List pingbacks with pagination</source>
+				<source>The approved Pingbacks of the page the element is placed on, newest first, with pagination.</source>
 			</trans-unit>
 			<trans-unit id="plugin.tx_pongback.pongback_latest.title">
-				<source>Pongback:: Latest Pingbacks</source>
+				<source>Latest Pingbacks</source>
 			</trans-unit>
 			<trans-unit id="plugin.tx_pongback.pongback_latest.description">
-				<source>List latest pingbacks with pagination</source>
+				<source>The newest approved Pingbacks of the whole site.</source>
+			</trans-unit>
+			<trans-unit id="widgets.group.pongback">
+				<source>Pingbacks</source>
 			</trans-unit>
 			<trans-unit id="widgets.pongback.title">
-				<source>List Pingbacks</source>
+				<source>Latest Pingbacks</source>
 			</trans-unit>
 			<trans-unit id="widgets.pongback.description">
-				<source>Pingback list</source>
+				<source>The newest Pingbacks with the linking website, pending ones marked.</source>
+			</trans-unit>
+			<trans-unit id="widgets.pongback.button">
+				<source>Moderate Pingbacks</source>
+			</trans-unit>
+			<trans-unit id="widgets.pongback.pending">
+				<source>%d Pingbacks are waiting for approval.</source>
+			</trans-unit>
+			<trans-unit id="widgets.pongback.empty">
+				<source>No Pingbacks yet.</source>
 			</trans-unit>
 			<trans-unit id="plugin.pongback.configuration">
 				<source>Pingback Configuration</source>
 			</trans-unit>
 			<trans-unit id="plugin.pongback.configuration.listitem">
-				<source>Number of displayed items</source>
+				<source>Number of Pingbacks (per page for "Pingbacks of this page")</source>
 			</trans-unit>
 		</body>
 	</file>

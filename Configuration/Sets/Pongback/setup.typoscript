@@ -18,7 +18,7 @@ plugin {
             storagePid = {$plugin.tx_pongback.persistence.storagePid}
         }
         settings {
-            listItem = 2
+            listItem = 5
         }
     }
 }

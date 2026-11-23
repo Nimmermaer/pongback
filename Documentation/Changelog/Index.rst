@@ -34,6 +34,13 @@ Breaking
     tables from TCA.
 *   Sites without the site set `webicorns/pongback` get no Pingback
     features: no discovery, no endpoint, no sending.
+*   The backend modules "Pongback Admin" and its AJAX toggle are replaced by
+    the module :guilabel:`Web > Pongback`. The Pingback table is hidden in
+    :guilabel:`Web > List`.
+*   The cache `tx_pongback_cache` is removed, plugins are cached with the
+    page.
+*   The Page TSconfig for the new content element wizard, the list module
+    and the dashboard templates is removed.
 
 Features
 --------
@@ -45,6 +52,13 @@ Features
 *   PSR-14 event :php:`BeforePingbackCreateEvent` can reject Pingbacks, see
     :ref:`developer-event`.
 *   Discovery header and link tag can be switched off per site.
+*   Module :guilabel:`Web > Pongback` to approve, hide and delete Pingbacks
+    of a page tree, see :ref:`editors-module`.
+*   Email notification with a link into the module, see
+    :ref:`editors-email`.
+*   PSR-14 event :php:`AfterPingbackCreatedEvent`, see
+    :ref:`developer-event-created`.
+*   Dashboard widget with the linking websites in its own group.
 *   Sending Pingbacks via the Symfony Messenger with retries and a log of
     sent Pingbacks, see :ref:`sending`. EXT:webhooks is no longer needed.
 
