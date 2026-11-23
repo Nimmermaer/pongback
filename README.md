@@ -1,7 +1,7 @@
 ![PHP Version](https://img.shields.io/badge/PHP-8.2%2B-blue)
 ![TYPO3 Version](https://img.shields.io/badge/TYPO3-13.4%20%7C%2014-orange)
 ![Extension Status](https://img.shields.io/badge/Status-Beta-lightblue)
-![Version](https://img.shields.io/badge/Version-0.9.0-blue)
+![Version](https://img.shields.io/badge/Version-0.10.0-blue)
 [![CI](https://github.com/Nimmermaer/pongback/actions/workflows/ci.yml/badge.svg)](https://github.com/Nimmermaer/pongback/actions/workflows/ci.yml)
 
 # TYPO3 Extension - Pongback

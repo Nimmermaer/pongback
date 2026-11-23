@@ -9,8 +9,8 @@
 >
     <project
         title="Pongback"
-        version="0.9"
-        release="0.9.0"
+        version="0.10"
+        release="0.10.0"
         copyright="since 2023 by Webicorns and contributors"
     />
     <extension
