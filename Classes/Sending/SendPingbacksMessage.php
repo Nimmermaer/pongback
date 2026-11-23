@@ -12,17 +12,24 @@ declare(strict_types=1);
 
 namespace Webicorns\Pongback\Sending;
 
+use Webicorns\Pongback\Messaging\RetryableMessage;
+
 /**
  * "Send the Pingbacks of this page", queued when a page or its content changes.
  * Holds IDs only, the handler reads the current state when it runs.
  */
-final readonly class SendPingbacksMessage
+final readonly class SendPingbacksMessage implements RetryableMessage
 {
     public function __construct(
         public int $pageId,
         public int $languageId = 0,
         public int $attempt = 1,
     ) {}
+
+    public function getAttempt(): int
+    {
+        return $this->attempt;
+    }
 
     public function nextAttempt(): self
     {

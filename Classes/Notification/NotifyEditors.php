@@ -26,8 +26,7 @@ use Webicorns\Pongback\Configuration\PongbackSettings;
 use Webicorns\Pongback\Controller\Backend\ModerationController;
 use Webicorns\Pongback\Event\AfterPingbackCreatedEvent;
 use Webicorns\Pongback\Event\SendingFailedEvent;
-use Webicorns\Pongback\Mention\IncomingMention;
-use Webicorns\Pongback\Sending\PingStatus;
+use Webicorns\Pongback\Sending\SendStatus;
 
 /**
  * Emails the recipients of the site setting "pongback.notification.emailTo":
@@ -54,7 +53,7 @@ readonly class NotifyEditors
         $pingback = $event->pingback;
         $subject = sprintf(
             $this->label($event->target->site, 'notification.subject'),
-            self::protocolName($pingback->getProtocol()),
+            $pingback->getProtocol()->label(),
             $pingback->getSourceTitle() !== '' ? $pingback->getSourceTitle() : $pingback->getSourceLink(),
         );
 
@@ -62,7 +61,7 @@ readonly class NotifyEditors
         $this->send($event->target->site, $subject, self::TEMPLATE, [
             'pingback' => $pingback,
             'pending' => $pingback->isHidden(),
-            'protocol' => self::protocolName($pingback->getProtocol()),
+            'protocol' => $pingback->getProtocol()->label(),
             'moderationUrl' => $this->moduleUrl(['id' => $event->target->pageId, 'pingback' => $event->uid]),
         ], ['uid' => $event->uid]);
     }
@@ -74,8 +73,8 @@ readonly class NotifyEditors
         foreach ($event->problems as $target => $result) {
             $problems[] = [
                 'target' => $target,
-                'protocol' => $result->protocol === '' ? '' : self::protocolName($result->protocol),
-                'rejected' => $result->status === PingStatus::Rejected,
+                'protocol' => $result->protocol?->label() ?? '',
+                'rejected' => $result->status === SendStatus::Rejected,
                 'message' => $result->message,
             ];
         }
@@ -125,11 +124,6 @@ readonly class NotifyEditors
     private function label(Site $site, string $key): string
     {
         return $this->languageServiceFactory->createFromSiteLanguage($site->getDefaultLanguage())->sL(self::LABELS . $key);
-    }
-
-    private static function protocolName(string $protocol): string
-    {
-        return $protocol === IncomingMention::PROTOCOL_WEBMENTION ? 'Webmention' : 'Pingback';
     }
 
     /**

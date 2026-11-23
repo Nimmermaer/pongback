@@ -100,7 +100,7 @@ readonly class MentionStorage
                 'hidden' => (int) $pingback->isHidden(),
                 'crdate' => $now,
                 'tstamp' => $now,
-                'protocol' => $pingback->getProtocol(),
+                'protocol' => $pingback->getProtocol()->value,
                 'source_link' => $pingback->getSourceLink(),
                 'target_link' => $pingback->getTargetLink(),
                 'source_title' => $pingback->getSourceTitle(),

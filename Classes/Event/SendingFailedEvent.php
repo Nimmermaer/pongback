@@ -13,7 +13,7 @@ declare(strict_types=1);
 namespace Webicorns\Pongback\Event;
 
 use TYPO3\CMS\Core\Site\Entity\Site;
-use Webicorns\Pongback\Sending\PingResult;
+use Webicorns\Pongback\Sending\SendResult;
 
 /**
  * Dispatched after sending the Pingbacks and Webmentions of a page, if linked pages could not be
@@ -23,7 +23,7 @@ use Webicorns\Pongback\Sending\PingResult;
 final readonly class SendingFailedEvent
 {
     /**
-     * @param array<string, PingResult> $problems result per linked URL
+     * @param array<string, SendResult> $problems result per linked URL
      */
     public function __construct(
         public Site $site,

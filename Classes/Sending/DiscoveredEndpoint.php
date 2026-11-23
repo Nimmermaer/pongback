@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Webicorns\Pongback\Sending;
 
-use Webicorns\Pongback\Mention\IncomingMention;
+use Webicorns\Pongback\Mention\Protocol;
 
 /**
  * The endpoint a linked page announces, with its protocol.
@@ -20,12 +20,12 @@ use Webicorns\Pongback\Mention\IncomingMention;
 final readonly class DiscoveredEndpoint
 {
     public function __construct(
-        public string $protocol,
+        public Protocol $protocol,
         public string $url,
     ) {}
 
     public function isWebmention(): bool
     {
-        return $this->protocol === IncomingMention::PROTOCOL_WEBMENTION;
+        return $this->protocol === Protocol::Webmention;
     }
 }

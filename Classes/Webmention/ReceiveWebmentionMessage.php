@@ -12,10 +12,12 @@ declare(strict_types=1);
 
 namespace Webicorns\Pongback\Webmention;
 
+use Webicorns\Pongback\Messaging\RetryableMessage;
+
 /**
  * "Verify this Webmention", queued by the endpoint after the quick checks.
  */
-final readonly class ReceiveWebmentionMessage
+final readonly class ReceiveWebmentionMessage implements RetryableMessage
 {
     public function __construct(
         public string $source,
@@ -25,6 +27,11 @@ final readonly class ReceiveWebmentionMessage
         public string $userAgent = '',
         public int $attempt = 1,
     ) {}
+
+    public function getAttempt(): int
+    {
+        return $this->attempt;
+    }
 
     public function nextAttempt(): self
     {

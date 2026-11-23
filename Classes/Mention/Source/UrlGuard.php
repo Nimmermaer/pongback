@@ -17,8 +17,9 @@ use Webicorns\Pongback\Mention\RejectionReason;
 use Webicorns\Pongback\Utility\Constants;
 
 /**
- * Protects against server side request forgery: the source of a mention is chosen by the
- * remote party, so it must only point to public web servers.
+ * Protects against server side request forgery: sources of received mentions are chosen by the
+ * remote party, linked pages and their endpoints by whoever edits the content and the linked
+ * site. Every such URL must only point to public web servers.
  */
 readonly class UrlGuard
 {
@@ -53,7 +54,7 @@ readonly class UrlGuard
     private function parseUrl(string $url): array
     {
         if (strlen($url) > Constants::MAX_URL_LENGTH) {
-            throw new MentionRejected(RejectionReason::InvalidRequest, 'The source URI is too long.');
+            throw new MentionRejected(RejectionReason::InvalidRequest, 'The URL is too long.');
         }
 
         $parts = parse_url($url);
@@ -61,16 +62,16 @@ readonly class UrlGuard
         $host = strtolower(rtrim((string) ($parts['host'] ?? ''), '.'));
 
         if (! isset(self::ALLOWED_PORTS[$scheme]) || $host === '') {
-            throw new MentionRejected(RejectionReason::InvalidRequest, 'The source URI must be an absolute http(s) URI.');
+            throw new MentionRejected(RejectionReason::InvalidRequest, 'The URL must be an absolute http(s) URI.');
         }
 
         if (isset($parts['user']) || isset($parts['pass'])) {
-            throw new MentionRejected(RejectionReason::InvalidRequest, 'The source URI must not contain credentials.');
+            throw new MentionRejected(RejectionReason::InvalidRequest, 'The URL must not contain credentials.');
         }
 
         $port = (int) ($parts['port'] ?? self::ALLOWED_PORTS[$scheme]);
         if ($port !== self::ALLOWED_PORTS[$scheme]) {
-            throw new MentionRejected(RejectionReason::InvalidRequest, 'The source URI must use the default port.');
+            throw new MentionRejected(RejectionReason::InvalidRequest, 'The URL must use the default port.');
         }
 
         return [$host, $port];
@@ -84,13 +85,13 @@ readonly class UrlGuard
         $literalIp = trim($host, '[]');
         $ips = filter_var($literalIp, FILTER_VALIDATE_IP) !== false ? [$literalIp] : ($this->resolver)($host);
         if ($ips === []) {
-            throw new MentionRejected(RejectionReason::SourceNotFound, 'The source URI does not exist.');
+            throw new MentionRejected(RejectionReason::SourceNotFound, 'The URL does not exist.');
         }
 
         // All addresses must be public: the HTTP client may pick any of them.
         foreach ($ips as $ip) {
             if (! self::isPublicIp($ip)) {
-                throw new MentionRejected(RejectionReason::InvalidRequest, 'The source URI must point to a public host.');
+                throw new MentionRejected(RejectionReason::InvalidRequest, 'The URL must point to a public host.');
             }
         }
 

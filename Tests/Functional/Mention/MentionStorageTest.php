@@ -17,6 +17,7 @@ use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use Webicorns\Pongback\Domain\Model\Pingback;
 use Webicorns\Pongback\Mention\MentionStorage;
+use Webicorns\Pongback\Mention\Protocol;
 use Webicorns\Pongback\Tests\Functional\AbstractPongbackTestCase;
 use Webicorns\Pongback\Utility\Constants;
 
@@ -55,7 +56,7 @@ final class MentionStorageTest extends AbstractPongbackTestCase
         $cacheManager->expects(self::exactly(2))->method('flushCachesInGroupByTags')->with('pages', [Constants::PINGBACK_TABLE]);
         $storage = $this->storage($cacheManager);
         $pingback = $this->pingback(hidden: true);
-        $pingback->setProtocol('webmention');
+        $pingback->setProtocol(Protocol::Webmention);
         $uid = $storage->add($pingback, 0);
 
         self::assertSame($uid, $storage->find('https://blog.example/post', 'https://main.example/article'));

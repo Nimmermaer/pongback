@@ -13,16 +13,17 @@ declare(strict_types=1);
 namespace Webicorns\Pongback\Tests\Functional\Sending;
 
 use PHPUnit\Framework\Attributes\Test;
-use Webicorns\Pongback\Sending\PingResult;
-use Webicorns\Pongback\Sending\PingStatus;
-use Webicorns\Pongback\Sending\SentPingbackLog;
+use Webicorns\Pongback\Mention\Protocol;
+use Webicorns\Pongback\Sending\SendResult;
+use Webicorns\Pongback\Sending\SendStatus;
+use Webicorns\Pongback\Sending\SentMentionLog;
 use Webicorns\Pongback\Tests\Functional\AbstractPongbackTestCase;
 use Webicorns\Pongback\Utility\Constants;
 
 /**
- * SentPingbackLog against a real database.
+ * SentMentionLog against a real database.
  */
-final class SentPingbackLogTest extends AbstractPongbackTestCase
+final class SentMentionLogTest extends AbstractPongbackTestCase
 {
     private const SOURCE = 'https://main.example/article';
     private const TARGET = 'https://blog.example/post';
@@ -30,7 +31,7 @@ final class SentPingbackLogTest extends AbstractPongbackTestCase
     #[Test]
     public function recordsTheFirstAttempt(): void
     {
-        $this->log()->record(2, self::SOURCE, self::TARGET, new PingResult(PingStatus::Sent, 'Thanks', 0, 'https://blog.example/xmlrpc.php'));
+        $this->log()->record(2, self::SOURCE, self::TARGET, new SendResult(SendStatus::Sent, 'Thanks', 0, 'https://blog.example/xmlrpc.php'));
 
         $rows = $this->rows();
         self::assertCount(1, $rows);
@@ -48,8 +49,8 @@ final class SentPingbackLogTest extends AbstractPongbackTestCase
     public function updatesTheRecordOnFurtherAttempts(): void
     {
         $log = $this->log();
-        $log->record(2, self::SOURCE, self::TARGET, new PingResult(PingStatus::Failed, 'Timeout'));
-        $log->record(2, self::SOURCE, self::TARGET, new PingResult(PingStatus::Rejected, 'No link', 17));
+        $log->record(2, self::SOURCE, self::TARGET, new SendResult(SendStatus::Failed, 'Timeout'));
+        $log->record(2, self::SOURCE, self::TARGET, new SendResult(SendStatus::Rejected, 'No link', 17));
 
         $rows = $this->rows();
         self::assertCount(1, $rows);
@@ -59,24 +60,24 @@ final class SentPingbackLogTest extends AbstractPongbackTestCase
     }
 
     #[Test]
-    public function onlyFailedPingbacksAreNotFinal(): void
+    public function findsTheLastResultOfThePageAndLink(): void
     {
         $log = $this->log();
-        self::assertFalse($log->isFinal(2, self::SOURCE, self::TARGET), 'Unknown Pingbacks are not final');
+        self::assertNull($log->lastResult(2, self::SOURCE, self::TARGET), 'Nothing sent yet');
 
-        $log->record(2, self::SOURCE, self::TARGET, new PingResult(PingStatus::Failed));
-        self::assertFalse($log->isFinal(2, self::SOURCE, self::TARGET));
+        $log->record(2, self::SOURCE, self::TARGET, new SendResult(SendStatus::Failed));
+        self::assertSame(SendStatus::Failed, $log->lastResult(2, self::SOURCE, self::TARGET)?->status);
 
-        $log->record(2, self::SOURCE, self::TARGET, new PingResult(PingStatus::NoEndpoint));
-        self::assertTrue($log->isFinal(2, self::SOURCE, self::TARGET));
-        self::assertFalse($log->isFinal(2, self::SOURCE, 'https://blog.example/other'));
-        self::assertFalse($log->isFinal(1, self::SOURCE, self::TARGET), 'Entries belong to their page');
+        $log->record(2, self::SOURCE, self::TARGET, new SendResult(SendStatus::NoEndpoint));
+        self::assertSame(SendStatus::NoEndpoint, $log->lastResult(2, self::SOURCE, self::TARGET)?->status);
+        self::assertNull($log->lastResult(2, self::SOURCE, 'https://blog.example/other'));
+        self::assertNull($log->lastResult(1, self::SOURCE, self::TARGET), 'Entries belong to their page');
     }
 
     #[Test]
     public function shortensLongMessages(): void
     {
-        $this->log()->record(2, self::SOURCE, self::TARGET, new PingResult(PingStatus::Failed, str_repeat('m', 300)));
+        $this->log()->record(2, self::SOURCE, self::TARGET, new SendResult(SendStatus::Failed, str_repeat('m', 300)));
 
         self::assertSame(str_repeat('m', 255), $this->rows()[0]['message']);
     }
@@ -87,10 +88,10 @@ final class SentPingbackLogTest extends AbstractPongbackTestCase
         $log = $this->log();
         self::assertNull($log->lastResult(2, self::SOURCE, self::TARGET));
 
-        $log->record(2, self::SOURCE, self::TARGET, new PingResult(PingStatus::Rejected, 'HTTP 400', 0, 'https://blog.example/webmention', 'webmention'));
+        $log->record(2, self::SOURCE, self::TARGET, new SendResult(SendStatus::Rejected, 'HTTP 400', 0, 'https://blog.example/webmention', Protocol::Webmention));
 
         self::assertEquals(
-            new PingResult(PingStatus::Rejected, 'HTTP 400', 0, 'https://blog.example/webmention', 'webmention'),
+            new SendResult(SendStatus::Rejected, 'HTTP 400', 0, 'https://blog.example/webmention', Protocol::Webmention),
             $log->lastResult(2, self::SOURCE, self::TARGET),
         );
     }
@@ -99,11 +100,11 @@ final class SentPingbackLogTest extends AbstractPongbackTestCase
     public function listsWebmentionTargetsOfAPageAndForgetsThem(): void
     {
         $log = $this->log();
-        $log->record(2, self::SOURCE, 'https://blog.example/one', new PingResult(PingStatus::Sent, protocol: 'webmention'));
-        $log->record(2, self::SOURCE, 'https://blog.example/pingback', new PingResult(PingStatus::Sent, protocol: 'pingback'));
-        $log->record(2, self::SOURCE, 'https://blog.example/two', new PingResult(PingStatus::Failed, protocol: 'webmention'));
-        $log->record(2, 'https://main.example/other', 'https://blog.example/three', new PingResult(PingStatus::Sent, protocol: 'webmention'));
-        $log->record(3, self::SOURCE, 'https://blog.example/four', new PingResult(PingStatus::Sent, protocol: 'webmention'));
+        $log->record(2, self::SOURCE, 'https://blog.example/one', new SendResult(SendStatus::Sent, protocol: Protocol::Webmention));
+        $log->record(2, self::SOURCE, 'https://blog.example/pingback', new SendResult(SendStatus::Sent, protocol: Protocol::Pingback));
+        $log->record(2, self::SOURCE, 'https://blog.example/two', new SendResult(SendStatus::Failed, protocol: Protocol::Webmention));
+        $log->record(2, 'https://main.example/other', 'https://blog.example/three', new SendResult(SendStatus::Sent, protocol: Protocol::Webmention));
+        $log->record(3, self::SOURCE, 'https://blog.example/four', new SendResult(SendStatus::Sent, protocol: Protocol::Webmention));
 
         self::assertSame(['https://blog.example/one', 'https://blog.example/two'], $log->webmentionTargets(2, self::SOURCE));
 
@@ -114,9 +115,9 @@ final class SentPingbackLogTest extends AbstractPongbackTestCase
         self::assertCount(4, $this->rows(), 'Only this entry is removed');
     }
 
-    private function log(): SentPingbackLog
+    private function log(): SentMentionLog
     {
-        return $this->get(SentPingbackLog::class);
+        return $this->get(SentMentionLog::class);
     }
 
     /**

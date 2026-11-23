@@ -49,7 +49,7 @@ final class UrlGuardTest extends TestCase
             'credentials' => ['https://user:secret@blog.example/'],
             'custom port' => ['http://blog.example:8080/'],
             'https on port 80' => ['https://blog.example:80/'],
-            'too long' => ['https://blog.example/' . str_repeat('a', 300)],
+            'too long' => ['https://blog.example/' . str_repeat('a', Constants::MAX_URL_LENGTH)],
         ];
     }
 

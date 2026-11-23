@@ -31,6 +31,7 @@ use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use Webicorns\Pongback\Event\SendingFailedEvent;
 use Webicorns\Pongback\Mention\MentionRejected;
+use Webicorns\Pongback\Mention\Protocol;
 use Webicorns\Pongback\Mention\RejectionReason;
 use Webicorns\Pongback\Messaging\MessageQueue;
 use Webicorns\Pongback\Sending\DiscoveredEndpoint;
@@ -38,15 +39,16 @@ use Webicorns\Pongback\Sending\EndpointDiscovery;
 use Webicorns\Pongback\Sending\LinkExtractor;
 use Webicorns\Pongback\Sending\PageFetcher;
 use Webicorns\Pongback\Sending\PingbackClient;
-use Webicorns\Pongback\Sending\PingResult;
-use Webicorns\Pongback\Sending\PingStatus;
-use Webicorns\Pongback\Sending\SendPingbacksHandler;
+use Webicorns\Pongback\Sending\SendMentionsHandler;
 use Webicorns\Pongback\Sending\SendPingbacksMessage;
-use Webicorns\Pongback\Sending\SentPingbackLog;
+use Webicorns\Pongback\Sending\SendResult;
+use Webicorns\Pongback\Sending\SendStatus;
+use Webicorns\Pongback\Sending\SentMentionLog;
+use Webicorns\Pongback\Sending\SourcePageResolver;
 use Webicorns\Pongback\Sending\WebmentionClient;
 use Webicorns\Pongback\Tests\Unit\Fixtures\SetSettings;
 
-final class SendPingbacksHandlerTest extends TestCase
+final class SendMentionsHandlerTest extends TestCase
 {
     private const PAGE_URL = 'https://main.example/blog/post';
     private const PAGE_HTML = '<main>'
@@ -63,7 +65,7 @@ final class SendPingbacksHandlerTest extends TestCase
     private EndpointDiscovery&MockObject $discovery;
     private PingbackClient&MockObject $client;
     private WebmentionClient&MockObject $webmentionClient;
-    private SentPingbackLog&MockObject $log;
+    private SentMentionLog&MockObject $log;
     private MessageBusInterface&MockObject $bus;
     private LoggerInterface&MockObject $logger;
     private RouterInterface&MockObject $router;
@@ -91,7 +93,7 @@ final class SendPingbacksHandlerTest extends TestCase
     private array $dispatched = [];
 
     /**
-     * @var list<array{int, string, string, PingResult}>
+     * @var list<array{int, string, string, SendResult}>
      */
     private array $recorded = [];
 
@@ -119,15 +121,15 @@ final class SendPingbacksHandlerTest extends TestCase
 
         $this->discovery = $this->createMock(EndpointDiscovery::class);
         $this->discovery->method('discover')->willReturnCallback(
-            static fn(string $target): DiscoveredEndpoint => new DiscoveredEndpoint('pingback', (string) preg_replace('#^(https://[^/]+)/.*$#', '$1/xmlrpc.php', $target)),
+            static fn(string $target): DiscoveredEndpoint => new DiscoveredEndpoint(Protocol::Pingback, (string) preg_replace('#^(https://[^/]+)/.*$#', '$1/xmlrpc.php', $target)),
         );
         $this->webmentionClient = $this->createMock(WebmentionClient::class);
 
         $this->client = $this->createMock(PingbackClient::class);
-        $this->client->method('ping')->willReturn(new PingResult(PingStatus::Sent, 'Thanks'));
+        $this->client->method('ping')->willReturn(new SendResult(SendStatus::Sent, 'Thanks'));
 
-        $this->log = $this->createMock(SentPingbackLog::class);
-        $this->log->method('record')->willReturnCallback(function (int $pageId, string $source, string $target, PingResult $result): void {
+        $this->log = $this->createMock(SentMentionLog::class);
+        $this->log->method('record')->willReturnCallback(function (int $pageId, string $source, string $target, SendResult $result): void {
             $this->recorded[] = [$pageId, $source, $target, $result];
         });
 
@@ -148,9 +150,9 @@ final class SendPingbacksHandlerTest extends TestCase
             ->with(5, ['_language' => 1], '', RouterInterface::ABSOLUTE_URL);
         $this->pageFetcher->expects(self::once())->method('fetch')->with(self::PAGE_URL);
         $pinged = [];
-        $this->client->method('ping')->willReturnCallback(function (string $endpoint, string $source, string $target) use (&$pinged): PingResult {
+        $this->client->method('ping')->willReturnCallback(function (string $endpoint, string $source, string $target) use (&$pinged): SendResult {
             $pinged[] = [$endpoint, $source, $target];
-            return new PingResult(PingStatus::Sent, 'Thanks');
+            return new SendResult(SendStatus::Sent, 'Thanks');
         });
 
         $this->handle(new SendPingbacksMessage(5, 1));
@@ -160,7 +162,7 @@ final class SendPingbacksHandlerTest extends TestCase
             ['https://second.example/xmlrpc.php', self::PAGE_URL, 'https://second.example/'],
         ], $pinged);
         self::assertSame([5, self::PAGE_URL, 'https://blog.example/article'], array_slice($this->recorded[0], 0, 3));
-        self::assertSame(PingStatus::Sent, $this->recorded[0][3]->status);
+        self::assertSame(SendStatus::Sent, $this->recorded[0][3]->status);
         self::assertSame('https://blog.example/xmlrpc.php', $this->recorded[0][3]->endpoint, 'The endpoint is logged');
         self::assertCount(2, $this->recorded);
         self::assertSame([], $this->dispatched, 'Nothing to retry');
@@ -170,8 +172,8 @@ final class SendPingbacksHandlerTest extends TestCase
     public function skipsLinksThatWereHandledForGood(): void
     {
         $this->log->method('lastResult')->willReturnCallback(
-            static fn(int $pageId, string $source, string $target): ?PingResult => $pageId === 5 && $source === self::PAGE_URL && $target === 'https://blog.example/article'
-                ? new PingResult(PingStatus::Sent, protocol: 'pingback')
+            static fn(int $pageId, string $source, string $target): ?SendResult => $pageId === 5 && $source === self::PAGE_URL && $target === 'https://blog.example/article'
+                ? new SendResult(SendStatus::Sent, protocol: Protocol::Pingback)
                 : null,
         );
 
@@ -189,26 +191,26 @@ final class SendPingbacksHandlerTest extends TestCase
 
         $this->handle(new SendPingbacksMessage(5));
 
-        self::assertSame([PingStatus::NoEndpoint, PingStatus::NoEndpoint], array_map(static fn(array $entry): PingStatus => $entry[3]->status, $this->recorded));
+        self::assertSame([SendStatus::NoEndpoint, SendStatus::NoEndpoint], array_map(static fn(array $entry): SendStatus => $entry[3]->status, $this->recorded));
     }
 
     /**
-     * @return array<string, array{RejectionReason, PingStatus}>
+     * @return array<string, array{RejectionReason, SendStatus}>
      */
     public static function discoveryProblemProvider(): array
     {
         return [
-            'server error is temporary' => [RejectionReason::UpstreamError, PingStatus::Failed],
-            'unreachable is temporary' => [RejectionReason::SourceNotFound, PingStatus::Failed],
-            'linked page gone is final' => [RejectionReason::SourceGone, PingStatus::Rejected],
-            'internal address is final' => [RejectionReason::InvalidRequest, PingStatus::Rejected],
-            'no html is final' => [RejectionReason::NoLinkToTarget, PingStatus::Rejected],
+            'server error is temporary' => [RejectionReason::UpstreamError, SendStatus::Failed],
+            'unreachable is temporary' => [RejectionReason::SourceNotFound, SendStatus::Failed],
+            'linked page gone is final' => [RejectionReason::SourceGone, SendStatus::Rejected],
+            'internal address is final' => [RejectionReason::InvalidRequest, SendStatus::Rejected],
+            'no html is final' => [RejectionReason::NoLinkToTarget, SendStatus::Rejected],
         ];
     }
 
     #[Test]
     #[DataProvider('discoveryProblemProvider')]
-    public function logsProblemsDuringDiscovery(RejectionReason $reason, PingStatus $expected): void
+    public function logsProblemsDuringDiscovery(RejectionReason $reason, SendStatus $expected): void
     {
         $this->discovery = $this->createMock(EndpointDiscovery::class);
         $this->discovery->method('discover')->willThrowException(new MentionRejected($reason, 'Problem'));
@@ -217,7 +219,7 @@ final class SendPingbacksHandlerTest extends TestCase
 
         self::assertSame($expected, $this->recorded[0][3]->status);
         self::assertSame('Problem', $this->recorded[0][3]->message);
-        self::assertCount($expected === PingStatus::Failed ? 1 : 0, $this->dispatched);
+        self::assertCount($expected === SendStatus::Failed ? 1 : 0, $this->dispatched);
     }
 
     #[Test]
@@ -225,8 +227,8 @@ final class SendPingbacksHandlerTest extends TestCase
     {
         $this->client = $this->createMock(PingbackClient::class);
         $this->client->method('ping')->willReturnOnConsecutiveCalls(
-            new PingResult(PingStatus::Failed, 'Timeout'),
-            new PingResult(PingStatus::Sent),
+            new SendResult(SendStatus::Failed, 'Timeout'),
+            new SendResult(SendStatus::Sent),
         );
 
         $this->handle(new SendPingbacksMessage(5, 1));
@@ -239,7 +241,7 @@ final class SendPingbacksHandlerTest extends TestCase
     public function waitsLongerBeforeTheLastAttempt(): void
     {
         $this->client = $this->createMock(PingbackClient::class);
-        $this->client->method('ping')->willReturn(new PingResult(PingStatus::Failed));
+        $this->client->method('ping')->willReturn(new SendResult(SendStatus::Failed));
 
         $this->handle(new SendPingbacksMessage(5, 0, 2));
 
@@ -250,9 +252,9 @@ final class SendPingbacksHandlerTest extends TestCase
     public function givesUpAfterTheLastAttempt(): void
     {
         $this->client = $this->createMock(PingbackClient::class);
-        $this->client->method('ping')->willReturn(new PingResult(PingStatus::Failed));
+        $this->client->method('ping')->willReturn(new SendResult(SendStatus::Failed));
 
-        $this->handle(new SendPingbacksMessage(5, 0, SendPingbacksHandler::MAX_ATTEMPTS));
+        $this->handle(new SendPingbacksMessage(5, 0, MessageQueue::MAX_ATTEMPTS));
 
         self::assertCount(2, $this->recorded);
         self::assertSame([], $this->dispatched);
@@ -338,15 +340,15 @@ final class SendPingbacksHandlerTest extends TestCase
         $this->discovery = $this->createMock(EndpointDiscovery::class);
         $this->discovery->expects(self::exactly(2))->method('discover')
             ->with(self::anything(), true)
-            ->willReturn(new DiscoveredEndpoint('webmention', 'https://blog.example/webmention'));
+            ->willReturn(new DiscoveredEndpoint(Protocol::Webmention, 'https://blog.example/webmention'));
         $this->client->expects(self::never())->method('ping');
         $this->webmentionClient->expects(self::exactly(2))->method('send')
             ->with('https://blog.example/webmention', self::PAGE_URL, self::anything())
-            ->willReturn(new PingResult(PingStatus::Sent, 'HTTP 202'));
+            ->willReturn(new SendResult(SendStatus::Sent, 'HTTP 202'));
 
         $this->handle(new SendPingbacksMessage(5));
 
-        self::assertSame(['webmention', 'webmention'], array_map(static fn(array $entry): string => $entry[3]->protocol, $this->recorded));
+        self::assertSame([Protocol::Webmention, Protocol::Webmention], array_map(static fn(array $entry): ?Protocol => $entry[3]->protocol, $this->recorded));
         self::assertSame('https://blog.example/webmention', $this->recorded[0][3]->endpoint);
     }
 
@@ -378,9 +380,9 @@ final class SendPingbacksHandlerTest extends TestCase
     public function sendsWebmentionsAgainWhenThePageChanged(string $protocol, int $attempt, bool $expected): void
     {
         $this->log->method('lastResult')->willReturnCallback(
-            static fn(int $pageId, string $source, string $target): PingResult => $target === 'https://blog.example/article'
-                ? new PingResult(PingStatus::Sent, protocol: $protocol)
-                : new PingResult(PingStatus::Failed, protocol: $protocol),
+            static fn(int $pageId, string $source, string $target): SendResult => $target === 'https://blog.example/article'
+                ? new SendResult(SendStatus::Sent, protocol: Protocol::from($protocol))
+                : new SendResult(SendStatus::Failed, protocol: Protocol::from($protocol)),
         );
 
         $this->handle(new SendPingbacksMessage(5, 0, $attempt));
@@ -395,12 +397,12 @@ final class SendPingbacksHandlerTest extends TestCase
         $this->log->method('webmentionTargets')->with(5, self::PAGE_URL)->willReturn(['https://blog.example/article', 'https://removed.example/post', 'https://removed2.example/post']);
         $this->discovery = $this->createMock(EndpointDiscovery::class);
         $this->discovery->method('discover')->willReturnCallback(
-            static fn(string $target): DiscoveredEndpoint => new DiscoveredEndpoint('webmention', 'https://' . parse_url($target, PHP_URL_HOST) . '/webmention'),
+            static fn(string $target): DiscoveredEndpoint => new DiscoveredEndpoint(Protocol::Webmention, 'https://' . parse_url($target, PHP_URL_HOST) . '/webmention'),
         );
         $sent = [];
-        $this->webmentionClient->method('send')->willReturnCallback(function (string $endpoint, string $source, string $target) use (&$sent): PingResult {
+        $this->webmentionClient->method('send')->willReturnCallback(function (string $endpoint, string $source, string $target) use (&$sent): SendResult {
             $sent[] = $target;
-            return new PingResult(PingStatus::Rejected, 'HTTP 400 no link');
+            return new SendResult(SendStatus::Rejected, 'HTTP 400 no link');
         });
         $forgotten = [];
         $this->log->expects(self::exactly(2))->method('forget')->willReturnCallback(function (int $pageId, string $source, string $target) use (&$forgotten): void {
@@ -419,11 +421,11 @@ final class SendPingbacksHandlerTest extends TestCase
     {
         $this->log->method('webmentionTargets')->willReturn(['https://removed.example/post']);
         $this->discovery = $this->createMock(EndpointDiscovery::class);
-        $this->discovery->method('discover')->willReturn(new DiscoveredEndpoint('webmention', 'https://removed.example/webmention'));
+        $this->discovery->method('discover')->willReturn(new DiscoveredEndpoint(Protocol::Webmention, 'https://removed.example/webmention'));
         $this->webmentionClient->method('send')->willReturnCallback(
-            static fn(string $endpoint, string $source, string $target): PingResult => $target === 'https://removed.example/post'
-                ? new PingResult(PingStatus::Failed, 'HTTP 503')
-                : new PingResult(PingStatus::Sent),
+            static fn(string $endpoint, string $source, string $target): SendResult => $target === 'https://removed.example/post'
+                ? new SendResult(SendStatus::Failed, 'HTTP 503')
+                : new SendResult(SendStatus::Sent),
         );
         $this->log->expects(self::never())->method('forget');
 
@@ -437,7 +439,7 @@ final class SendPingbacksHandlerTest extends TestCase
     public function doesNotPingRemovedTargetsThatOnlyOfferPingback(): void
     {
         $this->log->method('webmentionTargets')->willReturn(['https://removed.example/post']);
-        $this->client->expects(self::exactly(2))->method('ping')->willReturn(new PingResult(PingStatus::Sent));
+        $this->client->expects(self::exactly(2))->method('ping')->willReturn(new SendResult(SendStatus::Sent));
         $this->log->expects(self::once())->method('forget')->with(5, self::PAGE_URL, 'https://removed.example/post');
 
         $this->handle(new SendPingbacksMessage(5));
@@ -448,9 +450,9 @@ final class SendPingbacksHandlerTest extends TestCase
     {
         $this->client = $this->createMock(PingbackClient::class);
         $this->client->method('ping')->willReturnCallback(
-            static fn(string $endpoint, string $source, string $target): PingResult => $target === 'https://blog.example/article'
-                ? new PingResult(PingStatus::Rejected, 'No link', 17)
-                : new PingResult(PingStatus::Sent),
+            static fn(string $endpoint, string $source, string $target): SendResult => $target === 'https://blog.example/article'
+                ? new SendResult(SendStatus::Rejected, 'No link', 17)
+                : new SendResult(SendStatus::Sent),
         );
 
         $this->handle(new SendPingbacksMessage(5));
@@ -468,13 +470,13 @@ final class SendPingbacksHandlerTest extends TestCase
     #[Test]
     public function doesNotReportTheSameRejectionAgain(): void
     {
-        $this->webmentionClient->method('send')->willReturn(new PingResult(PingStatus::Rejected, 'HTTP 400'));
+        $this->webmentionClient->method('send')->willReturn(new SendResult(SendStatus::Rejected, 'HTTP 400'));
         $this->discovery = $this->createMock(EndpointDiscovery::class);
-        $this->discovery->method('discover')->willReturn(new DiscoveredEndpoint('webmention', 'https://blog.example/webmention'));
+        $this->discovery->method('discover')->willReturn(new DiscoveredEndpoint(Protocol::Webmention, 'https://blog.example/webmention'));
         $this->log->method('lastResult')->willReturnCallback(
-            static fn(int $pageId, string $source, string $target): PingResult => $target === 'https://blog.example/article'
-                ? new PingResult(PingStatus::Rejected, protocol: 'webmention')
-                : new PingResult(PingStatus::Sent, protocol: 'webmention'),
+            static fn(int $pageId, string $source, string $target): SendResult => $target === 'https://blog.example/article'
+                ? new SendResult(SendStatus::Rejected, protocol: Protocol::Webmention)
+                : new SendResult(SendStatus::Sent, protocol: Protocol::Webmention),
         );
 
         $this->handle(new SendPingbacksMessage(5));
@@ -492,7 +494,7 @@ final class SendPingbacksHandlerTest extends TestCase
         return [
             'first attempt: retried, not reported' => [1, false],
             'second attempt: retried, not reported' => [2, false],
-            'last attempt: reported' => [SendPingbacksHandler::MAX_ATTEMPTS, true],
+            'last attempt: reported' => [MessageQueue::MAX_ATTEMPTS, true],
         ];
     }
 
@@ -501,7 +503,7 @@ final class SendPingbacksHandlerTest extends TestCase
     public function reportsFailuresAfterTheLastAttempt(int $attempt, bool $expected): void
     {
         $this->client = $this->createMock(PingbackClient::class);
-        $this->client->method('ping')->willReturn(new PingResult(PingStatus::Failed, 'Timeout'));
+        $this->client->method('ping')->willReturn(new SendResult(SendStatus::Failed, 'Timeout'));
 
         $this->handle(new SendPingbacksMessage(5, 0, $attempt));
 
@@ -522,12 +524,12 @@ final class SendPingbacksHandlerTest extends TestCase
         $this->log->method('webmentionTargets')->willReturn(['https://removed.example/post']);
         $this->discovery = $this->createMock(EndpointDiscovery::class);
         $this->discovery->method('discover')->willReturnCallback(
-            static fn(string $target): DiscoveredEndpoint => new DiscoveredEndpoint('webmention', 'https://' . parse_url($target, PHP_URL_HOST) . '/webmention'),
+            static fn(string $target): DiscoveredEndpoint => new DiscoveredEndpoint(Protocol::Webmention, 'https://' . parse_url($target, PHP_URL_HOST) . '/webmention'),
         );
         $this->webmentionClient->method('send')->willReturnCallback(
-            static fn(string $endpoint, string $source, string $target): PingResult => $target === 'https://removed.example/post'
-                ? new PingResult(PingStatus::Rejected, 'HTTP 400 no link')
-                : new PingResult(PingStatus::Sent),
+            static fn(string $endpoint, string $source, string $target): SendResult => $target === 'https://removed.example/post'
+                ? new SendResult(SendStatus::Rejected, 'HTTP 400 no link')
+                : new SendResult(SendStatus::Sent),
         );
 
         $this->handle(new SendPingbacksMessage(5));
@@ -543,9 +545,8 @@ final class SendPingbacksHandlerTest extends TestCase
             return $event;
         });
 
-        $handler = new SendPingbacksHandler(
-            $this->pageRepository,
-            $this->siteFinder,
+        $handler = new SendMentionsHandler(
+            new SourcePageResolver($this->pageRepository, $this->siteFinder, $this->logger),
             $this->pageFetcher,
             new LinkExtractor(),
             $this->discovery,

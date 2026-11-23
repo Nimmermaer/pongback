@@ -20,7 +20,7 @@ use Webicorns\Pongback\Configuration\PongbackSettings;
 use Webicorns\Pongback\Mention\IncomingMention;
 use Webicorns\Pongback\Mention\MentionReceiverInterface;
 use Webicorns\Pongback\Mention\MentionRejected;
-use Webicorns\Pongback\Mention\RejectionReason;
+use Webicorns\Pongback\Mention\Protocol;
 use Webicorns\Pongback\Messaging\MessageQueue;
 
 /**
@@ -29,13 +29,6 @@ use Webicorns\Pongback\Messaging\MessageQueue;
 #[AsMessageHandler]
 readonly class ReceiveWebmentionHandler
 {
-    public const MAX_ATTEMPTS = 3;
-
-    /**
-     * Delay before attempt 2, 3 in seconds.
-     */
-    private const RETRY_DELAYS = [2 => 300, 3 => 3600];
-
     public function __construct(
         private SiteFinder $siteFinder,
         private MentionReceiverInterface $receiver,
@@ -58,7 +51,7 @@ readonly class ReceiveWebmentionHandler
         $mention = new IncomingMention(
             $message->source,
             $message->target,
-            IncomingMention::PROTOCOL_WEBMENTION,
+            Protocol::Webmention,
             $message->clientIp,
             $message->userAgent,
         );
@@ -73,10 +66,8 @@ readonly class ReceiveWebmentionHandler
                 'attempt' => $message->attempt,
             ]);
 
-            $temporary = in_array($rejected->reason, [RejectionReason::UpstreamError, RejectionReason::SourceNotFound], true);
-            if ($temporary && $message->attempt < self::MAX_ATTEMPTS) {
-                $next = $message->nextAttempt();
-                $this->queue->queue($next, self::RETRY_DELAYS[$next->attempt]);
+            if ($rejected->reason->isTemporary()) {
+                $this->queue->retryLater($message);
             }
         }
     }

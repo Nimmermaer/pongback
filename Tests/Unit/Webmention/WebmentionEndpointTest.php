@@ -87,7 +87,7 @@ final class WebmentionEndpointTest extends TestCase
         return [
             'http' => ['http://blog.example/post'],
             'upper case scheme' => ['HTTPS://blog.example/post'],
-            'longest allowed' => ['https://blog.example/' . str_repeat('a', 255 - 21)],
+            'longest allowed' => ['https://blog.example/' . str_repeat('a', 2048 - 21)],
         ];
     }
 
@@ -134,7 +134,7 @@ final class WebmentionEndpointTest extends TestCase
             'source no URL' => [['source' => 'not a url', 'target' => self::TARGET]],
             'target not http' => [['source' => self::SOURCE, 'target' => 'ftp://main.example/article']],
             'source not http' => [['source' => 'javascript:alert(1)', 'target' => self::TARGET]],
-            'source too long' => [['source' => 'https://blog.example/' . str_repeat('a', 255 - 20), 'target' => self::TARGET]],
+            'source too long' => [['source' => 'https://blog.example/' . str_repeat('a', 2048 - 20), 'target' => self::TARGET]],
             'http, but no valid URL' => [['source' => 'http://blog example/post', 'target' => self::TARGET]],
             'same URL' => [['source' => self::TARGET . '#comments', 'target' => self::TARGET]],
         ];

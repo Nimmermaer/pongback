@@ -15,11 +15,10 @@ namespace Webicorns\Pongback\Webmention;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
-use TYPO3\CMS\Core\Http\NormalizedParams;
-use TYPO3\CMS\Core\Http\Response;
-use TYPO3\CMS\Core\Http\Stream;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use Webicorns\Pongback\Configuration\PongbackSettings;
+use Webicorns\Pongback\Http\ClientIp;
+use Webicorns\Pongback\Http\TextResponse;
 use Webicorns\Pongback\Mention\MentionRateLimiter;
 use Webicorns\Pongback\Mention\MentionRejected;
 use Webicorns\Pongback\Mention\RejectionReason;
@@ -47,7 +46,7 @@ readonly class WebmentionEndpoint
         $body = $request->getParsedBody();
         $source = is_array($body) && is_string($body['source'] ?? null) ? trim($body['source']) : '';
         $target = is_array($body) && is_string($body['target'] ?? null) ? trim($body['target']) : '';
-        $clientIp = $this->getClientIp($request);
+        $clientIp = ClientIp::of($request);
 
         try {
             $this->assertValidUrl($source, 'source');
@@ -99,20 +98,7 @@ readonly class WebmentionEndpoint
 
     private function text(int $status, string $text): ResponseInterface
     {
-        $body = new Stream('php://temp', 'rw');
-        $body->write($text);
-        $body->rewind();
-
-        return (new Response($body, $status))->withHeader('Content-Type', 'text/plain; charset=utf-8');
+        return new TextResponse($text, $status);
     }
 
-    private function getClientIp(ServerRequestInterface $request): string
-    {
-        $normalizedParams = $request->getAttribute('normalizedParams');
-        if ($normalizedParams instanceof NormalizedParams) {
-            return $normalizedParams->getRemoteAddress();
-        }
-
-        return (string) ($request->getServerParams()['REMOTE_ADDR'] ?? '');
-    }
 }

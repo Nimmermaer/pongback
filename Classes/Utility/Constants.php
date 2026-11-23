@@ -24,9 +24,9 @@ final class Constants
     public const USER_AGENT = 'Pongback (TYPO3 extension; +https://extensions.typo3.org/extension/pongback)';
 
     /**
-     * Longest URL accepted for received Pingbacks.
+     * Longest URL accepted for sources, targets and endpoints; matches the "max" of the URL columns in TCA.
      */
-    public const MAX_URL_LENGTH = 255;
+    public const MAX_URL_LENGTH = 2048;
 
     /**
      * Page type ("typeNum") of the Pingback XML-RPC endpoint.

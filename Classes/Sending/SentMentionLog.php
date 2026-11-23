@@ -15,35 +15,27 @@ namespace Webicorns\Pongback\Sending;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
-use Webicorns\Pongback\Mention\IncomingMention;
+use Webicorns\Pongback\Mention\Protocol;
 use Webicorns\Pongback\Utility\Constants;
 
 /**
  * One record per source page and linked page: what happened when the Pingback was sent.
  */
-readonly class SentPingbackLog
+readonly class SentMentionLog
 {
     public function __construct(
         private ConnectionPool $connectionPool,
     ) {}
 
-    /**
-     * True if this Pingback must not be sent again (sent, refused or no endpoint).
-     */
-    public function isFinal(int $pageId, string $source, string $target): bool
-    {
-        return $this->lastResult($pageId, $source, $target)?->status->isFinal() ?? false;
-    }
-
-    public function lastResult(int $pageId, string $source, string $target): ?PingResult
+    public function lastResult(int $pageId, string $source, string $target): ?SendResult
     {
         $row = $this->find($pageId, $source, $target);
-        $status = $row === null ? null : PingStatus::tryFrom((string) $row['status']);
+        $status = $row === null ? null : SendStatus::tryFrom((string) $row['status']);
         if ($row === null || $status === null) {
             return null;
         }
 
-        return new PingResult($status, (string) $row['message'], (int) $row['fault_code'], (string) $row['endpoint'], (string) $row['protocol']);
+        return new SendResult($status, (string) $row['message'], (int) $row['fault_code'], (string) $row['endpoint'], Protocol::tryFrom((string) $row['protocol']));
     }
 
     /**
@@ -62,7 +54,7 @@ readonly class SentPingbackLog
             ->where(
                 $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pageId, Connection::PARAM_INT)),
                 $queryBuilder->expr()->eq('source_link', $queryBuilder->createNamedParameter($source)),
-                $queryBuilder->expr()->eq('protocol', $queryBuilder->createNamedParameter(IncomingMention::PROTOCOL_WEBMENTION)),
+                $queryBuilder->expr()->eq('protocol', $queryBuilder->createNamedParameter(Protocol::Webmention->value)),
             )
             ->orderBy('uid')
             ->executeQuery()
@@ -81,13 +73,13 @@ readonly class SentPingbackLog
         );
     }
 
-    public function record(int $pageId, string $source, string $target, PingResult $result): void
+    public function record(int $pageId, string $source, string $target, SendResult $result): void
     {
         $now = time();
         $values = [
             'tstamp' => $now,
             'endpoint' => mb_substr($result->endpoint, 0, 2048),
-            'protocol' => $result->protocol,
+            'protocol' => $result->protocol->value ?? '',
             'status' => $result->status->value,
             'fault_code' => $result->faultCode,
             'message' => mb_substr($result->message, 0, 255),

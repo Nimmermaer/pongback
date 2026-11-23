@@ -23,6 +23,7 @@ use Webicorns\Pongback\Mention\MentionReceiver;
 use Webicorns\Pongback\Mention\MentionReceiverInterface;
 use Webicorns\Pongback\Mention\MentionRejected;
 use Webicorns\Pongback\Mention\MentionStorage;
+use Webicorns\Pongback\Mention\Protocol;
 use Webicorns\Pongback\Mention\RejectionReason;
 use Webicorns\Pongback\Mention\Source\FetchedSource;
 use Webicorns\Pongback\Mention\Source\SourceFetcher;
@@ -103,7 +104,7 @@ final class MentionReceiverTest extends AbstractPongbackTestCase
 
     private function mention(): IncomingMention
     {
-        return new IncomingMention(self::SOURCE, self::TARGET, IncomingMention::PROTOCOL_PINGBACK, '203.0.113.5');
+        return new IncomingMention(self::SOURCE, self::TARGET, Protocol::Pingback, '203.0.113.5');
     }
 
     private function site(): Site

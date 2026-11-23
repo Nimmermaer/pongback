@@ -53,7 +53,7 @@
                                         <f:then><span class="badge badge-danger"><f:translate key="{ll}sending.status.rejected" /></span></f:then>
                                         <f:else><span class="badge badge-warning"><f:translate key="{ll}sending.status.failed" /></span></f:else>
                                     </f:if>
-                                    <f:if condition="{problem.protocol}"><span class="badge badge-default">{f:if(condition: '{problem.protocol} == \'webmention\'', then: 'Webmention', else: 'Pingback')}</span></f:if>
+                                    <f:if condition="{problem.protocol_label}"><span class="badge badge-default">{problem.protocol_label}</span></f:if>
                                 </td>
                                 <td><a href="{problem.target_link}" target="_blank" rel="noreferrer noopener">{problem.target_link}</a></td>
                                 <td>{problem.page_title} [{problem.pid}]</td>
@@ -92,7 +92,7 @@
                                 <f:then><span class="badge badge-warning"><f:translate key="{ll}status.pending" /></span></f:then>
                                 <f:else><span class="badge badge-success"><f:translate key="{ll}status.approved" /></span></f:else>
                             </f:if>
-                            <span class="badge badge-default">{f:if(condition: '{pingback.protocol} == \'webmention\'', then: 'Webmention', else: 'Pingback')}</span>
+                            <span class="badge badge-default">{pingback.protocol_label}</span>
                         </td>
                         <td>
                             <a href="{pingback.source_link}" target="_blank" rel="noreferrer noopener">{f:if(condition: pingback.source_title, then: pingback.source_title, else: pingback.source_link)}</a>

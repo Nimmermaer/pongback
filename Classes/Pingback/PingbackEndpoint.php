@@ -15,15 +15,15 @@ namespace Webicorns\Pongback\Pingback;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
-use TYPO3\CMS\Core\Http\NormalizedParams;
-use TYPO3\CMS\Core\Http\Response;
-use TYPO3\CMS\Core\Http\Stream;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use Webicorns\Pongback\Configuration\PongbackSettings;
+use Webicorns\Pongback\Http\ClientIp;
+use Webicorns\Pongback\Http\TextResponse;
 use Webicorns\Pongback\Mention\IncomingMention;
 use Webicorns\Pongback\Mention\MentionRateLimiter;
 use Webicorns\Pongback\Mention\MentionReceiverInterface;
 use Webicorns\Pongback\Mention\MentionRejected;
+use Webicorns\Pongback\Mention\Protocol;
 use Webicorns\Pongback\Mention\RejectionReason;
 use Webicorns\Pongback\XmlRpc\XmlRpcCodec;
 
@@ -92,8 +92,8 @@ readonly class PingbackEndpoint
         $mention = new IncomingMention(
             trim($source),
             trim($target),
-            IncomingMention::PROTOCOL_PINGBACK,
-            $this->getClientIp($request),
+            Protocol::Pingback,
+            ClientIp::of($request),
             substr($request->getHeaderLine('User-Agent'), 0, 255),
         );
 
@@ -130,13 +130,7 @@ readonly class PingbackEndpoint
 
     private function xmlResponse(string $xml): ResponseInterface
     {
-        $body = new Stream('php://temp', 'rw');
-        $body->write($xml);
-        $body->rewind();
-
-        return (new Response())
-            ->withHeader('Content-Type', 'text/xml; charset=utf-8')
-            ->withBody($body);
+        return new TextResponse($xml, 200, 'text/xml');
     }
 
     private static function faultCode(RejectionReason $reason): int
@@ -153,14 +147,4 @@ readonly class PingbackEndpoint
         };
     }
 
-    private function getClientIp(ServerRequestInterface $request): string
-    {
-        // NormalizedParams respects [SYS][reverseProxyIP], unlike REMOTE_ADDR.
-        $normalizedParams = $request->getAttribute('normalizedParams');
-        if ($normalizedParams instanceof NormalizedParams) {
-            return $normalizedParams->getRemoteAddress();
-        }
-
-        return (string) ($request->getServerParams()['REMOTE_ADDR'] ?? '');
-    }
 }

@@ -6,7 +6,7 @@ skinparam sequenceMessageAlign center
 actor Editor
 participant "DataHandler\nPageChangeHook" as Hook
 queue "Message queue\n(doctrine)" as Queue
-participant "Worker\nSendPingbacksHandler" as Worker
+participant "Worker\nSendMentionsHandler" as Worker
 participant "Own page" as Page
 participant "Linked page" as Target
 participant "Endpoint of the\nlinked site" as Endpoint

@@ -14,18 +14,19 @@ namespace Webicorns\Pongback\Tests\Unit\Sending;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Webicorns\Pongback\Mention\Protocol;
 use Webicorns\Pongback\Sending\DiscoveredEndpoint;
-use Webicorns\Pongback\Sending\PingResult;
-use Webicorns\Pongback\Sending\PingStatus;
 use Webicorns\Pongback\Sending\SendPingbacksMessage;
+use Webicorns\Pongback\Sending\SendResult;
+use Webicorns\Pongback\Sending\SendStatus;
 
-final class PingStatusTest extends TestCase
+final class SendStatusTest extends TestCase
 {
     #[Test]
     public function onlyFailedPingbacksAreSentAgain(): void
     {
-        foreach (PingStatus::cases() as $status) {
-            self::assertSame($status !== PingStatus::Failed, $status->isFinal(), $status->name);
+        foreach (SendStatus::cases() as $status) {
+            self::assertSame($status !== SendStatus::Failed, $status->isFinal(), $status->name);
         }
     }
 
@@ -40,19 +41,19 @@ final class PingStatusTest extends TestCase
             $tca['columns']['status']['config']['items'],
         );
 
-        self::assertEqualsCanonicalizing(array_column(PingStatus::cases(), 'value'), $items);
+        self::assertEqualsCanonicalizing(array_column(SendStatus::cases(), 'value'), $items);
     }
 
     #[Test]
     public function resultsKeepEverythingButTheEndpointWhenAddingIt(): void
     {
-        $result = (new PingResult(PingStatus::Rejected, 'Nope', 17))->withEndpoint(new DiscoveredEndpoint('pingback', 'https://blog.example/xmlrpc.php'));
+        $result = (new SendResult(SendStatus::Rejected, 'Nope', 17))->withEndpoint(new DiscoveredEndpoint(Protocol::Pingback, 'https://blog.example/xmlrpc.php'));
 
-        self::assertSame(PingStatus::Rejected, $result->status);
+        self::assertSame(SendStatus::Rejected, $result->status);
         self::assertSame('Nope', $result->message);
         self::assertSame(17, $result->faultCode);
         self::assertSame('https://blog.example/xmlrpc.php', $result->endpoint);
-        self::assertSame('pingback', $result->protocol);
+        self::assertSame(Protocol::Pingback, $result->protocol);
     }
 
     #[Test]

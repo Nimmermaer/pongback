@@ -127,7 +127,7 @@ readonly class MentionReceiver implements MentionReceiverInterface
     private function log(string $message, IncomingMention $mention, int $uid): void
     {
         $this->logger->info($message, [
-            'protocol' => $mention->protocol,
+            'protocol' => $mention->protocol->value,
             'source' => $mention->source,
             'target' => $mention->target,
             'uid' => $uid,

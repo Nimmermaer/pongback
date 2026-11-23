@@ -23,7 +23,8 @@ its checklist in sync.
 | `Classes/Middleware/PingbackReceiverMiddleware.php`  | Answers POST requests on page type `Constants::PINGBACK_PAGE_TYPE`, before TypoScript rendering |
 | `Classes/Pingback/PingbackEndpoint.php` | XML-RPC `pingback.ping`: parameters, rate limit, fault codes |
 | `Classes/Webmention/`                  | `WebmentionEndpoint` (quick checks, 202 Accepted), `ReceiveWebmentionHandler` (worker: `MentionReceiver::synchronize()` creates, updates or removes) |
-| `Classes/Messaging/MessageQueue.php`   | Always dispatch messages through it: explicit transport, TYPO3 13 would also use the sync `*` route |
+| `Classes/Messaging/MessageQueue.php`   | Always dispatch messages through it: explicit transport (TYPO3 13 would also use the sync `*` route); `retryLater()` for `RetryableMessage`s (5 min, 1 h) |
+| `Classes/Http/`                        | `OutgoingRequest::options()` for every request to other servers (timeouts, no redirects, User-Agent, IP pinning), `TextResponse`, `ClientIp` |
 | `Classes/Mention/`                     | Protocol neutral receiving (shared by the Pingback and Webmention endpoints): `MentionReceiverInterface`, `TargetResolver` (routing + page visibility), `MentionStorage`, `MentionRateLimiter` |
 | `Classes/Mention/Source/`              | Untrusted source handling: `UrlGuard` (SSRF), `SourceFetcher` (limits, redirects, IP pinning), `SourceInspector` (link check, plain text excerpt) |
 | `Classes/XmlRpc/XmlRpcCodec.php`       | XML-RPC parsing/encoding (replaces PECL `ext-xmlrpc`)     |
@@ -31,10 +32,10 @@ its checklist in sync.
 | `Classes/Controller/PingbackController.php` | Frontend plugins (list, latest), cached with the page via the cache tag `tx_pongback_domain_model_pingback` (DataHandler flushes it) |
 | `Classes/Listener/`                    | v13 route enhancer listener |
 | `Classes/Hooks/PageChangeHook.php`     | DataHandler hook: queues `SendPingbacksMessage` once per changed live page and language |
-| `Classes/Sending/`                     | Sending: `SendPingbacksHandler` (Messenger, retries), `LinkExtractor`, `EndpointDiscovery`, `PingbackClient`, `SentPingbackLog` (table `tx_pongback_sent`) |
+| `Classes/Sending/`                     | Sending: `SendMentionsHandler` (Messenger, retries; handles `SendPingbacksMessage`, whose name stays for queued messages), `SourcePageResolver`, `WebmentionClient`, `LinkExtractor`, `EndpointDiscovery`, `PingbackClient`, `SentMentionLog` (table `tx_pongback_sent`) |
 | `Classes/Html/HtmlDocumentLoader.php`  | Safe HTML parsing shared by receiving and sending |
 | `Classes/Controller/Backend/ModerationController.php` | Module `Web > Pongback`: list per page tree, POST approve/hide/delete |
-| `Classes/Moderation/`                  | `ModerationRepository` (permission aware queries for module and widget), `PingbackModerator` (DataHandler, so permissions, history and caches are handled by TYPO3) |
+| `Classes/Moderation/`                  | `ModerationRepository` (permission aware queries for module and widget), `MentionModerator` (DataHandler, so permissions, history and caches are handled by TYPO3) |
 | `Classes/Notification/NotifyEditors.php` | Listener of `AfterPingbackCreatedEvent` and `SendingFailedEvent`: emails with login redirect link into the module |
 | `Classes/Widget/`                      | Dashboard widget and its button, only registered if EXT:dashboard exists (`Configuration/Services.php`) |
 | `Classes/Configuration/PongbackSettings.php` | Typed access to the site settings; sites without the set get `enabled = false` |
@@ -100,6 +101,7 @@ Never put the TER token anywhere but the repository secret `TYPO3_API_TOKEN`.
   live only in the YAML file; `PongbackSettings::KEYS` lists the names (a unit
   test keeps them in sync). Tests take the defaults from the YAML
   (`Tests/Unit/Fixtures/SetSettings`).
+- The protocol is the enum `Mention\Protocol`, never a string.
 - Database tables and columns are created from TCA; there is no
   `ext_tables.sql`. Use TCA options (`max`, types) to shape columns.
 - Sites without the set `webicorns/pongback` get no features at all

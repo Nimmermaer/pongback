@@ -26,6 +26,12 @@ readonly class MessageQueue
 {
     public const DEFAULT_TRANSPORT = 'doctrine';
 
+    /**
+     * Attempts of a RetryableMessage, and the delay before attempt 2, 3 in seconds.
+     */
+    public const MAX_ATTEMPTS = 3;
+    public const RETRY_DELAYS = [2 => 300, 3 => 3600];
+
     public function __construct(
         private MessageBusInterface $bus,
     ) {}
@@ -38,6 +44,28 @@ readonly class MessageQueue
         }
 
         $this->bus->dispatch($message, $stamps);
+    }
+
+    /**
+     * Queues the next attempt after a temporary problem.
+     *
+     * @return bool false after the last attempt
+     */
+    public function retryLater(RetryableMessage $message): bool
+    {
+        if (self::isLastAttempt($message)) {
+            return false;
+        }
+
+        $next = $message->nextAttempt();
+        $this->queue($next, self::RETRY_DELAYS[$next->getAttempt()]);
+
+        return true;
+    }
+
+    public static function isLastAttempt(RetryableMessage $message): bool
+    {
+        return $message->getAttempt() >= self::MAX_ATTEMPTS;
     }
 
     /**

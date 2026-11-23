@@ -21,10 +21,11 @@ use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Http\RequestFactory;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Http\Stream;
+use Webicorns\Pongback\Http\OutgoingRequest;
 use Webicorns\Pongback\Mention\Source\UrlGuard;
 use Webicorns\Pongback\Pingback\PingbackEndpoint;
 use Webicorns\Pongback\Sending\PingbackClient;
-use Webicorns\Pongback\Sending\PingStatus;
+use Webicorns\Pongback\Sending\SendStatus;
 use Webicorns\Pongback\Utility\Constants;
 use Webicorns\Pongback\XmlRpc\XmlRpcCodec;
 
@@ -45,7 +46,7 @@ final class PingbackClientTest extends TestCase
         $result = $this->createSubject($this->xml((new XmlRpcCodec())->encodeResponse('Thanks!')))
             ->ping(self::ENDPOINT, self::SOURCE, self::TARGET);
 
-        self::assertSame(PingStatus::Sent, $result->status);
+        self::assertSame(SendStatus::Sent, $result->status);
         self::assertSame('Thanks!', $result->message);
         self::assertSame(0, $result->faultCode);
 
@@ -58,7 +59,7 @@ final class PingbackClientTest extends TestCase
         self::assertFalse($options['allow_redirects']);
         self::assertFalse($options['http_errors']);
         self::assertSame(5, $options['connect_timeout']);
-        self::assertSame(PingbackClient::TIMEOUT, $options['timeout']);
+        self::assertSame(OutgoingRequest::TIMEOUT, $options['timeout']);
         self::assertSame('text/xml; charset=utf-8', $options['headers']['Content-Type']);
         self::assertSame(Constants::USER_AGENT, $options['headers']['User-Agent']);
         self::assertSame([\CURLOPT_RESOLVE => ['blog.example:443:93.184.215.14']], $options['curl']);
@@ -75,7 +76,7 @@ final class PingbackClientTest extends TestCase
 
         $result = $this->createSubject($this->xml($body))->ping(self::ENDPOINT, self::SOURCE, self::TARGET);
 
-        self::assertSame(PingStatus::Sent, $result->status);
+        self::assertSame(SendStatus::Sent, $result->status);
         self::assertSame('', $result->message);
     }
 
@@ -92,7 +93,7 @@ final class PingbackClientTest extends TestCase
     {
         $result = $this->createSubject()->ping('https://intranet.example/xmlrpc.php', self::SOURCE, self::TARGET);
 
-        self::assertSame(PingStatus::Rejected, $result->status);
+        self::assertSame(SendStatus::Rejected, $result->status);
         self::assertMatchesRegularExpression('/^Endpoint not allowed: \S/', $result->message);
         self::assertSame([], $this->requests);
     }
@@ -103,7 +104,7 @@ final class PingbackClientTest extends TestCase
         $result = $this->createSubject(new ConnectException('Connection refused', new Request('POST', self::ENDPOINT)))
             ->ping(self::ENDPOINT, self::SOURCE, self::TARGET);
 
-        self::assertSame(PingStatus::Failed, $result->status);
+        self::assertSame(SendStatus::Failed, $result->status);
         self::assertSame('Endpoint not reachable: Connection refused', $result->message);
     }
 
@@ -126,7 +127,7 @@ final class PingbackClientTest extends TestCase
     {
         $result = $this->createSubject(new Response(null, $status))->ping(self::ENDPOINT, self::SOURCE, self::TARGET);
 
-        self::assertSame(PingStatus::Failed, $result->status);
+        self::assertSame(SendStatus::Failed, $result->status);
         self::assertSame(sprintf('Endpoint responded with HTTP %d', $status), $result->message);
     }
 
@@ -135,7 +136,7 @@ final class PingbackClientTest extends TestCase
     {
         $result = $this->createSubject($this->xml('<html>Not XML-RPC</html>'))->ping(self::ENDPOINT, self::SOURCE, self::TARGET);
 
-        self::assertSame(PingStatus::Failed, $result->status);
+        self::assertSame(SendStatus::Failed, $result->status);
         self::assertMatchesRegularExpression('/^Invalid XML-RPC response: \S/', $result->message);
     }
 
@@ -146,34 +147,34 @@ final class PingbackClientTest extends TestCase
         $body = (new XmlRpcCodec())->encodeResponse('ok');
         $padded = str_replace('<methodResponse>', '<methodResponse>' . str_repeat(' ', 65536), $body);
 
-        self::assertSame(PingStatus::Sent, $this->createSubject($this->xml($body))->ping(self::ENDPOINT, self::SOURCE, self::TARGET)->status);
-        self::assertSame(PingStatus::Failed, $this->createSubject($this->xml($padded))->ping(self::ENDPOINT, self::SOURCE, self::TARGET)->status);
+        self::assertSame(SendStatus::Sent, $this->createSubject($this->xml($body))->ping(self::ENDPOINT, self::SOURCE, self::TARGET)->status);
+        self::assertSame(SendStatus::Failed, $this->createSubject($this->xml($padded))->ping(self::ENDPOINT, self::SOURCE, self::TARGET)->status);
     }
 
     /**
-     * @return array<string, array{int, PingStatus}>
+     * @return array<string, array{int, SendStatus}>
      */
     public static function faultProvider(): array
     {
         return [
-            'generic' => [PingbackEndpoint::FAULT_GENERIC, PingStatus::Failed],
-            'source not found' => [PingbackEndpoint::FAULT_SOURCE_NOT_FOUND, PingStatus::Rejected],
-            'no link to target' => [PingbackEndpoint::FAULT_NO_LINK_TO_TARGET, PingStatus::Rejected],
-            'target not found' => [PingbackEndpoint::FAULT_TARGET_NOT_FOUND, PingStatus::Rejected],
-            'target not allowed' => [PingbackEndpoint::FAULT_TARGET_NOT_ALLOWED, PingStatus::Rejected],
-            'already registered' => [PingbackEndpoint::FAULT_ALREADY_REGISTERED, PingStatus::AlreadyRegistered],
-            'access denied' => [PingbackEndpoint::FAULT_ACCESS_DENIED, PingStatus::Rejected],
-            'upstream error' => [PingbackEndpoint::FAULT_UPSTREAM_ERROR, PingStatus::Failed],
-            'parse error' => [PingbackEndpoint::FAULT_PARSE_ERROR, PingStatus::Failed],
-            'method not found' => [PingbackEndpoint::FAULT_METHOD_NOT_FOUND, PingStatus::Rejected],
-            'invalid params' => [PingbackEndpoint::FAULT_INVALID_PARAMS, PingStatus::Rejected],
-            'unknown' => [4711, PingStatus::Failed],
+            'generic' => [PingbackEndpoint::FAULT_GENERIC, SendStatus::Failed],
+            'source not found' => [PingbackEndpoint::FAULT_SOURCE_NOT_FOUND, SendStatus::Rejected],
+            'no link to target' => [PingbackEndpoint::FAULT_NO_LINK_TO_TARGET, SendStatus::Rejected],
+            'target not found' => [PingbackEndpoint::FAULT_TARGET_NOT_FOUND, SendStatus::Rejected],
+            'target not allowed' => [PingbackEndpoint::FAULT_TARGET_NOT_ALLOWED, SendStatus::Rejected],
+            'already registered' => [PingbackEndpoint::FAULT_ALREADY_REGISTERED, SendStatus::AlreadyRegistered],
+            'access denied' => [PingbackEndpoint::FAULT_ACCESS_DENIED, SendStatus::Rejected],
+            'upstream error' => [PingbackEndpoint::FAULT_UPSTREAM_ERROR, SendStatus::Failed],
+            'parse error' => [PingbackEndpoint::FAULT_PARSE_ERROR, SendStatus::Failed],
+            'method not found' => [PingbackEndpoint::FAULT_METHOD_NOT_FOUND, SendStatus::Rejected],
+            'invalid params' => [PingbackEndpoint::FAULT_INVALID_PARAMS, SendStatus::Rejected],
+            'unknown' => [4711, SendStatus::Failed],
         ];
     }
 
     #[Test]
     #[DataProvider('faultProvider')]
-    public function mapsFaultCodes(int $faultCode, PingStatus $expected): void
+    public function mapsFaultCodes(int $faultCode, SendStatus $expected): void
     {
         $result = $this->createSubject($this->xml((new XmlRpcCodec())->encodeFault($faultCode, 'Nope')))
             ->ping(self::ENDPOINT, self::SOURCE, self::TARGET);

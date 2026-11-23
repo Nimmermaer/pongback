@@ -26,10 +26,11 @@ use Webicorns\Pongback\Domain\Model\Pingback;
 use Webicorns\Pongback\Event\AfterPingbackCreatedEvent;
 use Webicorns\Pongback\Event\SendingFailedEvent;
 use Webicorns\Pongback\Mention\IncomingMention;
+use Webicorns\Pongback\Mention\Protocol;
 use Webicorns\Pongback\Mention\ResolvedTarget;
 use Webicorns\Pongback\Notification\NotifyEditors;
-use Webicorns\Pongback\Sending\PingResult;
-use Webicorns\Pongback\Sending\PingStatus;
+use Webicorns\Pongback\Sending\SendResult;
+use Webicorns\Pongback\Sending\SendStatus;
 use Webicorns\Pongback\Tests\Functional\AbstractPongbackTestCase;
 
 final class NotifyEditorsTest extends AbstractPongbackTestCase
@@ -145,8 +146,8 @@ final class NotifyEditorsTest extends AbstractPongbackTestCase
             2,
             'https://main.example/article',
             [
-                'https://down.example/post' => new PingResult(PingStatus::Failed, 'HTTP 503 <busy>', 0, 'https://down.example/wm', 'webmention'),
-                'https://strict.example/post' => new PingResult(PingStatus::Rejected, 'No link', 17, 'https://strict.example/xmlrpc', 'pingback'),
+                'https://down.example/post' => new SendResult(SendStatus::Failed, 'HTTP 503 <busy>', 0, 'https://down.example/wm', Protocol::Webmention),
+                'https://strict.example/post' => new SendResult(SendStatus::Rejected, 'No link', 17, 'https://strict.example/xmlrpc', Protocol::Pingback),
             ],
         ));
 
@@ -187,7 +188,7 @@ final class NotifyEditorsTest extends AbstractPongbackTestCase
         $pingback = new Pingback();
         $pingback->setPid(2);
         $pingback->setHidden($pending);
-        $pingback->setProtocol($protocol);
+        $pingback->setProtocol(Protocol::from($protocol));
         $pingback->setSourceLink('https://blog.example/post');
         $pingback->setSourceTitle('A <great> post');
         $pingback->setTargetLink('https://main.example/article');
@@ -196,7 +197,7 @@ final class NotifyEditorsTest extends AbstractPongbackTestCase
         return new AfterPingbackCreatedEvent(
             7,
             $pingback,
-            new IncomingMention('https://blog.example/post', 'https://main.example/article', IncomingMention::PROTOCOL_PINGBACK),
+            new IncomingMention('https://blog.example/post', 'https://main.example/article', Protocol::Pingback),
             new ResolvedTarget($this->get(SiteFinder::class)->getSiteByIdentifier('main'), 2, 0),
         );
     }

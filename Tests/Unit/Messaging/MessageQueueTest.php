@@ -80,6 +80,39 @@ final class MessageQueueTest extends TestCase
         self::assertSame(300_000, $envelope->last(DelayStamp::class)?->getDelay());
     }
 
+    #[Test]
+    public function retriesAfterFiveMinutesAndOneHour(): void
+    {
+        $dispatched = new \ArrayObject();
+        $bus = $this->createMock(MessageBusInterface::class);
+        $bus->method('dispatch')->willReturnCallback(static function (object $message, array $stamps) use ($dispatched): Envelope {
+            $envelope = new Envelope($message, $stamps);
+            $dispatched->append($envelope);
+            return $envelope;
+        });
+        $queue = new MessageQueue($bus);
+
+        self::assertTrue($queue->retryLater(new SendPingbacksMessage(5, 1, 1)));
+        self::assertTrue($queue->retryLater(new SendPingbacksMessage(5, 1, 2)));
+        self::assertFalse($queue->retryLater(new SendPingbacksMessage(5, 1, MessageQueue::MAX_ATTEMPTS)));
+
+        /** @var list<Envelope> $envelopes */
+        $envelopes = $dispatched->getArrayCopy();
+        self::assertCount(2, $envelopes);
+        self::assertEquals(new SendPingbacksMessage(5, 1, 2), $envelopes[0]->getMessage());
+        self::assertSame(300_000, $envelopes[0]->last(DelayStamp::class)?->getDelay());
+        self::assertEquals(new SendPingbacksMessage(5, 1, 3), $envelopes[1]->getMessage());
+        self::assertSame(3_600_000, $envelopes[1]->last(DelayStamp::class)?->getDelay());
+    }
+
+    #[Test]
+    public function knowsTheLastAttempt(): void
+    {
+        self::assertFalse(MessageQueue::isLastAttempt(new SendPingbacksMessage(5, 0, MessageQueue::MAX_ATTEMPTS - 1)));
+        self::assertTrue(MessageQueue::isLastAttempt(new SendPingbacksMessage(5, 0, MessageQueue::MAX_ATTEMPTS)));
+        self::assertTrue(MessageQueue::isLastAttempt(new SendPingbacksMessage(5, 0, MessageQueue::MAX_ATTEMPTS + 1)));
+    }
+
     private function queue(SendPingbacksMessage $message, int $delay = 0): Envelope
     {
         $dispatched = null;

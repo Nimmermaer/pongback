@@ -12,14 +12,16 @@ declare(strict_types=1);
 
 namespace Webicorns\Pongback\Sending;
 
-final readonly class PingResult
+use Webicorns\Pongback\Mention\Protocol;
+
+final readonly class SendResult
 {
     public function __construct(
-        public PingStatus $status,
+        public SendStatus $status,
         public string $message = '',
         public int $faultCode = 0,
         public string $endpoint = '',
-        public string $protocol = '',
+        public ?Protocol $protocol = null,
     ) {}
 
     public function withEndpoint(DiscoveredEndpoint $endpoint): self

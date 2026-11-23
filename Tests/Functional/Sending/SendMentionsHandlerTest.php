@@ -15,19 +15,19 @@ namespace Webicorns\Pongback\Tests\Functional\Sending;
 use PHPUnit\Framework\Attributes\Test;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\NullLogger;
-use TYPO3\CMS\Core\Domain\Repository\PageRepository;
-use TYPO3\CMS\Core\Site\SiteFinder;
+use Webicorns\Pongback\Mention\Protocol;
 use Webicorns\Pongback\Messaging\MessageQueue;
 use Webicorns\Pongback\Sending\DiscoveredEndpoint;
 use Webicorns\Pongback\Sending\EndpointDiscovery;
 use Webicorns\Pongback\Sending\LinkExtractor;
 use Webicorns\Pongback\Sending\PageFetcher;
 use Webicorns\Pongback\Sending\PingbackClient;
-use Webicorns\Pongback\Sending\PingResult;
-use Webicorns\Pongback\Sending\PingStatus;
-use Webicorns\Pongback\Sending\SendPingbacksHandler;
+use Webicorns\Pongback\Sending\SendMentionsHandler;
 use Webicorns\Pongback\Sending\SendPingbacksMessage;
-use Webicorns\Pongback\Sending\SentPingbackLog;
+use Webicorns\Pongback\Sending\SendResult;
+use Webicorns\Pongback\Sending\SendStatus;
+use Webicorns\Pongback\Sending\SentMentionLog;
+use Webicorns\Pongback\Sending\SourcePageResolver;
 use Webicorns\Pongback\Sending\WebmentionClient;
 use Webicorns\Pongback\Tests\Functional\AbstractPongbackTestCase;
 use Webicorns\Pongback\Utility\Constants;
@@ -36,7 +36,7 @@ use Webicorns\Pongback\Utility\Constants;
  * Sending with real sites, routing, page visibility, log table and queue.
  * Only the HTTP requests (own page, discovery, ping) are replaced.
  */
-final class SendPingbacksHandlerTest extends AbstractPongbackTestCase
+final class SendMentionsHandlerTest extends AbstractPongbackTestCase
 {
     /**
      * @var list<string>
@@ -98,23 +98,22 @@ final class SendPingbacksHandlerTest extends AbstractPongbackTestCase
         });
 
         $discovery = $this->createMock(EndpointDiscovery::class);
-        $discovery->method('discover')->willReturn(new DiscoveredEndpoint('pingback', 'https://blog.example/xmlrpc.php'));
+        $discovery->method('discover')->willReturn(new DiscoveredEndpoint(Protocol::Pingback, 'https://blog.example/xmlrpc.php'));
 
         $client = $this->createMock(PingbackClient::class);
-        $client->method('ping')->willReturnCallback(function (string $endpoint, string $source, string $target): PingResult {
+        $client->method('ping')->willReturnCallback(function (string $endpoint, string $source, string $target): SendResult {
             $this->pings[] = [$endpoint, $source, $target];
-            return new PingResult(PingStatus::Sent);
+            return new SendResult(SendStatus::Sent);
         });
 
-        $handler = new SendPingbacksHandler(
-            $this->get(PageRepository::class),
-            $this->get(SiteFinder::class),
+        $handler = new SendMentionsHandler(
+            $this->get(SourcePageResolver::class),
             $pageFetcher,
             new LinkExtractor(),
             $discovery,
             $client,
             $this->createMock(WebmentionClient::class),
-            $this->get(SentPingbackLog::class),
+            $this->get(SentMentionLog::class),
             $this->get(MessageQueue::class),
             $this->get(EventDispatcherInterface::class),
             new NullLogger(),

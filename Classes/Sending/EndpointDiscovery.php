@@ -16,8 +16,8 @@ use GuzzleHttp\Psr7\UriResolver;
 use GuzzleHttp\Psr7\Utils;
 use Webicorns\Pongback\Html\HtmlDocumentLoader;
 use Webicorns\Pongback\Html\LinkHeader;
-use Webicorns\Pongback\Mention\IncomingMention;
 use Webicorns\Pongback\Mention\MentionRejected;
+use Webicorns\Pongback\Mention\Protocol;
 use Webicorns\Pongback\Mention\Source\FetchedSource;
 use Webicorns\Pongback\Mention\Source\SourceFetcher;
 
@@ -47,7 +47,7 @@ readonly class EndpointDiscovery
             $endpoint = LinkHeader::find($page->linkHeaders, 'webmention') ?? $this->findElement($document, ['link', 'a'], 'webmention');
             $absolute = $endpoint === null ? null : $this->absolute($page, $endpoint);
             if ($absolute !== null) {
-                return new DiscoveredEndpoint(IncomingMention::PROTOCOL_WEBMENTION, $absolute);
+                return new DiscoveredEndpoint(Protocol::Webmention, $absolute);
             }
         }
 
@@ -55,7 +55,7 @@ readonly class EndpointDiscovery
         // The Pingback endpoint must not be the page itself.
         $absolute = $endpoint === null || $endpoint === '' ? null : $this->absolute($page, $endpoint);
 
-        return $absolute === null ? null : new DiscoveredEndpoint(IncomingMention::PROTOCOL_PINGBACK, $absolute);
+        return $absolute === null ? null : new DiscoveredEndpoint(Protocol::Pingback, $absolute);
     }
 
     /**

@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Webicorns\Pongback\Sending;
 
-enum PingStatus: string
+enum SendStatus: string
 {
     /** The linked site registered the Pingback. */
     case Sent = 'sent';
