@@ -81,6 +81,39 @@ final class SentPingbackLogTest extends AbstractPongbackTestCase
         self::assertSame(str_repeat('m', 255), $this->rows()[0]['message']);
     }
 
+    #[Test]
+    public function remembersTheLastResultWithProtocol(): void
+    {
+        $log = $this->log();
+        self::assertNull($log->lastResult(2, self::SOURCE, self::TARGET));
+
+        $log->record(2, self::SOURCE, self::TARGET, new PingResult(PingStatus::Rejected, 'HTTP 400', 0, 'https://blog.example/webmention', 'webmention'));
+
+        self::assertEquals(
+            new PingResult(PingStatus::Rejected, 'HTTP 400', 0, 'https://blog.example/webmention', 'webmention'),
+            $log->lastResult(2, self::SOURCE, self::TARGET),
+        );
+    }
+
+    #[Test]
+    public function listsWebmentionTargetsOfAPageAndForgetsThem(): void
+    {
+        $log = $this->log();
+        $log->record(2, self::SOURCE, 'https://blog.example/one', new PingResult(PingStatus::Sent, protocol: 'webmention'));
+        $log->record(2, self::SOURCE, 'https://blog.example/pingback', new PingResult(PingStatus::Sent, protocol: 'pingback'));
+        $log->record(2, self::SOURCE, 'https://blog.example/two', new PingResult(PingStatus::Failed, protocol: 'webmention'));
+        $log->record(2, 'https://main.example/other', 'https://blog.example/three', new PingResult(PingStatus::Sent, protocol: 'webmention'));
+        $log->record(3, self::SOURCE, 'https://blog.example/four', new PingResult(PingStatus::Sent, protocol: 'webmention'));
+
+        self::assertSame(['https://blog.example/one', 'https://blog.example/two'], $log->webmentionTargets(2, self::SOURCE));
+
+        $log->forget(2, self::SOURCE, 'https://blog.example/one');
+
+        self::assertSame(['https://blog.example/two'], $log->webmentionTargets(2, self::SOURCE));
+        self::assertNull($log->lastResult(2, self::SOURCE, 'https://blog.example/one'));
+        self::assertCount(4, $this->rows(), 'Only this entry is removed');
+    }
+
     private function log(): SentPingbackLog
     {
         return $this->get(SentPingbackLog::class);

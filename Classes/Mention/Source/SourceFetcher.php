@@ -61,6 +61,7 @@ readonly class SourceFetcher
                 $url,
                 $this->readLimited($response->getBody()),
                 trim($response->getHeaderLine('X-Pingback')),
+                array_values($response->getHeader('Link')),
             );
         }
 

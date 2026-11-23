@@ -19,10 +19,12 @@ final readonly class FetchedSource
 {
     /**
      * @param string $pingbackHeader value of the "X-Pingback" response header, if any
+     * @param list<string> $linkHeaders values of the "Link" response headers
      */
     public function __construct(
         public string $url,
         public string $html,
         public string $pingbackHeader = '',
+        public array $linkHeaders = [],
     ) {}
 }

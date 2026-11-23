@@ -14,6 +14,7 @@ namespace Webicorns\Pongback\Tests\Unit\Sending;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Webicorns\Pongback\Sending\DiscoveredEndpoint;
 use Webicorns\Pongback\Sending\PingResult;
 use Webicorns\Pongback\Sending\PingStatus;
 use Webicorns\Pongback\Sending\SendPingbacksMessage;
@@ -45,12 +46,13 @@ final class PingStatusTest extends TestCase
     #[Test]
     public function resultsKeepEverythingButTheEndpointWhenAddingIt(): void
     {
-        $result = (new PingResult(PingStatus::Rejected, 'Nope', 17))->withEndpoint('https://blog.example/xmlrpc.php');
+        $result = (new PingResult(PingStatus::Rejected, 'Nope', 17))->withEndpoint(new DiscoveredEndpoint('pingback', 'https://blog.example/xmlrpc.php'));
 
         self::assertSame(PingStatus::Rejected, $result->status);
         self::assertSame('Nope', $result->message);
         self::assertSame(17, $result->faultCode);
         self::assertSame('https://blog.example/xmlrpc.php', $result->endpoint);
+        self::assertSame('pingback', $result->protocol);
     }
 
     #[Test]

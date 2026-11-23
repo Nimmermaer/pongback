@@ -22,6 +22,7 @@ use Psr\Log\NullLogger;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\Entity\SiteSettings;
 use Webicorns\Pongback\Domain\Model\Pingback;
+use Webicorns\Pongback\Event\AfterPingbackCreatedEvent;
 use Webicorns\Pongback\Event\BeforePingbackCreateEvent;
 use Webicorns\Pongback\Mention\IncomingMention;
 use Webicorns\Pongback\Mention\MentionReceiver;
@@ -51,6 +52,11 @@ final class MentionReceiverTest extends TestCase
      * @var list<BeforePingbackCreateEvent>
      */
     private array $dispatchedEvents = [];
+
+    /**
+     * @var list<AfterPingbackCreatedEvent>
+     */
+    private array $createdEvents = [];
 
     /**
      * @var (\Closure(BeforePingbackCreateEvent): void)|null
@@ -182,6 +188,9 @@ final class MentionReceiverTest extends TestCase
 
         self::assertSame(SyncResult::Created, $this->createSubject()->synchronize($this->webmention(), $site));
         self::assertCount(1, $this->dispatchedEvents, 'Listeners can reject new Webmentions as well');
+        self::assertCount(1, $this->createdEvents);
+        self::assertSame(3, $this->createdEvents[0]->uid);
+        self::assertSame(IncomingMention::PROTOCOL_WEBMENTION, $this->createdEvents[0]->pingback->getProtocol());
     }
 
     #[Test]
@@ -291,6 +300,9 @@ final class MentionReceiverTest extends TestCase
     {
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $eventDispatcher->method('dispatch')->willReturnCallback(function (object $event): object {
+            if ($event instanceof AfterPingbackCreatedEvent) {
+                $this->createdEvents[] = $event;
+            }
             if ($event instanceof BeforePingbackCreateEvent) {
                 $this->dispatchedEvents[] = $event;
                 if ($this->listener !== null) {

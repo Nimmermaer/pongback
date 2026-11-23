@@ -19,10 +19,11 @@ final readonly class PingResult
         public string $message = '',
         public int $faultCode = 0,
         public string $endpoint = '',
+        public string $protocol = '',
     ) {}
 
-    public function withEndpoint(string $endpoint): self
+    public function withEndpoint(DiscoveredEndpoint $endpoint): self
     {
-        return new self($this->status, $this->message, $this->faultCode, $endpoint);
+        return new self($this->status, $this->message, $this->faultCode, $endpoint->url, $endpoint->protocol);
     }
 }
