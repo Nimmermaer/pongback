@@ -110,6 +110,7 @@ final class PingbackEndpointTest extends TestCase
         return [
             'invalid request' => [RejectionReason::InvalidRequest, 0],
             'source not found' => [RejectionReason::SourceNotFound, 16],
+            'source gone' => [RejectionReason::SourceGone, 16],
             'no link' => [RejectionReason::NoLinkToTarget, 17],
             'target not found' => [RejectionReason::TargetNotFound, 32],
             'target not allowed' => [RejectionReason::TargetNotAllowed, 33],

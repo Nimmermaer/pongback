@@ -35,18 +35,57 @@ readonly class MentionStorage
      */
     public function exists(string $source, string $target): bool
     {
+        return $this->find($source, $target) !== null;
+    }
+
+    /**
+     * @return int|null uid of the (also hidden) record of this source and target
+     */
+    public function find(string $source, string $target): ?int
+    {
         $queryBuilder = $this->connectionPool->getQueryBuilderForTable(Constants::PINGBACK_TABLE);
         $queryBuilder->getRestrictions()->removeAll()->add(new DeletedRestriction());
 
-        return (int) $queryBuilder
-            ->count('uid')
+        $uid = $queryBuilder
+            ->select('uid')
             ->from(Constants::PINGBACK_TABLE)
             ->where(
                 $queryBuilder->expr()->eq('source_link', $queryBuilder->createNamedParameter($source)),
                 $queryBuilder->expr()->eq('target_link', $queryBuilder->createNamedParameter($target)),
             )
+            ->setMaxResults(1)
             ->executeQuery()
-            ->fetchOne() > 0;
+            ->fetchOne();
+
+        return $uid === false ? null : (int) $uid;
+    }
+
+    /**
+     * The source changed: new title and excerpt, the moderation state stays.
+     */
+    public function update(int $uid, string $sourceTitle, string $excerpt): void
+    {
+        $this->connectionPool->getConnectionForTable(Constants::PINGBACK_TABLE)->update(
+            Constants::PINGBACK_TABLE,
+            ['source_title' => $sourceTitle, 'excerpt' => $excerpt, 'tstamp' => time()],
+            ['uid' => $uid],
+            ['tstamp' => Connection::PARAM_INT],
+        );
+        $this->flushPages();
+    }
+
+    /**
+     * The source was deleted or no longer links to the target.
+     */
+    public function remove(int $uid): void
+    {
+        $this->connectionPool->getConnectionForTable(Constants::PINGBACK_TABLE)->update(
+            Constants::PINGBACK_TABLE,
+            ['deleted' => 1, 'tstamp' => time()],
+            ['uid' => $uid],
+            ['deleted' => Connection::PARAM_INT, 'tstamp' => Connection::PARAM_INT],
+        );
+        $this->flushPages();
     }
 
     public function add(Pingback $pingback, int $languageId): int
@@ -61,6 +100,7 @@ readonly class MentionStorage
                 'hidden' => (int) $pingback->isHidden(),
                 'crdate' => $now,
                 'tstamp' => $now,
+                'protocol' => $pingback->getProtocol(),
                 'source_link' => $pingback->getSourceLink(),
                 'target_link' => $pingback->getTargetLink(),
                 'source_title' => $pingback->getSourceTitle(),
@@ -77,10 +117,17 @@ readonly class MentionStorage
         $uid = (int) $connection->lastInsertId();
 
         if (! $pingback->isHidden()) {
-            // Pages showing Pingbacks carry this tag, as for changes made with the DataHandler.
-            $this->cacheManager->flushCachesInGroupByTags('pages', [Constants::PINGBACK_TABLE]);
+            $this->flushPages();
         }
 
         return $uid;
+    }
+
+    /**
+     * Pages showing Pingbacks carry this tag, as for changes made with the DataHandler.
+     */
+    private function flushPages(): void
+    {
+        $this->cacheManager->flushCachesInGroupByTags('pages', [Constants::PINGBACK_TABLE]);
     }
 }

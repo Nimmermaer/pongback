@@ -94,7 +94,7 @@ readonly class SourceFetcher
     {
         $status = $response->getStatusCode();
         if ($status === 404 || $status === 410) {
-            throw new MentionRejected(RejectionReason::SourceNotFound, 'The source URI does not exist.');
+            throw new MentionRejected(RejectionReason::SourceGone, 'The source URI does not exist.');
         }
 
         if ($status < 200 || $status >= 300) {

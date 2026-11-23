@@ -189,6 +189,7 @@ final class SendPingbacksHandlerTest extends TestCase
         return [
             'server error is temporary' => [RejectionReason::UpstreamError, PingStatus::Failed],
             'unreachable is temporary' => [RejectionReason::SourceNotFound, PingStatus::Failed],
+            'linked page gone is final' => [RejectionReason::SourceGone, PingStatus::Rejected],
             'internal address is final' => [RejectionReason::InvalidRequest, PingStatus::Rejected],
             'no html is final' => [RejectionReason::NoLinkToTarget, PingStatus::Rejected],
         ];

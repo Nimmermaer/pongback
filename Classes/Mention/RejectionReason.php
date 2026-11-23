@@ -20,7 +20,10 @@ namespace Webicorns\Pongback\Mention;
 enum RejectionReason: string
 {
     case InvalidRequest = 'invalid_request';
+    /** The source could not be reached (network problem), may be temporary. */
     case SourceNotFound = 'source_not_found';
+    /** The source answered 404 or 410: it does not exist (any more). */
+    case SourceGone = 'source_gone';
     case NoLinkToTarget = 'no_link_to_target';
     case TargetNotFound = 'target_not_found';
     case TargetNotAllowed = 'target_not_allowed';
