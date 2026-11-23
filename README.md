@@ -99,8 +99,13 @@ EXT:dashboard is optional (dashboard widget).
    the message queue worker regularly, e.g. by cron:
 
    ```bash
-   vendor/bin/typo3 messenger:consume doctrine --time-limit=240
+   # crontab of the web server user, e.g. sudo crontab -u www-data -e
+   */5 * * * * /usr/bin/php /var/www/example.com/vendor/bin/typo3 messenger:consume doctrine --time-limit=240 --quiet
    ```
+
+   Without the worker nothing is sent. Alternatives (TYPO3 scheduler,
+   supervisor/systemd) and how to check it: see the manual, chapter
+   "Sending Pingbacks", section "Run the worker".
 
 ## For developers
 
