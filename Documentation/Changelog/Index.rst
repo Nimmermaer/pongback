@@ -7,9 +7,13 @@ Changelog
 =========
 
 ..  _changelog-upcoming:
+..  _changelog-0-10-0:
 
-Upcoming
-========
+0.10.0 (beta)
+=============
+
+Adds Webmention to the public beta of version 1.0.0. Update the database
+schema (new column `protocol`) after updating.
 
 Features
 --------
