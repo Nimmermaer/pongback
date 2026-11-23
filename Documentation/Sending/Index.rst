@@ -36,6 +36,9 @@ the page changes. The result, including the protocol, is stored as record
 :guilabel:`Sent Pingback` on the page and can be viewed in the module
 :guilabel:`Web > List`.
 
+..  uml:: /Images/Plantuml/sending.plantuml
+    :caption: Sending: queued when saving, sent by the worker, logged per link
+
 ..  _sending-worker:
 
 Run the worker

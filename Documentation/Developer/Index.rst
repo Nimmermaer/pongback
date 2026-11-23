@@ -61,6 +61,18 @@ specification.
     *   -   -32700, -32601, -32602
         -   Not well formed XML, unknown method, invalid parameters
 
+..  _developer-flow-pingback:
+
+Flow of a received Pingback
+===========================
+
+..  uml:: /Images/Plantuml/receive-pingback.plantuml
+    :caption: Receiving a Pingback, answered within the request
+
+The answer is an XML-RPC response, or a fault code of the specification if a
+check fails. See :ref:`webmention-receiving` for Webmentions and
+:ref:`sending` for the other direction.
+
 ..  _developer-event:
 
 Modify or reject Pingbacks

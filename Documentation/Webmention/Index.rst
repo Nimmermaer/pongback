@@ -33,6 +33,9 @@ The endpoint accepts `POST` requests with the form fields `source` and
         -d source=https://blog.example/post \
         -d target=https://example.com/article
 
+..  uml:: /Images/Plantuml/receive-webmention.plantuml
+    :caption: Receiving a Webmention, verified later by the worker
+
 The endpoint checks right away that both are `http(s)` URLs, that they
 differ, that the target is a page of this site visible to visitors, and the
 rate limit (`pongback.receive.rateLimit`). It answers:

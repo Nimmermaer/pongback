@@ -1,0 +1,42 @@
+@startuml
+title Receiving a Webmention (asynchronous)
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor "Linking site" as Sender
+participant "WebmentionEndpoint\n/webmention" as Endpoint
+queue "Message queue\n(doctrine)" as Queue
+participant "Worker\nReceiveWebmentionHandler" as Worker
+participant "MentionReceiver" as Receiver
+participant "Linking page\n(source)" as Source
+database "tx_pongback_\ndomain_model_pingback" as Table
+
+Sender -> Endpoint : POST source, target\n(form encoded)
+Endpoint -> Endpoint : http(s) URLs, different,\nrate limit per IP,\ntarget is a visible page of this site
+alt invalid
+  Endpoint --> Sender : 400 Bad Request / 429 Too Many Requests
+else valid
+  Endpoint -> Queue : ReceiveWebmentionMessage
+  Endpoint --> Sender : 202 Accepted
+end
+
+== Later: messenger:consume doctrine ==
+
+Queue -> Worker : ReceiveWebmentionMessage
+Worker -> Receiver : synchronize(mention, site)
+Receiver -> Source : GET source
+alt source links to target
+  Source --> Receiver : HTML
+  Receiver -> Table : new: store (events, email as for Pingbacks)\nknown: update title and excerpt
+else source gone (404/410) or no longer linking
+  Receiver -> Table : remove a stored mention
+else network or server problem
+  Receiver --> Worker : temporary problem
+  Worker -> Queue : again in 5 minutes, then in 1 hour
+end
+
+note over Sender, Endpoint
+  The linking site only gets 202 Accepted.
+  The result of the verification is not reported back.
+end note
+@enduml

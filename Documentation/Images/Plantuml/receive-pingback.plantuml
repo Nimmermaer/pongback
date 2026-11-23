@@ -1,0 +1,35 @@
+@startuml
+title Receiving a Pingback (synchronous)
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor "Linking site" as Sender
+participant "PingbackReceiverMiddleware\n/pingback.ping" as Middleware
+participant "PingbackEndpoint" as Endpoint
+participant "MentionReceiver" as Receiver
+participant "Linking page\n(source)" as Source
+database "tx_pongback_\ndomain_model_pingback" as Table
+participant "NotifyEditors" as Mail
+
+Sender -> Middleware : POST XML-RPC\npingback.ping(source, target)
+Middleware -> Endpoint : handle()
+Endpoint -> Endpoint : parse XML-RPC,\nrate limit per IP
+Endpoint -> Receiver : receive(mention, site)
+Receiver -> Receiver : target is a visible page\nof this site?
+Receiver -> Table : already registered?
+Receiver -> Source : GET source\n(public hosts only, max. 3 redirects, 1 MiB)
+Source --> Receiver : HTML
+Receiver -> Receiver : links to target?\ntitle and excerpt as plain text
+Receiver -> Receiver : BeforePingbackCreateEvent\n(listeners may reject)
+Receiver -> Table : store (hidden: waiting for approval)
+Receiver -> Mail : AfterPingbackCreatedEvent
+Mail -> Mail : email to\npongback.notification.emailTo
+Receiver --> Endpoint : uid
+Endpoint --> Sender : XML-RPC response "registered"
+
+note over Endpoint, Receiver
+  Any check failing ends here: the endpoint answers
+  with the XML-RPC fault code of the specification,
+  for example 17 (no link) or 48 (already registered).
+end note
+@enduml
