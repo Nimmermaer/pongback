@@ -32,8 +32,9 @@ and install it in the module :guilabel:`System > Extensions`.
 Update the database
 ===================
 
-Pongback stores Pingbacks in the table `tx_pongback_domain_model_pingback`.
-Create it with the database analyzer in :guilabel:`Admin Tools > Maintenance`
+Pongback stores received Pingbacks in the table
+`tx_pongback_domain_model_pingback` and sent ones in `tx_pongback_sent`.
+TYPO3 creates both from their TCA. Run the database analyzer in :guilabel:`Admin Tools > Maintenance`
 or on the command line:
 
 ..  code-block:: bash
@@ -45,4 +46,8 @@ or on the command line:
 Next steps
 ==========
 
-Add the site set to your site, see :ref:`configuration`.
+#.  Add the site set to your site, see :ref:`configuration`.
+#.  To send Pingbacks, run the message queue worker, see
+    :ref:`sending-worker`.
+#.  Give editors access to the module :guilabel:`Web > Pongback`, see
+    :ref:`editors-permissions`.
