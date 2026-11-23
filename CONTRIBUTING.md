@@ -85,6 +85,14 @@ Install the dev dependencies with `composer install`, then run:
 The same checks run in GitHub Actions (`.github/workflows/ci.yml`) for every
 supported TYPO3/PHP combination.
 
+## Documentation
+
+- Changes visible to integrators, editors or developers need an update of
+  the manual in `Documentation/` and an entry in
+  `Documentation/Changelog/Index.rst`.
+- The CI renders the manual and fails on warnings (see AGENTS.md for the
+  command).
+
 ## Tests
 
 - New logic needs unit tests in `Tests/Unit/`, mirroring the `Classes/`

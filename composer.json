@@ -21,6 +21,11 @@
 			"role": "Product manager"
 		}
 	],
+	"support": {
+		"docs": "https://docs.typo3.org/p/webicorns/pongback/main/en-us/",
+		"issues": "https://github.com/Nimmermaer/pongback/issues",
+		"source": "https://github.com/Nimmermaer/pongback"
+	},
 	"require": {
 		"php": "^8.2",
 		"ext-dom": "*",

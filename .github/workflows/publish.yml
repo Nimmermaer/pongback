@@ -1,0 +1,64 @@
+name: Publish to TER
+
+# Runs when a version tag like 1.2.3 is pushed.
+# Requires the repository secret TYPO3_API_TOKEN (Settings > Secrets and variables > Actions).
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish new version to TER
+    runs-on: ubuntu-latest
+    env:
+      TYPO3_API_TOKEN: ${{ secrets.TYPO3_API_TOKEN }}
+      # Passed as environment variables, never interpolated into scripts
+      VERSION: ${{ github.ref_name }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check tag and declared versions
+        run: |
+          if ! [[ "$VERSION" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+            echo "Tag '$VERSION' is no version number" >&2
+            exit 1
+          fi
+          composer_version=$(php -r 'echo json_decode(file_get_contents("composer.json"), true)["extra"]["typo3/cms"]["version"] ?? "";')
+          emconf_version=$(php -r '$_EXTKEY = "pongback"; include "ext_emconf.php"; echo $EM_CONF[$_EXTKEY]["version"] ?? "";')
+          if [[ "$composer_version" != "$VERSION" || "$emconf_version" != "$VERSION" ]]; then
+            echo "Version mismatch: tag $VERSION, composer.json $composer_version, ext_emconf.php $emconf_version" >&2
+            echo "Run 'tailor set-version $VERSION' and commit before tagging." >&2
+            exit 1
+          fi
+
+      - name: Get release comment from the tag message
+        run: |
+          comment=$(git tag -l "$VERSION" --format='%(contents)')
+          if [[ -z "${comment// }" ]]; then
+            comment="Released version $VERSION"
+          fi
+          {
+            echo 'COMMENT<<EOF_COMMENT'
+            echo "$comment"
+            echo 'EOF_COMMENT'
+          } >> "$GITHUB_ENV"
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: intl, mbstring, json, zip, curl
+          tools: composer:v2
+
+      - name: Install tailor
+        run: composer global require typo3/tailor --prefer-dist --no-progress
+
+      - name: Publish to TER
+        # The extension key is read from composer.json (extra.typo3/cms.extension-key)
+        run: php ~/.composer/vendor/bin/tailor ter:publish --comment "$COMMENT" "$VERSION"

@@ -51,6 +51,31 @@ Run all of them before you commit. Green tests are not enough: new logic must ke
 covered mutation score (MSI) of Infection at 90 % or above. If a tool cannot be installed in your
 environment, say so explicitly in your summary instead of claiming it passed.
 
+## Documentation
+
+The manual in `Documentation/` (reStructuredText) follows the TYPO3 guide
+"How to document": https://docs.typo3.org/permalink/h2document:start.
+Render it and fail on every warning before committing changes there:
+
+```bash
+mkdir -p Documentation-GENERATED-temp
+docker run --rm --pull always -v $(pwd):/project \
+  ghcr.io/typo3-documentation/render-guides:latest \
+  --config=Documentation --no-progress --minimal-test
+```
+
+- Check every statement against `Classes/` and `Configuration/`.
+- Never remove an anchor (`..  _name:`), also not when deleting a section.
+- No symbolic links inside `Documentation/`, and no AGENTS.md there.
+
+## Releases
+
+Releases are published to TER by `.github/workflows/publish.yml` when a tag
+like `1.2.3` is pushed. Before tagging, set the version in `composer.json`
+(`extra.typo3/cms.version`), `ext_emconf.php` and `Documentation/guides.xml`,
+e.g. with `tailor set-version 1.2.3`, and add the changelog entry.
+Never put the TER token anywhere but the repository secret `TYPO3_API_TOKEN`.
+
 ## Rules for agents
 
 - Keep changes compatible with **both** TYPO3 13 and 14. When unsure, look
