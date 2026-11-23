@@ -8,8 +8,10 @@ Known problems
 
 Pongback is being prepared for version 1.0. Until then:
 
-*   **Sending** Pingbacks is not implemented yet. On page changes only a
-    message is dispatched to the Symfony Messenger.
+*   **Sending**: pages that become visible by their start time are not
+    detected, save them again to send their Pingbacks. Sending needs a
+    worker for the message queue, see :ref:`sending-worker`. The worker must
+    be able to request the pages of the site via their public URL.
 *   The **backend module**, the **frontend plugins** and the **dashboard
     widget** are being reworked. Use the module :guilabel:`Web > List` to
     approve Pingbacks meanwhile, see :ref:`editors`.

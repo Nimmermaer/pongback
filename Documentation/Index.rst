@@ -80,6 +80,7 @@ the link can be shown on your page after approval.
     Installation/Index
     Configuration/Index
     Editors/Index
+    Sending/Index
     Developer/Index
     Security/Index
     KnownProblems/Index

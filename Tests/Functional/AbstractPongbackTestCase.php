@@ -12,6 +12,9 @@ declare(strict_types=1);
 
 namespace Webicorns\Pongback\Tests\Functional;
 
+use Psr\EventDispatcher\EventDispatcherInterface;
+use TYPO3\CMS\Core\Cache\CacheManager;
+use TYPO3\CMS\Core\Configuration\Event\SiteConfigurationChangedEvent;
 use TYPO3\CMS\Core\Configuration\SiteWriter;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
@@ -20,8 +23,6 @@ use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
  */
 abstract class AbstractPongbackTestCase extends FunctionalTestCase
 {
-    protected array $coreExtensionsToLoad = ['webhooks'];
-
     protected array $testExtensionsToLoad = ['webicorns/pongback'];
 
     protected function setUp(): void
@@ -54,5 +55,18 @@ abstract class AbstractPongbackTestCase extends FunctionalTestCase
                 ],
             ],
         ]);
+    }
+
+    /**
+     * Writes settings.yaml of a site and drops the cached site settings: SiteSettingsFactory caches
+     * them by site configuration only, so the entry of an earlier test would survive.
+     *
+     * @param array<string, mixed> $settings
+     */
+    protected function writeSiteSettings(string $identifier, array $settings): void
+    {
+        $this->get(SiteWriter::class)->writeSettings($identifier, $settings);
+        $this->get(CacheManager::class)->getCache('core')->flush();
+        $this->get(EventDispatcherInterface::class)->dispatch(new SiteConfigurationChangedEvent($identifier));
     }
 }

@@ -30,6 +30,10 @@ Breaking
 *   Database: the fields `ping_client`, `ping_resource` and
     `serialized_information` are replaced by `source_title` and `excerpt`.
 *   New Pingbacks are hidden by default (moderation).
+*   The extension has no :file:`ext_tables.sql` any more, TYPO3 creates the
+    tables from TCA.
+*   Sites without the site set `webicorns/pongback` get no Pingback
+    features: no discovery, no endpoint, no sending.
 
 Features
 --------
@@ -41,6 +45,8 @@ Features
 *   PSR-14 event :php:`BeforePingbackCreateEvent` can reject Pingbacks, see
     :ref:`developer-event`.
 *   Discovery header and link tag can be switched off per site.
+*   Sending Pingbacks via the Symfony Messenger with retries and a log of
+    sent Pingbacks, see :ref:`sending`. EXT:webhooks is no longer needed.
 
 Security
 --------

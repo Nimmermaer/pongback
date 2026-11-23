@@ -33,4 +33,19 @@ final readonly class CheckedAddress
     {
         return sprintf('%s:%d:%s', $this->host, $this->port, $this->ips[0]);
     }
+
+    /**
+     * Guzzle request options that pin the connection to the checked IP address
+     * (no DNS rebinding between check and request). Only effective with the cURL handler.
+     *
+     * @return array<string, mixed>
+     */
+    public function pinningRequestOptions(): array
+    {
+        if (! \defined('CURLOPT_RESOLVE')) {
+            return [];
+        }
+
+        return ['curl' => [\CURLOPT_RESOLVE => [$this->toCurlResolveEntry()]]];
+    }
 }

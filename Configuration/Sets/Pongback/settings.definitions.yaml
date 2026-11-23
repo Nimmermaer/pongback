@@ -34,6 +34,10 @@ settings:
     type: int
     default: 20
     category: pongback.receive
+  pongback.send.enabled:
+    type: bool
+    default: true
+    category: pongback.send
   pongback.send.tables:
     type: stringlist
     default: ['pages', 'tt_content']

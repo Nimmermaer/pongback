@@ -16,6 +16,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Error\Http\InternalServerErrorException;
 use TYPO3\CMS\Core\Http\Stream;
 use TYPO3\TestingFramework\Core\Functional\Framework\Frontend\InternalRequest;
 use Webicorns\Pongback\Pingback\PingbackEndpoint;
@@ -58,6 +59,29 @@ final class PingbackEndpointTest extends AbstractPongbackTestCase
         $response = $this->post('<methodCall>');
 
         self::assertSame(PingbackEndpoint::FAULT_PARSE_ERROR, $this->faultCode($response));
+    }
+
+    #[Test]
+    public function sitesWithoutTheSetHaveNoEndpointAndAnnounceNothing(): void
+    {
+        $this->setUpFrontendRootPage(10, ['EXT:pongback/Tests/Functional/Fixtures/page.typoscript']);
+        $endpoint = 'https://other.example/?type=' . Constants::PINGBACK_PAGE_TYPE;
+
+        $page = $this->executeFrontendSubRequest(new InternalRequest('https://other.example/article'));
+        self::assertSame(200, $page->getStatusCode());
+        self::assertFalse($page->hasHeader('X-Pingback'));
+        self::assertStringNotContainsString('rel="pingback"', (string) $page->getBody());
+
+        $mainSite = $this->post('<methodCall>', 'https://main.example/?type=' . Constants::PINGBACK_PAGE_TYPE);
+        self::assertSame(PingbackEndpoint::FAULT_PARSE_ERROR, $this->faultCode($mainSite), 'The page type reaches the endpoint');
+
+        // TYPO3 handles the request itself: "No page configured for type=…", thrown in v13, a response in v14.
+        try {
+            $otherSite = (string) $this->post('<methodCall>', $endpoint)->getBody();
+        } catch (InternalServerErrorException $exception) {
+            $otherSite = $exception->getMessage();
+        }
+        self::assertStringNotContainsString('methodResponse', $otherSite);
     }
 
     /**
@@ -106,13 +130,13 @@ final class PingbackEndpointTest extends AbstractPongbackTestCase
         );
     }
 
-    private function post(string $body): ResponseInterface
+    private function post(string $body, string $url = self::ENDPOINT): ResponseInterface
     {
         $stream = new Stream('php://temp', 'rw');
         $stream->write($body);
         $stream->rewind();
 
-        $request = (new InternalRequest(self::ENDPOINT))
+        $request = (new InternalRequest($url))
             ->withMethod('POST')
             ->withHeader('Content-Type', 'text/xml')
             ->withBody($stream);

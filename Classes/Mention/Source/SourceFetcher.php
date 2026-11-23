@@ -22,6 +22,7 @@ use Psr\Http\Message\StreamInterface;
 use TYPO3\CMS\Core\Http\RequestFactory;
 use Webicorns\Pongback\Mention\MentionRejected;
 use Webicorns\Pongback\Mention\RejectionReason;
+use Webicorns\Pongback\Utility\Constants;
 
 /**
  * Downloads the HTML of a mention source with strict limits.
@@ -56,7 +57,11 @@ readonly class SourceFetcher
 
             $this->assertHtmlDocument($response);
 
-            return new FetchedSource($url, $this->readLimited($response->getBody()));
+            return new FetchedSource(
+                $url,
+                $this->readLimited($response->getBody()),
+                trim($response->getHeaderLine('X-Pingback')),
+            );
         }
 
         throw new MentionRejected(RejectionReason::UpstreamError, 'The source URI redirects too often.');
@@ -115,18 +120,11 @@ readonly class SourceFetcher
             RequestOptions::STREAM => true,
             RequestOptions::HEADERS => [
                 'Accept' => 'text/html,application/xhtml+xml;q=0.9',
-                'User-Agent' => 'Pongback (TYPO3 Pingback receiver)',
+                'User-Agent' => Constants::USER_AGENT,
             ],
         ];
 
-        // Pin the connection to the IP address checked by the UrlGuard (cURL handler only).
-        if (\defined('CURLOPT_RESOLVE')) {
-            $options['curl'] = [
-                \CURLOPT_RESOLVE => [$address->toCurlResolveEntry()],
-            ];
-        }
-
-        return $options;
+        return $options + $address->pinningRequestOptions();
     }
 
     private function readLimited(StreamInterface $body): string

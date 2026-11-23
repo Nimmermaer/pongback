@@ -51,17 +51,48 @@ final class PongbackSettingsTest extends TestCase
     }
 
     #[Test]
-    public function sitesWithoutTheSetUseTheDefaults(): void
+    public function sitesWithTheSetUseTheDefaults(): void
     {
-        $settings = PongbackSettings::fromSite(null);
+        $site = $this->createMock(Site::class);
+        // The set provides its defaults for every defined setting.
+        $site->method('getSettings')->willReturn(SiteSettings::create(new Settings(PongbackSettings::DEFAULTS)));
 
+        $settings = PongbackSettings::fromSite($site);
+
+        self::assertTrue($settings->enabled);
         self::assertTrue($settings->discoveryHttpHeader);
         self::assertTrue($settings->discoveryMetaTag);
         self::assertFalse($settings->receiveAutoPublish);
         self::assertSame(20, $settings->receiveRateLimit);
+        self::assertTrue($settings->sendEnabled);
         self::assertSame(['pages', 'tt_content'], $settings->sendTables);
         self::assertSame('', $settings->notificationEmailTo);
         self::assertSame('', $settings->notificationEmailFrom);
+    }
+
+    #[Test]
+    public function sitesWithoutTheSetGetNoPingbackFeatures(): void
+    {
+        $site = $this->createMock(Site::class);
+        $site->method('getSettings')->willReturn(SiteSettings::createFromSettingsTree(['other' => ['setting' => 1]]));
+
+        foreach ([PongbackSettings::fromSite($site), PongbackSettings::fromSite(null)] as $settings) {
+            self::assertFalse($settings->enabled);
+            self::assertFalse($settings->discoveryHttpHeader);
+            self::assertFalse($settings->discoveryMetaTag);
+            self::assertFalse($settings->sendEnabled);
+        }
+    }
+
+    #[Test]
+    public function anySettingOfTheSetMarksTheSiteAsUsingIt(): void
+    {
+        foreach (array_keys(PongbackSettings::DEFAULTS) as $key) {
+            $site = $this->createMock(Site::class);
+            $site->method('getSettings')->willReturn(SiteSettings::create(new Settings([$key => PongbackSettings::DEFAULTS[$key]])));
+
+            self::assertTrue(PongbackSettings::fromSite($site)->enabled, $key);
+        }
     }
 
     #[Test]
@@ -88,6 +119,21 @@ final class PongbackSettingsTest extends TestCase
         self::assertSame(['pages', 'tx_news_domain_model_news'], $settings->sendTables);
         self::assertSame('editor@example.com', $settings->notificationEmailTo);
         self::assertSame('noreply@example.com', $settings->notificationEmailFrom);
+    }
+
+    #[Test]
+    public function castsValuesFromYamlOrTheBackend(): void
+    {
+        $site = $this->createMock(Site::class);
+        $site->method('getSettings')->willReturn(SiteSettings::create(new Settings([
+            'pongback.receive.rateLimit' => '7',
+            'pongback.send.tables' => 'pages',
+        ])));
+
+        $settings = PongbackSettings::fromSite($site);
+
+        self::assertSame(7, $settings->receiveRateLimit);
+        self::assertSame(['pages'], $settings->sendTables);
     }
 
     #[Test]

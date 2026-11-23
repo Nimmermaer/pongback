@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Webicorns\Pongback\Tests\Unit\XmlRpc;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Webicorns\Pongback\XmlRpc\XmlRpcCodec;
@@ -194,5 +195,68 @@ final class XmlRpcCodecTest extends TestCase
             '<string>&lt;a href=&quot;x&quot;&gt;Tom &amp; Jerry&apos;s&lt;/a&gt;</string>',
             $this->subject->encodeResponse('<a href="x">Tom & Jerry\'s</a>'),
         );
+    }
+
+    #[Test]
+    public function encodedMethodCallsCanBeDecodedAgain(): void
+    {
+        $xml = $this->subject->encodeMethodCall('pingback.ping', ['https://a.example/?x=1&y=<2>', 'https://b.example/']);
+
+        $call = $this->subject->decodeMethodCall($xml);
+
+        self::assertSame('pingback.ping', $call->methodName);
+        self::assertSame(['https://a.example/?x=1&y=<2>', 'https://b.example/'], $call->params);
+    }
+
+    #[Test]
+    public function decodesSuccessResponses(): void
+    {
+        $response = $this->subject->decodeMethodResponse($this->subject->encodeResponse('Thanks'));
+
+        self::assertFalse($response->isFault());
+        self::assertSame('Thanks', $response->value);
+        self::assertNull($response->faultCode);
+    }
+
+    #[Test]
+    public function decodesFaultResponses(): void
+    {
+        $response = $this->subject->decodeMethodResponse($this->subject->encodeFault(48, 'Already registered'));
+
+        self::assertTrue($response->isFault());
+        self::assertSame(48, $response->faultCode);
+        self::assertSame('Already registered', $response->faultString);
+        self::assertNull($response->value);
+    }
+
+    #[Test]
+    public function decodesFaultsWithMissingMembersDefensively(): void
+    {
+        $response = $this->subject->decodeMethodResponse('<methodResponse><fault><value><struct></struct></value></fault></methodResponse>');
+
+        self::assertTrue($response->isFault());
+        self::assertSame(0, $response->faultCode);
+        self::assertSame('', $response->faultString);
+    }
+
+    /**
+     * @return array<string, array{string, int}>
+     */
+    public static function invalidResponseProvider(): array
+    {
+        return [
+            'method call instead of response' => ['<methodCall><methodName>x</methodName></methodCall>', 1732500001],
+            'neither fault nor value' => ['<methodResponse><params></params></methodResponse>', 1732500002],
+            'param without value' => ['<methodResponse><params><param/></params></methodResponse>', 1732500002],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('invalidResponseProvider')]
+    public function rejectsInvalidResponses(string $xml, int $expectedCode): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionCode($expectedCode);
+        $this->subject->decodeMethodResponse($xml);
     }
 }

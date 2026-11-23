@@ -6,9 +6,9 @@ use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
 use TYPO3\CMS\Core\Cache\Frontend\VariableFrontend;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 use Webicorns\Pongback\Controller\PingbackController;
+use Webicorns\Pongback\Hooks\PageChangeHook;
 use Webicorns\Pongback\Hooks\PingbackDataMap;
-use Webicorns\Pongback\Listener\PageModificationListener;
-use Webicorns\Pongback\Message\PingbackMessage;
+use Webicorns\Pongback\Sending\SendPingbacksMessage;
 use Webicorns\Pongback\Utility\Constants;
 
 defined('TYPO3') || die();
@@ -36,13 +36,17 @@ defined('TYPO3') || die();
         ],
     ];
 
+    // Queue sending Pingbacks when pages or their content change
     $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] =
-        PageModificationListener::class;
+        PageChangeHook::class;
+    $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][] =
+        PageChangeHook::class;
 
     $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][] =
         PingbackDataMap::class;
     $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] =
         PingbackDataMap::class;
 
-    $GLOBALS['TYPO3_CONF_VARS']['SYS']['messenger']['routing'][PingbackMessage::class] = 'doctrine';
+    // Sending runs asynchronously: "vendor/bin/typo3 messenger:consume doctrine"
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['messenger']['routing'][SendPingbacksMessage::class] = 'doctrine';
 })('pongback');

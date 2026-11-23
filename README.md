@@ -38,6 +38,10 @@ EXT:dashboard is optional (dashboard widget).
   request forgery (public hosts and default ports only, every redirect checked,
   timeout and size limit). Title and excerpt of the source are stored as plain
   text only.
+- **Sending Pingbacks** to linked websites when a page or its content is
+  changed: in the background via the Symfony Messenger (worker:
+  `vendor/bin/typo3 messenger:consume doctrine`), each Pingback once, with
+  retries and a log of sent Pingbacks per page.
 - **Site set** with site settings: everything is configured per site in the
   backend, no TypoScript constants or extension settings needed.
 
@@ -46,9 +50,6 @@ EXT:dashboard is optional (dashboard widget).
 These parts exist but are currently being rebuilt, see the
 [roadmap](https://github.com/Nimmermaer/pongback/milestone/1):
 
-- **Sending Pingbacks** to linked websites when a page is published
-  ([#4](https://github.com/Nimmermaer/pongback/issues/4)). Today only a
-  message is dispatched on page changes, nothing is sent yet.
 - **Backend module** for moderation, **email notification** with approval,
   **frontend plugins** showing the Pingbacks of a page and the
   **dashboard widget** with the latest Pingbacks
@@ -72,6 +73,7 @@ These parts exist but are currently being rebuilt, see the
 2) Add the site set **"Pongback: Pingback endpoint and plugins"**
    (`webicorns/pongback`) to your site configuration. It provides the
    TypoScript, the route enhancer for `pingback.ping` and the site settings.
+   Sites without the set get no Pingback features.
 
    In TYPO3 v13 the route enhancer is added to all sites by the extension
    setting `includePongbackYaml` (enabled by default), as v13 does not support
@@ -85,10 +87,17 @@ These parts exist but are currently being rebuilt, see the
    | `pongback.discovery.metaTag`                  | `true`               |
    | `pongback.receive.autoPublish`                | `false` (moderation) |
    | `pongback.receive.rateLimit` (per IP and hour, `0` = off) | `20`     |
+   | `pongback.send.enabled`                       | `true`               |
    | `pongback.send.tables`                        | `pages, tt_content`  |
    | `pongback.notification.emailTo` / `emailFrom` | empty                |
    | `plugin.tx_pongback.view.*RootPath`           | extension paths      |
    | `plugin.tx_pongback.persistence.storagePid`   | `0`                  |
+
+4) To send Pingbacks, run the message queue worker regularly, e.g. by cron:
+
+   ```bash
+   vendor/bin/typo3 messenger:consume doctrine --time-limit=240
+   ```
 
 ## For developers
 
