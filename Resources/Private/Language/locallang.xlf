@@ -6,17 +6,14 @@
 			<trans-unit id="source_link">
 				<source>Source Link</source>
 			</trans-unit>
-			<trans-unit id="ping_client">
-				<source>Ping Client</source>
-			</trans-unit>
-			<trans-unit id="ping_resource">
-				<source>Resource</source>
+			<trans-unit id="source_title">
+				<source>Source</source>
 			</trans-unit>
 			<trans-unit id="target_link">
 				<source>Target Link</source>
 			</trans-unit>
-			<trans-unit id="serialized_information">
-				<source>Serialized Information</source>
+			<trans-unit id="excerpt">
+				<source>Excerpt</source>
 			</trans-unit>
 			<trans-unit id="pongback.notification.email.subject">
 				<source>New pingback was arrived in your System</source>

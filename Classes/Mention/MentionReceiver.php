@@ -38,7 +38,7 @@ readonly class MentionReceiver implements MentionReceiverInterface
 
     public function receive(IncomingMention $mention, Site $site): int
     {
-        if (SourceInspector::normalizeUrl($mention->source) === SourceInspector::normalizeUrl($mention->target)) {
+        if (UrlNormalizer::normalize($mention->source) === UrlNormalizer::normalize($mention->target)) {
             throw new MentionRejected(RejectionReason::InvalidRequest, 'Source and target URI must differ.');
         }
 
@@ -50,7 +50,7 @@ readonly class MentionReceiver implements MentionReceiverInterface
         }
 
         $source = $this->sourceFetcher->fetch($mention->source);
-        $document = $this->sourceInspector->inspect($source['html'], $source['url'], $mention->target);
+        $document = $this->sourceInspector->inspect($source->html, $source->url, $mention->target);
         if ($document === null) {
             throw new MentionRejected(RejectionReason::NoLinkToTarget, 'The source URI does not contain a link to the target URI.');
         }
@@ -59,9 +59,8 @@ readonly class MentionReceiver implements MentionReceiverInterface
         $pingback->setPid($target->pageId);
         $pingback->setSourceLink($mention->source);
         $pingback->setTargetLink($mention->target);
-        $pingback->setPingClient($document->title);
-        $pingback->setPingResource((string) $target->pageId);
-        $pingback->setSerializedInformation($document->excerpt);
+        $pingback->setSourceTitle($document->title);
+        $pingback->setExcerpt($document->excerpt);
         $pingback->setHidden(! PongbackSettings::fromSite($target->site)->receiveAutoPublish);
 
         $event = $this->eventDispatcher->dispatch(new BeforePingbackCreateEvent($pingback, $mention, $target));
@@ -72,7 +71,7 @@ readonly class MentionReceiver implements MentionReceiverInterface
             );
         }
 
-        $uid = $this->storage->add($event->getPingback(), $target->languageId);
+        $uid = $this->storage->add($pingback, $target->languageId);
         $this->logger->info('Mention registered', [
             'protocol' => $mention->protocol,
             'source' => $mention->source,

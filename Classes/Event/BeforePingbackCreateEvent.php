@@ -31,7 +31,7 @@ final class BeforePingbackCreateEvent implements StoppableEventInterface
     private string $rejectionMessage = '';
 
     public function __construct(
-        private Pingback $pingback,
+        private readonly Pingback $pingback,
         private readonly IncomingMention $mention,
         private readonly ResolvedTarget $target,
     ) {}
@@ -39,11 +39,6 @@ final class BeforePingbackCreateEvent implements StoppableEventInterface
     public function getPingback(): Pingback
     {
         return $this->pingback;
-    }
-
-    public function setPingback(Pingback $pingback): void
-    {
-        $this->pingback = $pingback;
     }
 
     public function getMention(): IncomingMention

@@ -11,7 +11,10 @@ services:
       - '../Classes/Mention/IncomingMention.php'
       - '../Classes/Mention/MentionRejected.php'
       - '../Classes/Mention/ResolvedTarget.php'
+      - '../Classes/Mention/Source/CheckedAddress.php'
+      - '../Classes/Mention/Source/FetchedSource.php'
       - '../Classes/Mention/Source/SourceDocument.php'
+      - '../Classes/XmlRpc/MethodCall.php'
       # EXT:dashboard is optional, the widget is registered in Services.php if available
       - '../Classes/Widget/*'
 

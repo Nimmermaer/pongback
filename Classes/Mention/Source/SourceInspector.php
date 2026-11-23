@@ -14,6 +14,7 @@ namespace Webicorns\Pongback\Mention\Source;
 
 use GuzzleHttp\Psr7\UriResolver;
 use GuzzleHttp\Psr7\Utils;
+use Webicorns\Pongback\Mention\UrlNormalizer;
 
 /**
  * Checks whether a source HTML document links to the target and extracts title and excerpt as plain text.
@@ -46,7 +47,7 @@ readonly class SourceInspector
 
         $this->removeNonContentElements($document);
 
-        $link = $this->findLink($document, $sourceUrl, self::normalizeUrl($targetUrl));
+        $link = $this->findLink($document, $sourceUrl, UrlNormalizer::normalize($targetUrl));
         if (! $link instanceof \DOMElement) {
             return null;
         }
@@ -55,26 +56,6 @@ readonly class SourceInspector
             $this->extractTitle($document),
             $this->extractExcerpt($link),
         );
-    }
-
-    public static function normalizeUrl(string $url): string
-    {
-        $parts = parse_url(trim($url));
-        if (! is_array($parts) || ! isset($parts['host'])) {
-            return trim($url);
-        }
-
-        $normalized = strtolower($parts['scheme'] ?? 'http') . '://' . strtolower($parts['host']);
-        if (isset($parts['port'])) {
-            $normalized .= ':' . $parts['port'];
-        }
-
-        $normalized .= rtrim($parts['path'] ?? '', '/');
-        if (($parts['query'] ?? '') !== '') {
-            $normalized .= '?' . $parts['query'];
-        }
-
-        return $normalized;
     }
 
     private function findLink(\DOMDocument $document, string $sourceUrl, string $normalizedTarget): ?\DOMElement
@@ -87,7 +68,7 @@ readonly class SourceInspector
             }
 
             $absolute = (string) UriResolver::resolve($base, Utils::uriFor($href));
-            if (self::normalizeUrl($absolute) === $normalizedTarget) {
+            if (UrlNormalizer::normalize($absolute) === $normalizedTarget) {
                 return $anchor;
             }
         }

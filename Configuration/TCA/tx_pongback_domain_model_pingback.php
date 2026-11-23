@@ -39,11 +39,10 @@ $tca = [
             'showitem' => 'sys_language_uid,
             --palette--,l10n_parent,l10n_diffsource,hidden,
             --palette--;;1,
-            ping_client,
-            ping_resource,
             source_link,
+            source_title,
             target_link,
-            serialized_information,
+            excerpt,
             --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access,starttime,endtime',
         ],
     ],
@@ -121,22 +120,13 @@ $tca = [
                 'size' => 50,
             ],
         ],
-        'ping_client' => [
+        'source_title' => [
             'exclude' => 0,
-            'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.ping_client',
-            'description' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.ping_client.description',
+            'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.source_title',
+            'description' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.source_title.description',
             'config' => [
                 'type' => 'input',
                 'size' => 50,
-            ],
-        ],
-        'ping_resource' => [
-            'exclude' => 1,
-            'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.ping_resource',
-            'description' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.ping_resource.description',
-            'config' => [
-                'type' => 'text',
-                'rows' => 5,
             ],
         ],
         'target_link' => [
@@ -148,10 +138,10 @@ $tca = [
                 'size' => 50,
             ],
         ],
-        'serialized_information' => [
+        'excerpt' => [
             'exclude' => 1,
-            'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.serialized_information',
-            'description' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.serialized_information.description',
+            'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.excerpt',
+            'description' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.excerpt.description',
             'config' => [
                 'type' => 'text',
                 'rows' => 5,
@@ -162,7 +152,7 @@ $tca = [
 
 // TYPO3 v13 needs "searchFields", v14 uses the "searchable" field option instead and deprecates "searchFields".
 if (GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion() < 14) {
-    $tca['ctrl']['searchFields'] = 'source_link,ping_client,ping_resource,target_link,serialized_information';
+    $tca['ctrl']['searchFields'] = 'source_link,source_title,target_link,excerpt';
 }
 
 return $tca;

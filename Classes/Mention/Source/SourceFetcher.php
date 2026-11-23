@@ -41,11 +41,9 @@ readonly class SourceFetcher
     ) {}
 
     /**
-     * @return array{url: string, html: string} final URL after redirects and its (possibly truncated) HTML
-     *
      * @throws MentionRejected
      */
-    public function fetch(string $url): array
+    public function fetch(string $url): FetchedSource
     {
         for ($hop = 0; $hop <= self::MAX_REDIRECTS; $hop++) {
             $response = $this->send($url);
@@ -58,7 +56,7 @@ readonly class SourceFetcher
 
             $this->assertHtmlDocument($response);
 
-            return ['url' => $url, 'html' => $this->readLimited($response->getBody())];
+            return new FetchedSource($url, $this->readLimited($response->getBody()));
         }
 
         throw new MentionRejected(RejectionReason::UpstreamError, 'The source URI redirects too often.');
@@ -66,10 +64,10 @@ readonly class SourceFetcher
 
     private function send(string $url): ResponseInterface
     {
-        $target = $this->urlGuard->assertAllowed($url);
+        $address = $this->urlGuard->assertAllowed($url);
 
         try {
-            return $this->requestFactory->request($url, 'GET', $this->buildOptions($target));
+            return $this->requestFactory->request($url, 'GET', $this->buildOptions($address));
         } catch (ConnectException $exception) {
             throw new MentionRejected(RejectionReason::SourceNotFound, 'The source URI could not be reached.', $exception);
         } catch (GuzzleException $exception) {
@@ -105,10 +103,9 @@ readonly class SourceFetcher
     }
 
     /**
-     * @param array{host: string, port: int, ips: non-empty-list<string>} $target
      * @return array<string, mixed>
      */
-    private function buildOptions(array $target): array
+    private function buildOptions(CheckedAddress $address): array
     {
         $options = [
             RequestOptions::ALLOW_REDIRECTS => false,
@@ -125,7 +122,7 @@ readonly class SourceFetcher
         // Pin the connection to the IP address checked by the UrlGuard (cURL handler only).
         if (\defined('CURLOPT_RESOLVE')) {
             $options['curl'] = [
-                \CURLOPT_RESOLVE => [sprintf('%s:%d:%s', $target['host'], $target['port'], $target['ips'][0])],
+                \CURLOPT_RESOLVE => [$address->toCurlResolveEntry()],
             ];
         }
 

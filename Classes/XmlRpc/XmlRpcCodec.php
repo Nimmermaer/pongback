@@ -22,11 +22,9 @@ namespace Webicorns\Pongback\XmlRpc;
 final class XmlRpcCodec
 {
     /**
-     * @return array{methodName: string, params: list<mixed>}
-     *
      * @throws \InvalidArgumentException if the payload is not a valid XML-RPC method call
      */
-    public function decodeMethodCall(string $xml): array
+    public function decodeMethodCall(string $xml): MethodCall
     {
         $document = $this->loadDocument($xml);
         $root = $document->documentElement;
@@ -55,10 +53,7 @@ final class XmlRpcCodec
             throw new \InvalidArgumentException('XML-RPC methodCall has no methodName', 1732300002);
         }
 
-        return [
-            'methodName' => $methodName,
-            'params' => $params,
-        ];
+        return new MethodCall($methodName, $params);
     }
 
     public function encodeResponse(string $value): string

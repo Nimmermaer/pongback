@@ -48,7 +48,8 @@ final class SourceFetcherTest extends TestCase
     {
         $result = $this->createSubject([$this->html('<p>Hello</p>')])->fetch('https://blog.example/post');
 
-        self::assertSame(['url' => 'https://blog.example/post', 'html' => '<p>Hello</p>'], $result);
+        self::assertSame('https://blog.example/post', $result->url);
+        self::assertSame('<p>Hello</p>', $result->html);
         self::assertFalse($this->requests[0]['options']['allow_redirects']);
         self::assertSame(SourceFetcher::TIMEOUT, $this->requests[0]['options']['timeout']);
     }
@@ -62,7 +63,7 @@ final class SourceFetcherTest extends TestCase
             $this->html('<p>Hello</p>'),
         ]);
 
-        self::assertSame('https://www.blog.example/final', $subject->fetch('http://blog.example/post')['url']);
+        self::assertSame('https://www.blog.example/final', $subject->fetch('http://blog.example/post')->url);
         self::assertSame(
             ['http://blog.example/post', 'https://www.blog.example/post', 'https://www.blog.example/final'],
             array_column($this->requests, 'url'),
@@ -122,7 +123,7 @@ final class SourceFetcherTest extends TestCase
     public function readsAtMostTheConfiguredAmountOfBytes(): void
     {
         $html = $this->createSubject([$this->html(str_repeat('a', SourceFetcher::MAX_BYTES + 100))])
-            ->fetch('https://blog.example/huge')['html'];
+            ->fetch('https://blog.example/huge')->html;
 
         self::assertSame(SourceFetcher::MAX_BYTES, strlen($html));
     }
@@ -185,7 +186,7 @@ final class SourceFetcherTest extends TestCase
         $responses = array_fill(0, SourceFetcher::MAX_REDIRECTS, $this->redirect('https://blog.example/next'));
         $responses[] = $this->html('<p>Hello</p>');
 
-        self::assertSame('https://blog.example/next', $this->createSubject($responses)->fetch('https://blog.example/start')['url']);
+        self::assertSame('https://blog.example/next', $this->createSubject($responses)->fetch('https://blog.example/start')->url);
         self::assertCount(SourceFetcher::MAX_REDIRECTS + 1, $this->requests);
     }
 
@@ -215,7 +216,7 @@ final class SourceFetcherTest extends TestCase
         $subject = $this->createSubject([new Psr7Response($status, ['Content-Type' => 'text/html'])]);
 
         if ($expected === null) {
-            self::assertSame('', $subject->fetch('https://blog.example/post')['html']);
+            self::assertSame('', $subject->fetch('https://blog.example/post')->html);
             return;
         }
 
@@ -239,7 +240,7 @@ final class SourceFetcherTest extends TestCase
             $this->html('<p>Hello</p>'),
         ]);
 
-        self::assertSame('https://blog.example/final', $subject->fetch('https://blog.example/post')['url']);
+        self::assertSame('https://blog.example/final', $subject->fetch('https://blog.example/post')->url);
     }
 
     #[Test]
@@ -266,7 +267,7 @@ final class SourceFetcherTest extends TestCase
     {
         self::assertSame(
             '<p>Hello</p>',
-            $this->createSubject([$this->html('<p>Hello</p>', 'TEXT/HTML')])->fetch('https://blog.example/post')['html'],
+            $this->createSubject([$this->html('<p>Hello</p>', 'TEXT/HTML')])->fetch('https://blog.example/post')->html,
         );
         self::assertRejected(
             RejectionReason::NoLinkToTarget,
@@ -279,7 +280,7 @@ final class SourceFetcherTest extends TestCase
     {
         $response = $this->html('<p>Hello</p>')->withoutHeader('Content-Type');
 
-        self::assertSame('<p>Hello</p>', $this->createSubject([$response])->fetch('https://blog.example/post')['html']);
+        self::assertSame('<p>Hello</p>', $this->createSubject([$response])->fetch('https://blog.example/post')->html);
     }
 
     #[Test]

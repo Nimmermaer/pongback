@@ -23,6 +23,7 @@ use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Extbase\Persistence\QueryInterface;
 use TYPO3\CMS\Frontend\Page\PageInformation;
+use Webicorns\Pongback\Cache\CacheTags;
 use Webicorns\Pongback\Domain\Repository\PingbackRepository;
 use Webicorns\Pongback\Traits\PaginationTrait;
 use Webicorns\Pongback\Utility\Constants;
@@ -82,9 +83,7 @@ class PingbackController extends ActionController
             ));
 
             $data = $this->view->render();
-            $tags = ['pingback_' . $cacheTag . '_view'];
-            $tags[] = 'pageId_' . $pageId;
-            $cache->set($cacheKey, $data, $tags, 0);
+            $cache->set($cacheKey, $data, [CacheTags::forView($cacheTag), CacheTags::forPage((int) $pageId)], 0);
         }
 
         return $data;

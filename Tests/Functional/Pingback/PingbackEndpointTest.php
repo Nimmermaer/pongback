@@ -18,9 +18,9 @@ use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Http\Stream;
 use TYPO3\TestingFramework\Core\Functional\Framework\Frontend\InternalRequest;
-use Webicorns\Pongback\Mention\MentionStorage;
 use Webicorns\Pongback\Pingback\PingbackEndpoint;
 use Webicorns\Pongback\Tests\Functional\AbstractPongbackTestCase;
+use Webicorns\Pongback\Utility\Constants;
 
 /**
  * Real frontend requests through the TYPO3 middleware stack: routing, site resolution,
@@ -140,9 +140,9 @@ final class PingbackEndpointTest extends AbstractPongbackTestCase
     private function countPingbacks(): int
     {
         // Without restrictions: new pingbacks are hidden by default.
-        $queryBuilder = $this->get(ConnectionPool::class)->getQueryBuilderForTable(MentionStorage::TABLE);
+        $queryBuilder = $this->get(ConnectionPool::class)->getQueryBuilderForTable(Constants::PINGBACK_TABLE);
         $queryBuilder->getRestrictions()->removeAll();
 
-        return (int) $queryBuilder->count('uid')->from(MentionStorage::TABLE)->executeQuery()->fetchOne();
+        return (int) $queryBuilder->count('uid')->from(Constants::PINGBACK_TABLE)->executeQuery()->fetchOne();
     }
 }

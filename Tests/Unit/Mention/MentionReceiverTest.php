@@ -28,6 +28,7 @@ use Webicorns\Pongback\Mention\MentionRejected;
 use Webicorns\Pongback\Mention\MentionStorage;
 use Webicorns\Pongback\Mention\RejectionReason;
 use Webicorns\Pongback\Mention\ResolvedTarget;
+use Webicorns\Pongback\Mention\Source\FetchedSource;
 use Webicorns\Pongback\Mention\Source\SourceFetcher;
 use Webicorns\Pongback\Mention\Source\SourceInspector;
 use Webicorns\Pongback\Mention\TargetResolver;
@@ -66,10 +67,10 @@ final class MentionReceiverTest extends TestCase
     {
         $site = $this->createSite([]);
         $this->targetResolver->method('resolve')->with(self::TARGET, $site)->willReturn(new ResolvedTarget($site, 42, 1));
-        $this->sourceFetcher->method('fetch')->with(self::SOURCE)->willReturn([
-            'url' => self::SOURCE,
-            'html' => '<title>Source title</title><p>Read <a href="' . self::TARGET . '">this</a>!</p>',
-        ]);
+        $this->sourceFetcher->method('fetch')->with(self::SOURCE)->willReturn(new FetchedSource(
+            self::SOURCE,
+            '<title>Source title</title><p>Read <a href="' . self::TARGET . '">this</a>!</p>',
+        ));
 
         $stored = null;
         $this->storage->method('exists')->willReturn(false);
@@ -88,8 +89,8 @@ final class MentionReceiverTest extends TestCase
         self::assertTrue($pingback->isHidden());
         self::assertSame(self::SOURCE, $pingback->getSourceLink());
         self::assertSame(self::TARGET, $pingback->getTargetLink());
-        self::assertSame('Source title', $pingback->getPingClient());
-        self::assertSame('Read this!', $pingback->getSerializedInformation());
+        self::assertSame('Source title', $pingback->getSourceTitle());
+        self::assertSame('Read this!', $pingback->getExcerpt());
         self::assertCount(1, $this->dispatchedEvents);
     }
 
@@ -122,7 +123,7 @@ final class MentionReceiverTest extends TestCase
     {
         $site = $this->createSite([]);
         $this->targetResolver->method('resolve')->willReturn(new ResolvedTarget($site, 42, 0));
-        $this->sourceFetcher->method('fetch')->willReturn(['url' => self::SOURCE, 'html' => '<p>No link</p>']);
+        $this->sourceFetcher->method('fetch')->willReturn(new FetchedSource(self::SOURCE, '<p>No link</p>'));
         $this->storage->expects(self::never())->method('add');
 
         self::assertRejected(RejectionReason::NoLinkToTarget, fn() => $this->createSubject()->receive($this->mention(), $site));
@@ -170,10 +171,7 @@ final class MentionReceiverTest extends TestCase
     private function prepareValidMention(Site $site): void
     {
         $this->targetResolver->method('resolve')->willReturn(new ResolvedTarget($site, 42, 0));
-        $this->sourceFetcher->method('fetch')->willReturn([
-            'url' => self::SOURCE,
-            'html' => '<p><a href="' . self::TARGET . '">link</a></p>',
-        ]);
+        $this->sourceFetcher->method('fetch')->willReturn(new FetchedSource(self::SOURCE, '<p><a href="' . self::TARGET . '">link</a></p>'));
         $this->storage->method('exists')->willReturn(false);
     }
 
@@ -224,7 +222,7 @@ final class MentionReceiverTest extends TestCase
         $site = $this->createSite([]);
         $this->prepareValidMention($site);
         $this->storage->method('add')
-            ->with(self::callback(static fn(Pingback $pingback): bool => $pingback->getPingResource() === '42'))
+            ->with(self::callback(static fn(Pingback $pingback): bool => $pingback->getPid() === 42))
             ->willReturn(9);
 
         $logger = $this->createMock(LoggerInterface::class);
@@ -261,10 +259,7 @@ final class MentionReceiverTest extends TestCase
         $this->targetResolver->method('resolve')->willReturn(new ResolvedTarget($site, 42, 0));
         $this->storage->method('exists')->willReturn(false);
         // The relative link only points to the target when resolved against the final URL.
-        $this->sourceFetcher->method('fetch')->willReturn([
-            'url' => 'https://www.target.example/blog/answer',
-            'html' => '<p><a href="/article">relative</a></p>',
-        ]);
+        $this->sourceFetcher->method('fetch')->willReturn(new FetchedSource('https://www.target.example/blog/answer', '<p><a href="/article">relative</a></p>'));
         $this->storage->expects(self::once())->method('add')->willReturn(1);
 
         $this->createSubject()->receive($this->mention(), $site);
