@@ -7,12 +7,14 @@ Changelog
 =========
 
 ..  _changelog-unreleased:
+..  _changelog-0-9-0:
 
-Unreleased
-==========
+0.9.0 (beta)
+============
 
-A rewrite for TYPO3 13.4 and 14. Installations of earlier versions need to be
-set up again: there is no migration of records or configuration.
+Public beta of version 1.0.0, a rewrite for TYPO3 13.4 and 14.
+Installations of earlier versions need to be set up again: there is no
+migration of records or configuration.
 
 Breaking
 --------
