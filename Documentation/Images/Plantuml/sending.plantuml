@@ -1,0 +1,49 @@
+@startuml
+title Sending Pingbacks and Webmentions
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor Editor
+participant "DataHandler\nPageChangeHook" as Hook
+queue "Message queue\n(doctrine)" as Queue
+participant "Worker\nSendPingbacksHandler" as Worker
+participant "Own page" as Page
+participant "Linked page" as Target
+participant "Endpoint of the\nlinked site" as Endpoint
+database "tx_pongback_sent" as Log
+participant "NotifyEditors" as Mail
+
+Editor -> Hook : save page or content
+Hook -> Queue : SendPingbacksMessage\n(page, language)
+
+== Later: messenger:consume doctrine ==
+
+Queue -> Worker : SendPingbacksMessage
+Worker -> Page : GET page as visitors see it
+Page --> Worker : HTML
+Worker -> Worker : external links of the main content\n(main, article or body element, max. 50)
+
+loop every link (and once more for removed Webmention links)
+  Worker -> Log : already sent for good?
+  Worker -> Target : GET (endpoint discovery)
+  Target --> Worker : endpoint in Link or X-Pingback header\nor link element
+  alt Webmention endpoint
+    Worker -> Endpoint : POST source, target
+    Endpoint --> Worker : 2xx / 4xx / 5xx
+  else Pingback endpoint
+    Worker -> Endpoint : XML-RPC pingback.ping
+    Endpoint --> Worker : response / fault code
+  else no endpoint
+    Worker -> Worker : nothing to send
+  end
+  Worker -> Log : protocol, status, answer, attempts
+end
+
+opt temporary problems
+  Worker -> Queue : again in 5 minutes, then in 1 hour
+end
+opt rejected, or failed after the last attempt
+  Worker -> Mail : SendingFailedEvent
+  Mail -> Mail : one email per page
+end
+@enduml
