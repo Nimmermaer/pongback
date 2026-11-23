@@ -41,12 +41,13 @@ Ready
 *   Protection against server side request forgery when fetching the source
     page, plain text storage of title and excerpt
 *   PSR-14 event to modify or reject Pingbacks
+*   Sending Pingbacks to linked websites when a page is changed, in the
+    background with retries, see :ref:`sending`
 *   Configuration per site with a site set and site settings
 
 Being reworked for version 1.0
 ------------------------------
 
-*   Sending Pingbacks to linked websites when a page is published
 *   Backend module for moderation, email notification with approval
 *   Frontend plugins and dashboard widget showing the Pingbacks
 

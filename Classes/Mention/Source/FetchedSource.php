@@ -13,12 +13,16 @@ declare(strict_types=1);
 namespace Webicorns\Pongback\Mention\Source;
 
 /**
- * HTML of a source page and the URL it was finally retrieved from (after redirects).
+ * HTML of a page and the URL it was finally retrieved from (after redirects).
  */
 final readonly class FetchedSource
 {
+    /**
+     * @param string $pingbackHeader value of the "X-Pingback" response header, if any
+     */
     public function __construct(
         public string $url,
         public string $html,
+        public string $pingbackHeader = '',
     ) {}
 }

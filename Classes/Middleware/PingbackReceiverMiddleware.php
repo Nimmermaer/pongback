@@ -21,6 +21,7 @@ use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Http\Stream;
 use TYPO3\CMS\Core\Routing\PageArguments;
 use TYPO3\CMS\Core\Site\Entity\Site;
+use Webicorns\Pongback\Configuration\PongbackSettings;
 use Webicorns\Pongback\Pingback\PingbackEndpoint;
 use Webicorns\Pongback\Utility\Constants;
 
@@ -41,6 +42,7 @@ final readonly class PingbackReceiverMiddleware implements MiddlewareInterface
         if (! $routing instanceof PageArguments
             || $routing->getPageType() !== (string) Constants::PINGBACK_PAGE_TYPE
             || ! $site instanceof Site
+            || ! PongbackSettings::fromSite($site)->enabled
         ) {
             return $handler->handle($request);
         }

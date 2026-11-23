@@ -30,8 +30,44 @@
 			<trans-unit id="tx_pongback_domain_model_pingback.excerpt.description">
 				<source>Text around the link in the linking page, plain text.</source>
 			</trans-unit>
-			<trans-unit id="sys_webhook.webhook_type.pongback-pingback-page-modification">
-				<source>Sends an pingback if edit the page or content</source>
+			<trans-unit id="tx_pongback_sent">
+				<source>Sent Pingback</source>
+			</trans-unit>
+			<trans-unit id="tx_pongback_sent.source_link">
+				<source>Linking page (this site)</source>
+			</trans-unit>
+			<trans-unit id="tx_pongback_sent.target_link">
+				<source>Linked page</source>
+			</trans-unit>
+			<trans-unit id="tx_pongback_sent.endpoint">
+				<source>Pingback endpoint</source>
+			</trans-unit>
+			<trans-unit id="tx_pongback_sent.status">
+				<source>Status</source>
+			</trans-unit>
+			<trans-unit id="tx_pongback_sent.status.sent">
+				<source>Sent</source>
+			</trans-unit>
+			<trans-unit id="tx_pongback_sent.status.already_registered">
+				<source>Already registered</source>
+			</trans-unit>
+			<trans-unit id="tx_pongback_sent.status.no_endpoint">
+				<source>No Pingback endpoint</source>
+			</trans-unit>
+			<trans-unit id="tx_pongback_sent.status.rejected">
+				<source>Rejected</source>
+			</trans-unit>
+			<trans-unit id="tx_pongback_sent.status.failed">
+				<source>Failed, will be retried</source>
+			</trans-unit>
+			<trans-unit id="tx_pongback_sent.fault_code">
+				<source>Fault code</source>
+			</trans-unit>
+			<trans-unit id="tx_pongback_sent.message">
+				<source>Message</source>
+			</trans-unit>
+			<trans-unit id="tx_pongback_sent.attempts">
+				<source>Attempts</source>
 			</trans-unit>
 		</body>
 	</file>

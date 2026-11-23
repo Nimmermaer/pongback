@@ -73,8 +73,7 @@ jobs:
             "typo3/cms-core:${{ matrix.typo3 }}" \
             "typo3/cms-extbase:${{ matrix.typo3 }}" \
             "typo3/cms-fluid:${{ matrix.typo3 }}" \
-            "typo3/cms-frontend:${{ matrix.typo3 }}" \
-            "typo3/cms-webhooks:${{ matrix.typo3 }}"
+            "typo3/cms-frontend:${{ matrix.typo3 }}"
           composer require --dev --no-update --no-interaction "typo3/cms-dashboard:${{ matrix.typo3 }}"
           composer update --no-interaction --no-progress --prefer-dist
 

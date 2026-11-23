@@ -56,6 +56,54 @@ final class XmlRpcCodec
         return new MethodCall($methodName, $params);
     }
 
+    /**
+     * @param list<string> $params
+     */
+    public function encodeMethodCall(string $methodName, array $params): string
+    {
+        $encodedParams = implode('', array_map(
+            fn(string $param): string => '<param>' . $this->encodeValue($param) . '</param>',
+            $params,
+        ));
+
+        return '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
+            . '<methodCall><methodName>' . $this->escape($methodName) . '</methodName>'
+            . '<params>' . $encodedParams . '</params></methodCall>';
+    }
+
+    /**
+     * @throws \InvalidArgumentException if the payload is not a valid XML-RPC method response
+     */
+    public function decodeMethodResponse(string $xml): MethodResponse
+    {
+        $document = $this->loadDocument($xml);
+        $root = $document->documentElement;
+        if ($root === null || $root->nodeName !== 'methodResponse') {
+            throw new \InvalidArgumentException('Payload is not an XML-RPC methodResponse', 1732500001);
+        }
+
+        $fault = $this->firstChildElement($root, 'fault');
+        if ($fault instanceof \DOMElement) {
+            $faultValue = $this->firstChildElement($fault, 'value');
+            $struct = $faultValue instanceof \DOMElement ? $this->decodeValue($faultValue) : [];
+            $struct = is_array($struct) ? $struct : [];
+
+            return MethodResponse::fault(
+                (int) ($struct['faultCode'] ?? 0),
+                is_scalar($struct['faultString'] ?? null) ? (string) $struct['faultString'] : '',
+            );
+        }
+
+        $params = $this->firstChildElement($root, 'params');
+        $param = $params instanceof \DOMElement ? $this->firstChildElement($params, 'param') : null;
+        $value = $param instanceof \DOMElement ? $this->firstChildElement($param, 'value') : null;
+        if (! $value instanceof \DOMElement) {
+            throw new \InvalidArgumentException('XML-RPC methodResponse has neither fault nor value', 1732500002);
+        }
+
+        return MethodResponse::success($this->decodeValue($value));
+    }
+
     public function encodeResponse(string $value): string
     {
         return $this->wrap('<params><param>' . $this->encodeValue($value) . '</param></params>');

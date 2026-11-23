@@ -27,8 +27,10 @@ its checklist in sync.
 | `Classes/XmlRpc/XmlRpcCodec.php`       | XML-RPC parsing/encoding (replaces PECL `ext-xmlrpc`)     |
 | `Classes/Event/BeforePingbackCreateEvent.php` | Listeners may modify or reject a verified mention before it is stored |
 | `Classes/Controller/PingbackController.php` | Frontend plugins (list, latest) |
-| `Classes/Listener/`                    | DataHandler hook for sending, v13 route enhancer listener |
-| `Classes/Message/PingbackMessage.php`  | Messenger/webhook message on page changes                 |
+| `Classes/Listener/`                    | v13 route enhancer listener |
+| `Classes/Hooks/PageChangeHook.php`     | DataHandler hook: queues `SendPingbacksMessage` once per changed live page and language |
+| `Classes/Sending/`                     | Sending: `SendPingbacksHandler` (Messenger, retries), `PingbackQueue` (always dispatch through it: explicit transport, TYPO3 13 would also use the sync `*` route), `LinkExtractor`, `EndpointDiscovery`, `PingbackClient`, `SentPingbackLog` (table `tx_pongback_sent`) |
+| `Classes/Html/HtmlDocumentLoader.php`  | Safe HTML parsing shared by receiving and sending |
 | `Classes/Controller/Backend/`          | Backend module (`Web > Pongback`)                         |
 | `Classes/Widget/`                      | Dashboard widget, only registered if EXT:dashboard exists |
 | `Classes/Configuration/PongbackSettings.php` | Typed site settings incl. fallback defaults            |
@@ -92,5 +94,11 @@ Never put the TER token anywhere but the repository secret `TYPO3_API_TOKEN`.
 - Site related options are site settings (`settings.definitions.yaml`), not
   extension configuration or TypoScript constants. Keep the defaults in sync
   with `PongbackSettings::DEFAULTS` (covered by a unit test).
+- Database tables and columns are created from TCA; there is no
+  `ext_tables.sql`. Use TCA options (`max`, types) to shape columns.
+- Sites without the set `webicorns/pongback` get no features at all
+  (`PongbackSettings::$enabled`).
+- Test our code, not TYPO3 or Symfony: no tests that only verify framework
+  behaviour.
 - There are no installations of earlier versions to migrate: no upgrade
   wizards or backwards compatibility layers are needed before 1.0.0.

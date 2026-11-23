@@ -50,6 +50,12 @@
 			<trans-unit id="settings.description.pongback.receive.rateLimit">
 				<source>Further Pingbacks from the same IP address are rejected for the rest of the hour. 0 disables the limit.</source>
 			</trans-unit>
+			<trans-unit id="settings.pongback.send.enabled">
+				<source>Send Pingbacks</source>
+			</trans-unit>
+			<trans-unit id="settings.description.pongback.send.enabled">
+				<source>Notify linked websites when a page of this site is published or changed. Requires a worker for the message queue "doctrine" (typo3 messenger:consume doctrine).</source>
+			</trans-unit>
 			<trans-unit id="settings.pongback.send.tables">
 				<source>Tables that trigger sending Pingbacks</source>
 			</trans-unit>

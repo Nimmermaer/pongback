@@ -14,6 +14,7 @@ namespace Webicorns\Pongback\Mention\Source;
 
 use GuzzleHttp\Psr7\UriResolver;
 use GuzzleHttp\Psr7\Utils;
+use Webicorns\Pongback\Html\HtmlDocumentLoader;
 use Webicorns\Pongback\Mention\UrlNormalizer;
 
 /**
@@ -31,21 +32,10 @@ readonly class SourceInspector
      */
     public function inspect(string $html, string $sourceUrl, string $targetUrl): ?SourceDocument
     {
-        $document = new \DOMDocument();
-        $previous = libxml_use_internal_errors(true);
-        try {
-            // The XML declaration makes libxml treat the input as UTF-8; LIBXML_NONET forbids network access.
-            $loaded = $document->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
-        } finally {
-            libxml_clear_errors();
-            libxml_use_internal_errors($previous);
-        }
-
-        if ($loaded === false) {
+        $document = HtmlDocumentLoader::load($html);
+        if (! $document instanceof \DOMDocument) {
             return null;
         }
-
-        $this->removeNonContentElements($document);
 
         $link = $this->findLink($document, $sourceUrl, UrlNormalizer::normalize($targetUrl));
         if (! $link instanceof \DOMElement) {
@@ -76,15 +66,6 @@ readonly class SourceInspector
         return null;
     }
 
-    private function removeNonContentElements(\DOMDocument $document): void
-    {
-        foreach (['script', 'style', 'noscript', 'template'] as $tagName) {
-            // Copy the live list first, removing nodes while iterating would skip elements.
-            foreach (iterator_to_array($document->getElementsByTagName($tagName)) as $element) {
-                $element->parentNode?->removeChild($element);
-            }
-        }
-    }
 
     private function extractTitle(\DOMDocument $document): string
     {

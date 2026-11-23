@@ -18,8 +18,12 @@ final class Constants
 
     public const PINGBACK_TABLE = 'tx_pongback_domain_model_pingback';
 
+    public const SENT_TABLE = 'tx_pongback_sent';
+
+    public const USER_AGENT = 'Pongback (TYPO3 extension; +https://extensions.typo3.org/extension/pongback)';
+
     /**
-     * Length of the source_link/target_link columns (ext_tables.sql); longer URLs cannot be stored.
+     * Longest URL accepted for received Pingbacks.
      */
     public const MAX_URL_LENGTH = 255;
 

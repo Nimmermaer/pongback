@@ -15,11 +15,16 @@ services:
       - '../Classes/Mention/Source/FetchedSource.php'
       - '../Classes/Mention/Source/SourceDocument.php'
       - '../Classes/XmlRpc/MethodCall.php'
+      - '../Classes/XmlRpc/MethodResponse.php'
+      - '../Classes/Sending/PingResult.php'
+      - '../Classes/Sending/SendPingbacksMessage.php'
       # EXT:dashboard is optional, the widget is registered in Services.php if available
       - '../Classes/Widget/*'
 
-  Webicorns\Pongback\Listener\PageModificationListener:
+  # Instantiated by the DataHandler via GeneralUtility::makeInstance()
+  Webicorns\Pongback\Hooks\PageChangeHook:
     public: true
+    shared: false
 
   Webicorns\Pongback\Mention\MentionReceiverInterface:
     alias: Webicorns\Pongback\Mention\MentionReceiver

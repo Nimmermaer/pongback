@@ -27,6 +27,7 @@ use Webicorns\Pongback\Mention\RejectionReason;
 use Webicorns\Pongback\Mention\Source\SourceFetcher;
 use Webicorns\Pongback\Mention\Source\UrlGuard;
 use Webicorns\Pongback\Tests\Unit\Fixtures\AssertRejectionTrait;
+use Webicorns\Pongback\Utility\Constants;
 
 final class SourceFetcherTest extends TestCase
 {
@@ -176,7 +177,7 @@ final class SourceFetcherTest extends TestCase
         self::assertSame(5, $options['connect_timeout']);
         self::assertSame(SourceFetcher::TIMEOUT, $options['timeout']);
         self::assertSame('text/html,application/xhtml+xml;q=0.9', $options['headers']['Accept']);
-        self::assertSame('Pongback (TYPO3 Pingback receiver)', $options['headers']['User-Agent']);
+        self::assertSame(Constants::USER_AGENT, $options['headers']['User-Agent']);
         self::assertSame([\CURLOPT_RESOLVE => ['blog.example:443:93.184.215.14']], $options['curl']);
     }
 
