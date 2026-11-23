@@ -36,7 +36,7 @@ $tca = [
     ],
     'types' => [
         '1' => [
-            'showitem' => 'hidden, source_link, source_title, target_link, excerpt, sys_language_uid,
+            'showitem' => 'hidden, protocol, source_link, source_title, target_link, excerpt, sys_language_uid,
                 --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, starttime, endtime',
         ],
     ],
@@ -46,6 +46,20 @@ $tca = [
         'crdate' => [
             'config' => [
                 'type' => 'passthrough',
+            ],
+        ],
+        'protocol' => [
+            'label' => 'LLL:EXT:pongback/Resources/Private/Language/locallang_db.xlf:tx_pongback_domain_model_pingback.protocol',
+            'config' => [
+                'type' => 'select',
+                'renderType' => 'selectSingle',
+                'readOnly' => true,
+                'dbFieldLength' => 16,
+                'items' => [
+                    ['label' => 'Pingback', 'value' => 'pingback'],
+                    ['label' => 'Webmention', 'value' => 'webmention'],
+                ],
+                'default' => 'pingback',
             ],
         ],
         'source_link' => [

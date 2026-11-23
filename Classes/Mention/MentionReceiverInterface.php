@@ -16,7 +16,7 @@ use TYPO3\CMS\Core\Site\Entity\Site;
 
 /**
  * Receives a mention: verify target and source, then store it.
- * Shared by all protocol endpoints (Pingback, later Webmention).
+ * Shared by all protocol endpoints (Pingback, Webmention).
  */
 interface MentionReceiverInterface
 {
@@ -26,4 +26,12 @@ interface MentionReceiverInterface
      * @throws MentionRejected
      */
     public function receive(IncomingMention $mention, Site $site): int;
+
+    /**
+     * Brings the stored mention in line with the source (Webmention): creates it, updates title and
+     * excerpt of a known one, or removes it if the source is gone or no longer links to the target.
+     *
+     * @throws MentionRejected if nothing is stored for a source that cannot be verified
+     */
+    public function synchronize(IncomingMention $mention, Site $site): SyncResult;
 }

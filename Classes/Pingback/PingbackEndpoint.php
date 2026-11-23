@@ -143,7 +143,7 @@ readonly class PingbackEndpoint
     {
         return match ($reason) {
             RejectionReason::InvalidRequest => self::FAULT_GENERIC,
-            RejectionReason::SourceNotFound => self::FAULT_SOURCE_NOT_FOUND,
+            RejectionReason::SourceNotFound, RejectionReason::SourceGone => self::FAULT_SOURCE_NOT_FOUND,
             RejectionReason::NoLinkToTarget => self::FAULT_NO_LINK_TO_TARGET,
             RejectionReason::TargetNotFound => self::FAULT_TARGET_NOT_FOUND,
             RejectionReason::TargetNotAllowed => self::FAULT_TARGET_NOT_ALLOWED,

@@ -6,6 +6,9 @@
 			<trans-unit id="tx_pongback_domain_model_pingback">
 				<source>Pingback</source>
 			</trans-unit>
+			<trans-unit id="tx_pongback_domain_model_pingback.protocol">
+				<source>Protocol</source>
+			</trans-unit>
 			<trans-unit id="tx_pongback_domain_model_pingback.source_link">
 				<source>Source Link</source>
 			</trans-unit>

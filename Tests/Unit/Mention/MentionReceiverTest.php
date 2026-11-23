@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Webicorns\Pongback\Tests\Unit\Mention;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -31,6 +32,7 @@ use Webicorns\Pongback\Mention\ResolvedTarget;
 use Webicorns\Pongback\Mention\Source\FetchedSource;
 use Webicorns\Pongback\Mention\Source\SourceFetcher;
 use Webicorns\Pongback\Mention\Source\SourceInspector;
+use Webicorns\Pongback\Mention\SyncResult;
 use Webicorns\Pongback\Mention\TargetResolver;
 use Webicorns\Pongback\Tests\Unit\Fixtures\AssertRejectionTrait;
 
@@ -42,7 +44,7 @@ final class MentionReceiverTest extends TestCase
     private const TARGET = 'https://www.target.example/article';
 
     private TargetResolver&MockObject $targetResolver;
-    private SourceFetcher&MockObject $sourceFetcher;
+    public SourceFetcher&MockObject $sourceFetcher;
     private MentionStorage&MockObject $storage;
 
     /**
@@ -166,6 +168,117 @@ final class MentionReceiverTest extends TestCase
             ->willReturn(1);
 
         $this->createSubject()->receive($this->mention(), $site);
+    }
+
+    #[Test]
+    public function synchronizeCreatesUnknownWebmentions(): void
+    {
+        $site = $this->createSite([]);
+        $this->prepareValidMention($site);
+        $this->storage->method('find')->with(self::SOURCE, self::TARGET)->willReturn(null);
+        $this->storage->expects(self::once())->method('add')
+            ->with(self::callback(static fn(Pingback $pingback): bool => $pingback->getProtocol() === IncomingMention::PROTOCOL_WEBMENTION))
+            ->willReturn(3);
+
+        self::assertSame(SyncResult::Created, $this->createSubject()->synchronize($this->webmention(), $site));
+        self::assertCount(1, $this->dispatchedEvents, 'Listeners can reject new Webmentions as well');
+    }
+
+    #[Test]
+    public function synchronizeUpdatesKnownMentions(): void
+    {
+        $site = $this->createSite([]);
+        $this->targetResolver->method('resolve')->willReturn(new ResolvedTarget($site, 42, 0));
+        $this->sourceFetcher->method('fetch')->willReturn(new FetchedSource(
+            self::SOURCE,
+            '<title>New title</title><p>Updated: <a href="' . self::TARGET . '">link</a></p>',
+        ));
+        $this->storage->method('find')->willReturn(5);
+        $this->storage->expects(self::once())->method('update')->with(5, 'New title', 'Updated: link');
+        $this->storage->expects(self::never())->method('add');
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('info')->with('Mention updated', self::anything());
+
+        self::assertSame(SyncResult::Updated, $this->createSubject($logger)->synchronize($this->webmention(), $site));
+        self::assertSame([], $this->dispatchedEvents);
+    }
+
+    /**
+     * @return array<string, array{\Closure(self): void}>
+     */
+    public static function goneSourceProvider(): array
+    {
+        return [
+            'deleted (404/410)' => [static fn(self $test) => $test->sourceFetcher->method('fetch')->willThrowException(new MentionRejected(RejectionReason::SourceGone, 'Gone'))],
+            'link removed' => [static fn(self $test) => $test->sourceFetcher->method('fetch')->willReturn(new FetchedSource(self::SOURCE, '<p>No link any more</p>'))],
+        ];
+    }
+
+    /**
+     * @param \Closure(self): void $prepareSource
+     */
+    #[Test]
+    #[DataProvider('goneSourceProvider')]
+    public function synchronizeRemovesKnownMentionsWhoseSourceNoLongerLinks(\Closure $prepareSource): void
+    {
+        $site = $this->createSite([]);
+        $this->targetResolver->method('resolve')->willReturn(new ResolvedTarget($site, 42, 0));
+        $prepareSource($this);
+        $this->storage->method('find')->willReturn(5);
+        $this->storage->expects(self::once())->method('remove')->with(5);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('info')->with('Mention removed', [
+            'protocol' => IncomingMention::PROTOCOL_WEBMENTION,
+            'source' => self::SOURCE,
+            'target' => self::TARGET,
+            'uid' => 5,
+        ]);
+
+        self::assertSame(SyncResult::Removed, $this->createSubject($logger)->synchronize($this->webmention(), $site));
+    }
+
+    #[Test]
+    public function synchronizeRejectsUnknownMentionsWithoutLink(): void
+    {
+        $site = $this->createSite([]);
+        $this->targetResolver->method('resolve')->willReturn(new ResolvedTarget($site, 42, 0));
+        $this->sourceFetcher->method('fetch')->willReturn(new FetchedSource(self::SOURCE, '<p>No link</p>'));
+        $this->storage->method('find')->willReturn(null);
+        $this->storage->expects(self::never())->method('remove');
+
+        self::assertRejected(RejectionReason::NoLinkToTarget, fn() => $this->createSubject()->synchronize($this->webmention(), $site));
+    }
+
+    #[Test]
+    public function synchronizeKeepsKnownMentionsOnTemporaryProblems(): void
+    {
+        $site = $this->createSite([]);
+        $this->targetResolver->method('resolve')->willReturn(new ResolvedTarget($site, 42, 0));
+        $this->sourceFetcher->method('fetch')->willThrowException(new MentionRejected(RejectionReason::UpstreamError, 'HTTP 503'));
+        $this->storage->method('find')->willReturn(5);
+        $this->storage->expects(self::never())->method('remove');
+        $this->storage->expects(self::never())->method('update');
+
+        self::assertRejected(RejectionReason::UpstreamError, fn() => $this->createSubject()->synchronize($this->webmention(), $site));
+    }
+
+    #[Test]
+    public function synchronizeChecksSourceAndTargetFirst(): void
+    {
+        $site = $this->createSite([]);
+        $this->sourceFetcher->expects(self::never())->method('fetch');
+
+        self::assertRejected(RejectionReason::InvalidRequest, fn() => $this->createSubject()->synchronize(
+            new IncomingMention(self::TARGET, self::TARGET, IncomingMention::PROTOCOL_WEBMENTION),
+            $site,
+        ));
+    }
+
+    private function webmention(): IncomingMention
+    {
+        return new IncomingMention(self::SOURCE, self::TARGET, IncomingMention::PROTOCOL_WEBMENTION, '203.0.113.5');
     }
 
     private function prepareValidMention(Site $site): void

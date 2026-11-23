@@ -36,6 +36,21 @@ class Pingback extends AbstractEntity
 
     protected ?\DateTimeImmutable $crdate = null;
 
+    /**
+     * "pingback" or "webmention", see IncomingMention::PROTOCOL_*
+     */
+    protected string $protocol = 'pingback';
+
+    public function getProtocol(): string
+    {
+        return $this->protocol;
+    }
+
+    public function setProtocol(string $protocol): void
+    {
+        $this->protocol = $protocol;
+    }
+
     public function getCrdate(): ?\DateTimeImmutable
     {
         return $this->crdate;

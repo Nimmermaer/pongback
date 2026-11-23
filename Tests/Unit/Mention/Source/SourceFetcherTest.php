@@ -93,7 +93,7 @@ final class SourceFetcherTest extends TestCase
     {
         $subject = $this->createSubject([new Response(null, 404)]);
 
-        self::assertRejected(RejectionReason::SourceNotFound, fn() => $subject->fetch('https://blog.example/gone'));
+        self::assertRejected(RejectionReason::SourceGone, fn() => $subject->fetch('https://blog.example/gone'));
     }
 
     #[Test]
@@ -202,9 +202,9 @@ final class SourceFetcherTest extends TestCase
             '299 last success' => [299, null],
             '300 without location' => [300, RejectionReason::UpstreamError],
             '400 bad request' => [400, RejectionReason::UpstreamError],
-            '404 not found' => [404, RejectionReason::SourceNotFound],
+            '404 not found' => [404, RejectionReason::SourceGone],
             '409 conflict' => [409, RejectionReason::UpstreamError],
-            '410 gone' => [410, RejectionReason::SourceNotFound],
+            '410 gone' => [410, RejectionReason::SourceGone],
             '411 length required' => [411, RejectionReason::UpstreamError],
         ];
     }
