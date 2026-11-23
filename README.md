@@ -11,6 +11,9 @@ display and send [Pingbacks](https://www.hixie.ch/specs/pingback/pingback):
 when another website links to one of your pages, it can notify you, and the
 link shows up on your page after approval.
 
+📖 **Manual:** https://docs.typo3.org/p/webicorns/pongback/main/en-us/
+(source in [`Documentation/`](Documentation/Index.rst))
+
 **Requirements:** TYPO3 13.4 LTS or 14, PHP 8.2 or newer.
 EXT:dashboard is optional (dashboard widget).
 
